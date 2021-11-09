@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="satColor">#2573da</color>
+    <color name="sunColor">#dc143b</color>
+    <color name="currnetMonthDayColor">#FFFFFF</color>
+    <color name="preMonthDayColor">#C1989898</color>
+    <color name="toDayColor">#41FFFF</color>
+    <color name="toDayBackground">#41FFFF</color>
+</resources>

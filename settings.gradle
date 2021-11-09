@@ -1,0 +1,3 @@
+rootProject.name = "CalenderByDW"
+include ':app'
+include ':calenderbydw'
