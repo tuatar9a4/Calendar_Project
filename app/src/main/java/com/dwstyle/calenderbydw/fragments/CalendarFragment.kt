@@ -1,8 +1,10 @@
 package com.dwstyle.calenderbydw.fragments
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.AbstractThreadedSyncAdapter
 import android.content.ContentValues
+import android.content.DialogInterface
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
@@ -20,7 +22,7 @@ import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.adapters.DailyTaskAdapter
 import com.dwstyle.calenderbydw.calendardacorator.*
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
-import com.dwstyle.calenderbydw.item.TaskItem
+import com.dwstyle.calenderbydw.item.*
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -32,6 +34,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 class CalendarFragment : Fragment() {
 
@@ -43,19 +46,25 @@ class CalendarFragment : Fragment() {
     //할일 목록
     private lateinit var rcTaskList : RecyclerView
     private val monthlyTaskList : ArrayList<TaskItem> =ArrayList<TaskItem>()
+    private val yearRepeatTaskList : ArrayList<YearRepeatTaskItem> =ArrayList()
+    private val monthRepeatTaskList : ArrayList<MonthRepeatTaskItem> =ArrayList()
+    private val weekRepeatTaskList : ArrayList<WeekRepeatTaskItem> =ArrayList()
+    private val noRepeatTaskList : ArrayList<NoRepeatTaskItem> =ArrayList()
+
     private val dailyTaskList :ArrayList<TaskItem> = ArrayList()
     private lateinit var dailyTaskAdapter: DailyTaskAdapter
 
     //년도 반복 ,달마다 반복, 주마다 반복, 반복 없음 task
-    private val dayOfRepeatYear=HashMap<Int,String>()
+    private val dayOfRepeatYear=HashSet<String>()
+    private val dayOfRepeatMonth=HashSet<String>()
+    private val dayOfRepeatWeek=HashSet<String>()
+    private val dayOfRepeatNo=HashSet<String>()
 
 
     private lateinit var dbHelper : TaskDatabaseHelper
     private lateinit var database : SQLiteDatabase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dayOfRepeatYear[4] = "#FF0000&#00FF00&#0000FF"
-        dayOfRepeatYear[8] = "#FFFF00&#00FFFF&#FF00FF"
     }
 
     override fun onCreateView(
@@ -67,7 +76,7 @@ class CalendarFragment : Fragment() {
         AndroidThreeTen.init(view.context);
         initView(view)
         dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
-//        dropTable(view,"y2021");
+//        dropTable(view,"myTaskTbl");
 //        dropTable(view,"y2022");
         initCalendarSetting(view)
 
@@ -77,14 +86,14 @@ class CalendarFragment : Fragment() {
     fun initCalendarSetting(view : View){
         //달력 배경 색 및 선택시 색
         calendarView.background=view.context.getDrawable(R.drawable.calendar_background)
-        calendarView.selectionColor=Color.parseColor("#cc00cc")
+//        calendarView.selectionColor=Color.parseColor("#cc00cc")
 
         //달력 날짜 선택시 이벤트
         calendarView.setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
             selectedDate=date
             tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
-            searchTaskInDay(date.month,date.day)
-
+            searchTaskInRepeatWeek(date.month,date.day,date)
+            searchTaskInDay(date.month,date.day,date)
         })
 
         calendarView.setOnMonthChangedListener(OnMonthChangedListener { widget, date ->
@@ -105,6 +114,8 @@ class CalendarFragment : Fragment() {
         })
         //일요일 토요일 범위 벗어난 평일 데코레이트
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
+        searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
+        searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
         //월의 최값의 이전 날들, 최대값의 이후 날들 표시
         calendarView.showOtherDates=MaterialCalendarView.SHOW_OTHER_MONTHS
 
@@ -129,12 +140,163 @@ class CalendarFragment : Fragment() {
         dailyTaskAdapter=DailyTaskAdapter(view.context)
         rcTaskList.adapter=dailyTaskAdapter
 
+        dailyTaskAdapter.setOnItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
+            override fun onItemClick(v: View, item: TaskItem, pos: Int) {
+                Log.d("도원 ", "taskItem : ${item}   , \n pos : ? ${pos}")
+                Log.d("도원 ","taskItem : ${item._id}")
+                val builder  =AlertDialog.Builder(context)
+
+                builder.setMessage("삭제 ㅋ ")
+
+                builder.setPositiveButton("확인!", DialogInterface.OnClickListener { dialog, which ->
+
+                    deleteTask(item._id.toString())
+                    dailyTaskAdapter.deleteItemOfList(pos)
+                    setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+                })
+
+                val alertDialog =builder.create()
+                alertDialog.show()
+
+            }
+        })
+
+    }
+
+    //년마다 반복 task 의 날짜만 (month.day) 찾기
+    fun searchTaskOfRepeatYearInDB(){
+        dayOfRepeatYear.clear()
+        dbHelper.createMonthTBL("myTaskTbl");
+        database=dbHelper.readableDatabase
+        try {
+//        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
+            var c2: Cursor =
+                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY = 1", null);
+            while (c2.moveToNext()) {
+//                생각해보니 날짜만 있으면 될 것 같기도 하고...
+//                Log.d("도원","month : ${c2.getColumnIndex("month")} | " +
+//                        "day : ${c2.getColumnIndex("day")} | " +
+//                        "time : ${c2.getColumnIndex("time")} | " +
+//                        "text : ${c2.getColumnIndex("text")} | " +
+//                        "notice : ${c2.getColumnIndex("notice")} | ")
+//                yearRepeatTaskList.add(
+//                    YearRepeatTaskItem(
+//                        c2.getInt(c2.getColumnIndex("month")),
+//                        c2.getInt(c2.getColumnIndex("day")),
+//                        c2.getLong(c2.getColumnIndex("time")),
+//                        c2.getString(c2.getColumnIndex("text")),
+//                        c2.getInt(c2.getColumnIndex("notice"))
+//                    )
+//                )
+//
+//              아무래도 HashMap Contain으로 보는게 편해서
+                dayOfRepeatYear.add("${c2.getInt(c2.getColumnIndex("month"))}.${c2.getInt(c2.getColumnIndex("day"))}");
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
+    //월 마다 반복 TASK 찾기
+    fun searchTaskOfRepeatMonthInDB(){
+        dayOfRepeatMonth.clear()
+        dbHelper.createMonthTBL("myTaskTbl");
+        database=dbHelper.readableDatabase
+        try {
+            val c2: Cursor =
+                database.rawQuery("SELECT day,time,text,notice FROM myTaskTbl WHERE repeatM = 1", null);
+            while (c2.moveToNext()) {
+//                Log.d("도원","" +
+//                        "day : ${c2.getColumnIndex("day")} | " +
+//                        "time : ${c2.getColumnIndex("time")} | " +
+//                        "text : ${c2.getColumnIndex("text")} | " +
+//                        "notice : ${c2.getColumnIndex("notice")} | ")
+//                monthRepeatTaskList.add(
+//                    MonthRepeatTaskItem(
+//                        c2.getInt(c2.getColumnIndex("day")),
+//                        c2.getLong(c2.getColumnIndex("time")),
+//                        c2.getString(c2.getColumnIndex("text")),
+//                        c2.getInt(c2.getColumnIndex("notice"))
+//                    )
+//                )
+                dayOfRepeatMonth.add(c2.getInt(c2.getColumnIndex("day")).toString())
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+        }
+    }
+
+    //주마다 반복
+    fun searchTaskOfRepeatWeekInDB(){
+        dayOfRepeatWeek.clear()
+        dbHelper.createMonthTBL("myTaskTbl");
+        database=dbHelper.readableDatabase
+        try {
+            val c2: Cursor =
+                database.rawQuery("SELECT week,time,text,notice FROM myTaskTbl WHERE repeatW = 1", null);
+            while (c2.moveToNext()) {
+//                Log.d("도원","" +
+//                        "day : ${c2.getColumnIndex("week")} | " +
+//                        "time : ${c2.getColumnIndex("time")} | " +
+//                        "text : ${c2.getColumnIndex("text")} | " +
+//                        "notice : ${c2.getColumnIndex("notice")} | ")
+//                weekRepeatTaskList.add(
+//                    WeekRepeatTaskItem(
+//                        c2.getString(c2.getColumnIndex("week")),
+//                        c2.getLong(c2.getColumnIndex("time")),
+//                        c2.getString(c2.getColumnIndex("text")),
+//                        c2.getInt(c2.getColumnIndex("notice"))
+//                    )
+//                )
+                dayOfRepeatWeek.add(c2.getString(c2.getColumnIndex("week")))
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+        }
+
+    }
+
+    //반복 안하는 Task 찾기
+    fun searchTaskOfRepeatNoInDB(){
+        dayOfRepeatNo.clear()
+        dbHelper.createMonthTBL("myTaskTbl");
+        database=dbHelper.readableDatabase
+        try {
+            val c2: Cursor =
+                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN = 1", null);
+            while (c2.moveToNext()) {
+//                Log.d("도원","" +
+//                        "day : ${c2.getColumnIndex("week")} | " +
+//                        "time : ${c2.getColumnIndex("time")} | " +
+//                        "text : ${c2.getColumnIndex("text")} | " +
+//                        "notice : ${c2.getColumnIndex("notice")} | ")
+//                noRepeatTaskList.add(
+//                    NoRepeatTaskItem(
+//                        c2.getInt(c2.getColumnIndex("year")),
+//                        c2.getInt(c2.getColumnIndex("month")),
+//                        c2.getInt(c2.getColumnIndex("day")),
+//                        c2.getLong(c2.getColumnIndex("time")),
+//                        c2.getString(c2.getColumnIndex("text")),
+//                        c2.getInt(c2.getColumnIndex("notice"))
+//                    )
+//                )
+                dayOfRepeatNo.add("${c2.getInt(c2.getColumnIndex("year"))}" +
+                        ".${c2.getInt(c2.getColumnIndex("month"))}." +
+                        "${c2.getInt(c2.getColumnIndex("day"))}")
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+        }
+
     }
 
     //해당 월에 맞는 task 찾기
     fun searchTaskInDB(month : Int,year :Int){
         monthlyTaskList.clear()
-        dbHelper.createMonthTBL("y${year}");
+        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
 //        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
@@ -143,6 +305,7 @@ class CalendarFragment : Fragment() {
             while (c2.moveToNext()) {
                 monthlyTaskList.add(
                     TaskItem(
+                        c2.getInt(c2.getColumnIndex("_id")),
                         c2.getInt(c2.getColumnIndex("year")),
                         c2.getInt(c2.getColumnIndex("month")),
                         c2.getInt(c2.getColumnIndex("day")),
@@ -153,7 +316,9 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatY")),
                         c2.getInt(c2.getColumnIndex("repeatM")),
                         c2.getInt(c2.getColumnIndex("repeatW")),
-                        c2.getInt(c2.getColumnIndex("repeatN"))
+                        c2.getInt(c2.getColumnIndex("repeatN")),
+                        c2.getInt(c2.getColumnIndex("priority")),
+                        ""
                     )
                 )
             }
@@ -163,42 +328,144 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    //선택된 일에 맞는 task 찾기
-    private fun searchTaskInDay(month :Int,day:Int){
+
+    private fun searchTaskInRepeatWeek(month :Int,day:Int,calendarDay: CalendarDay){
         dailyTaskList.clear()
-        dbHelper.createMonthTBL("y"+selectedDate.year.toString());
+        var c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE week != '0&0&0&0&0&0&0' ",null);
+        while (c2.moveToNext()){
+            val tempStr :List<String> =c2.getString(c2.getColumnIndex("week")).split("&")
+            for (a in 0..tempStr.size-1){
+                if (tempStr[a].equals("1")){
+                    var pos=a;
+                    if (a==0) pos=7
+                    if (pos==calendarDay.date.dayOfWeek.value){
+                        val tempTask =TaskItem(
+                            c2.getInt(c2.getColumnIndex("_id")),
+                            c2.getInt(c2.getColumnIndex("year")),
+                            c2.getInt(c2.getColumnIndex("month")),
+                            c2.getInt(c2.getColumnIndex("day")),
+                            c2.getString(c2.getColumnIndex("week")),
+                            c2.getLong(c2.getColumnIndex("time")),
+                            c2.getString(c2.getColumnIndex("text")),
+                            c2.getInt(c2.getColumnIndex("notice")),
+                            c2.getInt(c2.getColumnIndex("repeatY")),
+                            c2.getInt(c2.getColumnIndex("repeatM")),
+                            c2.getInt(c2.getColumnIndex("repeatW")),
+                            c2.getInt(c2.getColumnIndex("repeatN")),
+                            c2.getInt(c2.getColumnIndex("priority")),
+                            ""
+                        )
+                        dailyTaskList.add(tempTask)
+                    }
+                }
+            }
+        }
+
+//        Log.d("도원","month : ${c2.getString(c2.getColumnIndex("week"))} | ")
+//        Log.d("도원","month : ${calendarDay.date.dayOfWeek.value} | ${tempStr.size} ")
+
+
+
+        c2.close()
+    }
+
+    //선택된 날짜에 맞는 task 찾기
+    private fun searchTaskInDay(month :Int,day:Int,calendarDay: CalendarDay){
+        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
-            var c2: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()} WHERE day = ${day} AND month = $month",null);
+            var c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE day = ${day} AND week == '0&0&0&0&0&0&0' ",null);
             while (c2.moveToNext()){
-//            Log.d("도원","month : ${c2.getString(c2.getColumnIndex("month"))} |  day ${c2.getString(c2.getColumnIndex("day"))}   | text :  ${c2.getString(c2.getColumnIndex("text"))} ")
-                val tempTask =TaskItem(
-                    c2.getInt(c2.getColumnIndex("year")),
-                    c2.getInt(c2.getColumnIndex("month")),
-                    c2.getInt(c2.getColumnIndex("day")),
-                    c2.getString(c2.getColumnIndex("week")),
-                    c2.getLong(c2.getColumnIndex("time")),
-                    c2.getString(c2.getColumnIndex("text")),
-                    c2.getInt(c2.getColumnIndex("notice")),
-                    c2.getInt(c2.getColumnIndex("repeatY")),
-                    c2.getInt(c2.getColumnIndex("repeatM")),
-                    c2.getInt(c2.getColumnIndex("repeatW")),
-                    c2.getInt(c2.getColumnIndex("repeatN"))
-                )
-                dailyTaskList.add(tempTask)
+                if (c2.getInt(c2.getColumnIndex("repeatN"))==1 &&
+                        month==c2.getInt(c2.getColumnIndex("month")) &&
+                    calendarDay.year == c2.getInt(c2.getColumnIndex("year"))){
+                    val tempTask =TaskItem(
+                        c2.getInt(c2.getColumnIndex("_id")),
+                        c2.getInt(c2.getColumnIndex("year")),
+                        c2.getInt(c2.getColumnIndex("month")),
+                        c2.getInt(c2.getColumnIndex("day")),
+                        c2.getString(c2.getColumnIndex("week")),
+                        c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("text")),
+                        c2.getInt(c2.getColumnIndex("notice")),
+                        c2.getInt(c2.getColumnIndex("repeatY")),
+                        c2.getInt(c2.getColumnIndex("repeatM")),
+                        c2.getInt(c2.getColumnIndex("repeatW")),
+                        c2.getInt(c2.getColumnIndex("repeatN")),
+                        c2.getInt(c2.getColumnIndex("priority")),
+                        ""
+                    )
+                    dailyTaskList.add(tempTask)
+                }else if (c2.getInt(c2.getColumnIndex("repeatY"))==1 &&
+                    month==c2.getInt(c2.getColumnIndex("month"))){
+                    val tempTask =TaskItem(
+                        c2.getInt(c2.getColumnIndex("_id")),
+                        c2.getInt(c2.getColumnIndex("year")),
+                        c2.getInt(c2.getColumnIndex("month")),
+                        c2.getInt(c2.getColumnIndex("day")),
+                        c2.getString(c2.getColumnIndex("week")),
+                        c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("text")),
+                        c2.getInt(c2.getColumnIndex("notice")),
+                        c2.getInt(c2.getColumnIndex("repeatY")),
+                        c2.getInt(c2.getColumnIndex("repeatM")),
+                        c2.getInt(c2.getColumnIndex("repeatW")),
+                        c2.getInt(c2.getColumnIndex("repeatN")),
+                        c2.getInt(c2.getColumnIndex("priority")),
+                        ""
+                    )
+                    dailyTaskList.add(tempTask)
+                }else if (c2.getInt(c2.getColumnIndex("repeatM"))==1&&
+                    day==c2.getInt(c2.getColumnIndex("day"))){
+                    val tempTask =TaskItem(
+                        c2.getInt(c2.getColumnIndex("_id")),
+                        c2.getInt(c2.getColumnIndex("year")),
+                        c2.getInt(c2.getColumnIndex("month")),
+                        c2.getInt(c2.getColumnIndex("day")),
+                        c2.getString(c2.getColumnIndex("week")),
+                        c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("text")),
+                        c2.getInt(c2.getColumnIndex("notice")),
+                        c2.getInt(c2.getColumnIndex("repeatY")),
+                        c2.getInt(c2.getColumnIndex("repeatM")),
+                        c2.getInt(c2.getColumnIndex("repeatW")),
+                        c2.getInt(c2.getColumnIndex("repeatN")),
+                        c2.getInt(c2.getColumnIndex("priority")),
+                        ""
+                    )
+                    dailyTaskList.add(tempTask)
+                }
+
             }
-            dailyTaskAdapter.setTaskItem(dailyTaskList)
+//            Log.d("도원","dailyTaskList2 : ${dailyTaskList} | ")
+            dailyTaskAdapter.setTaskItem(dailyTaskList,calendarDay)
+            c2.close()
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+            Log.d("도원","ee : ${e.localizedMessage}");
         }
 //        rcTaskList.adapter
     }
 
     //tbl 삭제용
     fun dropTable(view :View,tblName :String){
-        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
+//        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
         database=dbHelper.writableDatabase;
-        var c2: Cursor =database.rawQuery("DROP TABLE IF EXISTS $tblName",null)
+        var c2: Cursor =database.rawQuery("DROP TABLE IF EXISTS ${tblName.toString()}",null)
+
+        Log.d("도원","c2  ${c2} || ${database.version}")
+//        database.delete(tblName,null,null)
+    }
+
+    fun deleteTask(_id : String){
+        if (database!=null){
+            database=dbHelper.writableDatabase;
+            var c2:Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
+            Log.d("도원","c2 ${c2.count}")
+//            var c2:Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${_id} ",null)
+
+        }
+
     }
 
     //일정 만들기 method
@@ -218,6 +485,8 @@ class CalendarFragment : Fragment() {
         contentValue.put("repeatW",taskItem.repeatW);
         contentValue.put("repeatN",taskItem.repeatN);
         contentValue.put("notice",taskItem.notice);
+        contentValue.put("priority",taskItem.priority)
+        contentValue.put("expectDay",taskItem.exceptDay)
 
         database.insert("myTaskTbl",null,contentValue);
 //        var c2: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
@@ -231,13 +500,20 @@ class CalendarFragment : Fragment() {
     //데코레이션 method
     private fun setDecorateForCalender(year:Int,month :Int, date : CalendarDay){
         calendarView.removeDecorators()
-        searchTaskInDB(month,year)
+//        searchTaskInDB(month,year)
+        searchTaskOfRepeatYearInDB()
+        searchTaskOfRepeatMonthInDB()
+        searchTaskOfRepeatWeekInDB()
+        searchTaskOfRepeatNoInDB()
         calendarView.addDecorators(
             SundayDecorator(),
             SaturdayDecorator(),
-            TaskDotDecorator(dayOfRepeatYear),
-            SelectDecorator(context as Activity),
-            OutOfRangeDecorator(date)
+            OutOfRangeDecorator(date),
+            TaskDotDecorator(dayOfRepeatYear,month,"Year"),
+            TaskDotDecorator(dayOfRepeatMonth,month,"Month"),
+            TaskDotDecorator(dayOfRepeatWeek,month,"Week"),
+            TaskDotDecorator(dayOfRepeatNo,month,"No"),
+            SelectDecorator(context as Activity)
         )
     }
 

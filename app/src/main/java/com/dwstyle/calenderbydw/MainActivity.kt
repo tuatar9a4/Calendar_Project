@@ -22,13 +22,10 @@ class MainActivity : AppCompatActivity() {
 //            makeTaskDialog.show()
             makeTaskDialog.showDialog(calendarFragment.getSelectDateInfo(), {
 
-                Log.d("도원","작성"+makeTaskDialog.getInfo())
                 calendarFragment.createTask(makeTaskDialog.getInfo())
-
                 makeTaskDialog.dismissDialog()
             }, {
 
-                Log.d("도원","취소"+makeTaskDialog.getInfo().day)
                 makeTaskDialog.dismissDialog()
             })
 

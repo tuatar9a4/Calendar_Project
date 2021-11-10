@@ -6,25 +6,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:id="@+id/tvTaskDate"
-        android:layout_width="match_parent"
+        android:id="@+id/tvTaskDateTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/tvTaskTimeTitle"
         android:gravity="center"
         android:textSize="24sp"
         android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        android:text="Date  :"
+        />
+    <TextView
+        android:id="@+id/tvTaskDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/tvTaskDateTitle"
+        app:layout_constraintRight_toRightOf="parent"
+        android:textSize="24sp"
+        android:layout_marginTop="30dp"
+        android:paddingLeft="10dp"
         android:text="날짜"
         />
     <TextView
-        android:id="@+id/tvTaskTime"
-        android:layout_width="match_parent"
+        android:id="@+id/tvTaskTimeTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/tvTaskDate"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         android:gravity="center"
+        android:textSize="24sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:text="Time :"
+        />
+    <TextView
+        android:id="@+id/tvTaskTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tvTaskDate"
+        app:layout_constraintLeft_toRightOf="@+id/tvTaskTimeTitle"
+        app:layout_constraintRight_toRightOf="parent"
+        android:paddingLeft="10dp"
         android:textSize="24sp"
         android:layout_marginTop="10dp"
         android:text="시간"
@@ -37,9 +62,11 @@
         app:layout_constraintTop_toBottomOf="@+id/tvTaskTime"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:hint="write your Task"
         android:layout_marginTop="14dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:background="@color/transport"
          />
     <TextView
         android:id="@+id/tvRepeat"

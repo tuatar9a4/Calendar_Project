@@ -55,6 +55,7 @@ class MakeTaskDialog(context: Context) {
     private var sendRepeatM =0
     private var sendRepeatW =0
     private var sendRepeatN =1
+    private var sendPriority=0
 
 
     //dialog 보여주는 method
@@ -116,6 +117,7 @@ class MakeTaskDialog(context: Context) {
                 sendRepeatM =0
                 sendRepeatW =0
                 sendRepeatN =1
+                sendPriority=4
                 repeatWeekBox.visibility=View.GONE
             }
             else if (checkedId==R.id.radioYear){
@@ -123,6 +125,7 @@ class MakeTaskDialog(context: Context) {
                 sendRepeatM =0
                 sendRepeatW =0
                 sendRepeatN =0
+                sendPriority=1
                 repeatWeekBox.visibility=View.GONE
             }
             else if (checkedId==R.id.radioMonth){
@@ -130,6 +133,7 @@ class MakeTaskDialog(context: Context) {
                 sendRepeatM =1
                 sendRepeatW =0
                 sendRepeatN =0
+                sendPriority=2
                 repeatWeekBox.visibility=View.GONE
             }
             else if (checkedId==R.id.radioWeek){
@@ -137,12 +141,12 @@ class MakeTaskDialog(context: Context) {
                 sendRepeatM =0
                 sendRepeatW =1
                 sendRepeatN =0
+                sendPriority=3
                 repeatWeekBox.visibility=View.VISIBLE
             }
         })
 
         edtTaskText.doOnTextChanged { text, start, before, count ->
-            Log.d("도원","${text} , ${start} , ${before}, ${count}, ${ !text.toString().equals("")!!}")
             btnWrite.isClickable = !text.toString().equals("")
         }
         btnWrite.setOnClickListener(writeClickListener)
@@ -174,8 +178,8 @@ class MakeTaskDialog(context: Context) {
                 "${if(repeatFri.isChecked) 1 else 0}&" +
                 "${if(repeatSat.isChecked) 1 else 0}"
         return  TaskItem(
-            sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,
-            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN
+            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,
+            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""
         )
     }
 

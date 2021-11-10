@@ -1,6 +1,7 @@
 package com.dwstyle.calenderbydw.item
 
 data class TaskItem (
+    var _id :Int,
     var year :Int,
     var month : Int,
     var day :Int,
@@ -12,4 +13,6 @@ data class TaskItem (
     var repeatM :Int,
     var repeatW :Int,
     var repeatN :Int,
+    var priority :Int,
+    var exceptDay :String
         )

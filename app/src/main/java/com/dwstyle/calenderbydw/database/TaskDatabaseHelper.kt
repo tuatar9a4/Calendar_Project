@@ -19,12 +19,13 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                "week text,"+
                "time integer,"+
                "text text,"+
+               "notice integer,"+
                "repeatY integer,"+
                "repeatM integer,"+
                "repeatW integer,"+
                "repeatN integer,"+
-               "notice integer,"+
-
+               "priority integer,"+
+               "expectDay text"+
         ");"
         db?.let { it.execSQL(sql) }
     }
