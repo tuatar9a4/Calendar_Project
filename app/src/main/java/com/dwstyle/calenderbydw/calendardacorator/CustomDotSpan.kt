@@ -42,10 +42,10 @@ class CustomDotSpan : DotSpan {
         val oldColor =paint.color
         var x :Float = ((left+right)/2f)
 
-//        Log.d("도원","1left: ${left} , right : ${right} , bottom :  ${bottom}, top : ${top} " +
-//                ", start : ${start} , end : ${end} , lineNum : ${lineNum}, ");
+        Log.d("도원","1left: ${left} , right : ${right} , bottom :  ${bottom}, top : ${top} " +
+                ", start : ${start} , end : ${end} , lineNum : ${lineNum}, ");
         //디바이스마다 달력의 크기가 달라서 원 모양을 동적으로 조정
-        val radius=right/12f
+        val radius=right/15f
         if (mType.equals("Year")){
             //년간
             paint.color= Color.parseColor("#FF0000")
@@ -57,7 +57,7 @@ class CustomDotSpan : DotSpan {
         }else if (mType.equals("Week")){
             //주간
             paint.color= Color.parseColor("#00FF00")
-            canvas.drawCircle(right-radius,0f-radius+(radius*99/70f)*2,radius,paint)
+            canvas.drawCircle(right-radius-4f,0f-radius+(radius*99/70f)*2,radius,paint)
         }else{
             //반복 없음
             paint.color= Color.parseColor("#000000")

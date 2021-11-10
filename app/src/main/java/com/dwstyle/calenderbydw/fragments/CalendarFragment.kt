@@ -494,6 +494,9 @@ class CalendarFragment : Fragment() {
 //            Log.d("도원","month : ${c2.getString(c2.getColumnIndex("month"))} |  day ${c2.getString(c2.getColumnIndex("day"))}   | text :  ${c2.getString(c2.getColumnIndex("text"))} ")
 //        }
 
+
+        searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
+        searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
     }
 
@@ -509,11 +512,11 @@ class CalendarFragment : Fragment() {
             SundayDecorator(),
             SaturdayDecorator(),
             OutOfRangeDecorator(date),
-            TaskDotDecorator(dayOfRepeatYear,month,"Year"),
-            TaskDotDecorator(dayOfRepeatMonth,month,"Month"),
-            TaskDotDecorator(dayOfRepeatWeek,month,"Week"),
-            TaskDotDecorator(dayOfRepeatNo,month,"No"),
-            SelectDecorator(context as Activity)
+            SelectDecorator(context as Activity),
+            TaskDotDecorator(context as Activity,dayOfRepeatYear,month,"Year"),
+            TaskDotDecorator(context as Activity,dayOfRepeatMonth,month,"Month"),
+            TaskDotDecorator(context as Activity,dayOfRepeatWeek,month,"Week"),
+            TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No")
         )
     }
 

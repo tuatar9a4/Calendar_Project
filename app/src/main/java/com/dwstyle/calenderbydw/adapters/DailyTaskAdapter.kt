@@ -14,6 +14,8 @@ import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter.DailyTaskVH>() {
     private var taskList = ArrayList<TaskItem>()
@@ -84,17 +86,12 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
             database=dbHelper.readableDatabase
             tvTaskTitle.text = taskItem[position].text
             tvTaskDate.text = "${taskItem[position].month}.${taskItem[position].day}"
-            tvTaskTitle.setOnClickListener {
-                var c2: Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${taskItem[position]._id} ",null)
-                Log.d("도원","c2 : "+c2.count);
-                while (c2.moveToNext()){
-                    Log.d("도원","c2 : "+c2.getInt(0));
-                    Log.d("도원","c2 : "+c2.getInt(1));
-                    Log.d("도원","c2 : "+c2.getInt(2));
-                    Log.d("도원","c2 : "+c2.getInt(3));
-                }
-            }
 
+            val df : DateFormat =SimpleDateFormat("HH:mm")
+            val str=df.format(taskItem[position].time)
+            tvTaskTime.text =str
+
+            //삭제하기
             ivDeleteTask.setOnClickListener {
                 val pos=bindingAdapterPosition
                 if (pos != -1){
@@ -102,13 +99,7 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
                 }
             }
 
-//            val pos = bindingAdapterPosition
-//            if (pos != -1){
-//                itemView.setOnClickListener {
-//                    clickListener?.onItemClick(itemView,taskItem[pos],pos)
-//
-//                }
-//            }
+
 
 
         }

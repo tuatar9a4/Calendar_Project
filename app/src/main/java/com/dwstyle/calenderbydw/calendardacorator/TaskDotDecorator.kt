@@ -1,8 +1,12 @@
 package com.dwstyle.calenderbydw.calendardacorator
 
+import android.app.Activity
+import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.text.style.LineBackgroundSpan
 import android.util.Log
+import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
@@ -10,15 +14,19 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade
 
 class TaskDotDecorator : DayViewDecorator {
 //    private val taskList2=taskList;
-    var taskCnt=1;
     private var taskList =HashSet<String>();
-    private lateinit var mType :String
+    private var mType :String
     private var month =0
-
+    private var context :Activity
+    private var selectDrawable : Drawable
     private var weekRepeat = HashSet<String>()
 
-    constructor(taskList : HashSet<String>,month :Int,type :String){
+
+
+    constructor(context: Activity, taskList : HashSet<String>, month :Int, type :String){
         this.taskList=taskList
+        this.context=context
+        selectDrawable=context.resources.getDrawable(R.drawable.select_ractangle,null)
         mType=type
         this.month=month
         if (mType.equals("Week")){
@@ -79,5 +87,6 @@ class TaskDotDecorator : DayViewDecorator {
         //시작하자마자 decorate가 생기기 때문에 조건문 처리가 어려움 점을 여러개 생성하기 원할 경우 클래스 여러개 생성 필요
         val span1 : LineBackgroundSpan = CustomDotSpan(mType)
         view.addSpan(span1)
+        view.setSelectionDrawable(selectDrawable)
     }
 }

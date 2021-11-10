@@ -57,7 +57,7 @@ class MakeTaskDialog(context: Context) {
     private var sendRepeatN =1
     private var sendPriority=0
 
-
+    val format =SimpleDateFormat("HH:mm")
     //dialog 보여주는 method
     fun showDialog(calendarDay: CalendarDay, writeClickListener : View.OnClickListener, cancelListener: View.OnClickListener){
         dialog= Dialog(context)
@@ -77,6 +77,8 @@ class MakeTaskDialog(context: Context) {
         tvTaskDate.text="${calendarDay.year}.${calendarDay.month}.${calendarDay.day}  [${changeWeekIntToString(getWeekOfDate("${calendarDay.year}.${calendarDay.month}.${calendarDay.day}"))}]"
         tvTaskTime.text="${sendTime}"
 
+        var strT=format.parse(sendTime)
+        sendTimemllis=strT.time
 
         //시간
         tvTaskTime.setOnClickListener(View.OnClickListener {
@@ -84,9 +86,7 @@ class MakeTaskDialog(context: Context) {
                 TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
 
                     sendTime="${if(hourOfDay.toString().length==1) "0${hourOfDay}" else hourOfDay}:${if(minute.toString().length==1) "0${minute}" else minute}"
-                    val format =SimpleDateFormat("mm:ss")
-                    val strT=format.parse(sendTime)
-                    Log.d("도원","${strT.time}")
+                    strT=format.parse(sendTime)
                     sendTimemllis=strT.time
                     tvTaskTime.text=sendTime
                 },3,22,true)
