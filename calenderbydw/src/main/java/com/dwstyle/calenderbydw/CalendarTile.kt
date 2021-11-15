@@ -21,25 +21,27 @@ class Test : TileService(){
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
 
+        // setFreshnessIntervalMillis : 타일의 새로 고침 간격 (밀리초) / 날짜의 변화가 있어야해서 1시간에 한번 씩 새로고침함
+        // setTimeline : 화면을 구성을 set 함 보통 LayoutElementBuilders.LayoutElement 를 반환하는 method를 만든 후 거기에서 타일을 구성함
+
         val tile = TileBuilders.Tile.Builder()
             .setResourcesVersion(RESOURCES_VERSION)
             .setFreshnessIntervalMillis(1000*60*60)
             .setTimeline(
                 TimelineBuilders.Timeline.Builder()
-                // We add a single timeline entry when our layout is fixed, and
-                // we don't know in advance when its contents might change.
                 .addTimelineEntry(
                     TimelineBuilders.TimelineEntry.Builder().setLayout(
                         LayoutElementBuilders.Layout.Builder().setRoot(
                             myLayout(requestParams.deviceParameters!!)
                         ).build()
                     ).build()
-                    // .setLayout(...).build()
                 ).build()
             ).build()
         return Futures.immediateFuture(tile)
     }
 
+    //타일에서 drawable에 있는 Resource를 사용하려면 onResourcesRequest에서 해당 정도를 요청해서 얻어와야함
+    //이경우에는 dot_image 를 요청하는 상황  addIdToImageMapping 의 id 가 가져온 이미지의 id 값이 됨
     override fun onResourcesRequest(requestParams: RequestBuilders.ResourcesRequest): ListenableFuture<ResourceBuilders.Resources> {
         return Futures.immediateFuture(ResourceBuilders.Resources.Builder().setVersion(
             RESOURCES_VERSION).addIdToImageMapping("dot_image",ResourceBuilders.ImageResource.Builder()
@@ -49,20 +51,14 @@ class Test : TileService(){
     }
 
 
+    // 타일의 구성을 위한 method
     public fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
+        //달력 구성을 위한 정보를 미리 가져옴
         getCalendar()
-        var aa=LayoutElementBuilders.Row.Builder()
-        aa .setWidth(wrap())
-        aa .setHeight(expand())
-        aa.setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP)
-        for (a in 0..10){
-            aa.addContent(
-                LayoutElementBuilders.Text.Builder()
-                    .setText(a.toString())
-                    .build()
-            )
-        }
 
+        // Column : 타일의 구성 요소를 열(세로) 로 정렬
+        // 첫 addContent : (Spacer) 상단에서 30f 만큼의 공간을 만든다 / 워치가 원형이다 보니 중앙으로 구성을 맞추기 위함
+        // 둘 addContent : (Text) 글자를 쓰는 Builder / TextAlignmentProp 를 사용하여 text 를 중앙 정렬한다.
         val calendarLayout =LayoutElementBuilders.Column.Builder().setWidth(wrap())
         calendarLayout.setHeight(expand())
             .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(30f)).build())

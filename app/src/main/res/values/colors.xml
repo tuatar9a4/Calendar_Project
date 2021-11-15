@@ -9,4 +9,11 @@
     <color name="white">#FFFFFFFF</color>
     <color name="outOfRangeColor">#808080</color>
     <color name="transport">#00000000</color>
+
+    <color name="yearTopColor">#E02400</color>
+    <color name="monthTopColor">#FB8900</color>
+    <color name="weekTopColor">#5C00E0</color>
+    <color name="dayTopColor">#6792f9</color>
+
+    <color name="taskTextColor">#6792f9</color>
 </resources>

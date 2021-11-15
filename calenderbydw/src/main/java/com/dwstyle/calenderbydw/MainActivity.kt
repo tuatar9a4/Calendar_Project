@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.wear.tiles.TileService
 import androidx.wear.tiles.manager.TileUiClient
 import com.dwstyle.calenderbydw.databinding.ActivityMainBinding
+import com.google.android.gms.wearable.PutDataRequest
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +30,8 @@ class MainActivity : ComponentActivity() {
             parentView = rootLayout
         )
         tileUiClient.connect()
+
+
     }
 
     override fun onDestroy() {

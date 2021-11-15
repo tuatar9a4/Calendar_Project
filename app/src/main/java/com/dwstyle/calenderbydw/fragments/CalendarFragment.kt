@@ -140,10 +140,9 @@ class CalendarFragment : Fragment() {
         dailyTaskAdapter=DailyTaskAdapter(view.context)
         rcTaskList.adapter=dailyTaskAdapter
 
+
         dailyTaskAdapter.setOnItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
             override fun onItemClick(v: View, item: TaskItem, pos: Int) {
-                Log.d("도원 ", "taskItem : ${item}   , \n pos : ? ${pos}")
-                Log.d("도원 ","taskItem : ${item._id}")
                 val builder  =AlertDialog.Builder(context)
 
                 builder.setMessage("삭제 ㅋ ")
@@ -331,34 +330,41 @@ class CalendarFragment : Fragment() {
 
     private fun searchTaskInRepeatWeek(month :Int,day:Int,calendarDay: CalendarDay){
         dailyTaskList.clear()
-        var c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE week != '0&0&0&0&0&0&0' ",null);
-        while (c2.moveToNext()){
-            val tempStr :List<String> =c2.getString(c2.getColumnIndex("week")).split("&")
-            for (a in 0..tempStr.size-1){
-                if (tempStr[a].equals("1")){
-                    var pos=a;
-                    if (a==0) pos=7
-                    if (pos==calendarDay.date.dayOfWeek.value){
-                        val tempTask =TaskItem(
-                            c2.getInt(c2.getColumnIndex("_id")),
-                            c2.getInt(c2.getColumnIndex("year")),
-                            c2.getInt(c2.getColumnIndex("month")),
-                            c2.getInt(c2.getColumnIndex("day")),
-                            c2.getString(c2.getColumnIndex("week")),
-                            c2.getLong(c2.getColumnIndex("time")),
-                            c2.getString(c2.getColumnIndex("text")),
-                            c2.getInt(c2.getColumnIndex("notice")),
-                            c2.getInt(c2.getColumnIndex("repeatY")),
-                            c2.getInt(c2.getColumnIndex("repeatM")),
-                            c2.getInt(c2.getColumnIndex("repeatW")),
-                            c2.getInt(c2.getColumnIndex("repeatN")),
-                            c2.getInt(c2.getColumnIndex("priority")),
-                            ""
-                        )
-                        dailyTaskList.add(tempTask)
+        try {
+            var c2: Cursor =
+                database.rawQuery("SELECT * FROM myTaskTbl WHERE week != '0&0&0&0&0&0&0' ", null);
+            while (c2.moveToNext()) {
+                val tempStr: List<String> = c2.getString(c2.getColumnIndex("week")).split("&")
+                for (a in 0..tempStr.size - 1) {
+                    if (tempStr[a].equals("1")) {
+                        var pos = a;
+                        if (a == 0) pos = 7
+                        if (pos == calendarDay.date.dayOfWeek.value) {
+                            val tempTask = TaskItem(
+                                c2.getInt(c2.getColumnIndex("_id")),
+                                c2.getInt(c2.getColumnIndex("year")),
+                                c2.getInt(c2.getColumnIndex("month")),
+                                c2.getInt(c2.getColumnIndex("day")),
+                                c2.getString(c2.getColumnIndex("week")),
+                                c2.getLong(c2.getColumnIndex("time")),
+                                c2.getString(c2.getColumnIndex("text")),
+                                c2.getInt(c2.getColumnIndex("notice")),
+                                c2.getInt(c2.getColumnIndex("repeatY")),
+                                c2.getInt(c2.getColumnIndex("repeatM")),
+                                c2.getInt(c2.getColumnIndex("repeatW")),
+                                c2.getInt(c2.getColumnIndex("repeatN")),
+                                c2.getInt(c2.getColumnIndex("priority")),
+                                ""
+                            )
+                            dailyTaskList.add(tempTask)
+                        }
                     }
                 }
             }
+            c2.close()
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+            Log.d("도원","ee : ${e.localizedMessage}");
         }
 
 //        Log.d("도원","month : ${c2.getString(c2.getColumnIndex("week"))} | ")
@@ -366,7 +372,7 @@ class CalendarFragment : Fragment() {
 
 
 
-        c2.close()
+
     }
 
     //선택된 날짜에 맞는 task 찾기
@@ -509,6 +515,7 @@ class CalendarFragment : Fragment() {
         searchTaskOfRepeatWeekInDB()
         searchTaskOfRepeatNoInDB()
         calendarView.addDecorators(
+            RangeDayDecorator(date),
             SundayDecorator(),
             SaturdayDecorator(),
             OutOfRangeDecorator(date),

@@ -10,7 +10,6 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     private lateinit var tblName :String
 
     override fun onCreate(db: SQLiteDatabase?) {
-        Log.d("도원","tblName onCreate : ${tblName}");
        var sql : String="CREATE TABLE if not exists "+tblName+" ("+
                "_id integer primary key autoincrement,"+
                "year integer,"+

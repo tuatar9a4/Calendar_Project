@@ -49,4 +49,7 @@ dependencies {
 
     implementation "androidx.viewpager2:viewpager2:1.1.0-alpha01"
     implementation 'joda-time:joda-time:2.10.6'
+
+    //데이터 전송
+    implementation 'com.google.android.gms:play-services-wearable:17.0.0'
 }

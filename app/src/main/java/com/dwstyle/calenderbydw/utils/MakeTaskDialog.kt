@@ -58,8 +58,20 @@ class MakeTaskDialog(context: Context) {
     private var sendPriority=0
 
     val format =SimpleDateFormat("HH:mm")
+
+    fun initValue(){
+        sendTime = "03:22"
+        sendText = "No Text"
+        sendNotice =0
+        sendRepeatY =0
+        sendRepeatM =0
+        sendRepeatW =0
+        sendRepeatN =1
+        sendPriority=0
+    }
     //dialog 보여주는 method
     fun showDialog(calendarDay: CalendarDay, writeClickListener : View.OnClickListener, cancelListener: View.OnClickListener){
+        initValue()
         dialog= Dialog(context)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.write_task_layout)

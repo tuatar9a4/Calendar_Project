@@ -2,6 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginRight="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginTop="5dp"
+    android:background="@color/white"
+    android:elevation="5dp"
     >
     <CheckBox
         android:id="@+id/checkMyTask"
@@ -11,17 +16,24 @@
         android:layout_alignBottom="@+id/tvTaskTitle"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="20dp"
+        android:visibility="gone"
+        />
+    <View
+        android:id="@+id/topViewOfTaskKind"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
         />
     <TextView
         android:id="@+id/tvTaskTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="17sp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="23dp"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/checkMyTask"
-        android:textColor="@color/black"
+        android:textColor="@color/taskTextColor"
+        android:textStyle="bold"
         android:text="Task 1 : "
         />
     <ImageView
@@ -38,7 +50,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="12dp"
-        android:layout_marginLeft="60dp"
+        android:layout_marginLeft="30dp"
         android:layout_marginRight="20dp"
         android:layout_below="@+id/tvTaskTitle"
         android:paddingBottom="10dp"
