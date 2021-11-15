@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -41,7 +42,10 @@ dependencies {
     debugImplementation "androidx.wear.tiles:tiles-renderer:1.0.0-beta01"
 
     implementation 'com.github.prolificinteractive:material-calendarview:2.0.1'
-
     implementation 'joda-time:joda-time:2.10.6'
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+    implementation 'com.google.guava:guava:27.0.1-android'
 
 }

@@ -12,7 +12,7 @@ import org.joda.time.DateTimeConstants
 
 private const val RESOURCES_VERSION = "1"
 
-class Test : TileService(){
+class CalendarTile : TileService(){
 
     private var calendarTopTextSize=8f
     private var calendarSpace =0f

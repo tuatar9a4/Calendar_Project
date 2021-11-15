@@ -11,7 +11,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-
         android:theme="@android:style/Theme.DeviceDefault">
         <uses-library
             android:name="com.google.android.wearable"
@@ -26,31 +25,65 @@
             android:value="true" />
 
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
+            android:name=".TileActivity"
             android:exported="true"
-            >
+            android:label="@string/title_activity_tile">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="com.dwstyle.calenderbydw.Test"
-            android:label="@string/calendar"
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.example.android.wearable.datalayer.EXAMPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.DataLayerListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+
+                <data
+                    android:host="*"
+                    android:path="/taskdata"
+                    android:scheme="wear" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+
+                <data
+                    android:host="*"
+                    android:path="*"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".CalendarTile"
             android:description="@string/app_name"
             android:exported="true"
+            android:label="@string/calendar"
             android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
             <intent-filter>
-                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER"/>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
             </intent-filter>
-<!--            프리뷰 이미지 -->
-            <meta-data android:name="androidx.wear.tiles.PREVIEW"
+            <!-- 프리뷰 이미지 -->
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
                 android:resource="@drawable/calendar_preview" />
         </service>
-
     </application>
-
-
 
 </manifest>
