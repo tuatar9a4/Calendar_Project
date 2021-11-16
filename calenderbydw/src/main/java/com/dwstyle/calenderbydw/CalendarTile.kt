@@ -30,7 +30,8 @@ class CalendarTile : TileService(){
     private val dotDaySetY =HashSet<String>()
     private val dotDaySetM =HashSet<String>()
     private val dotDaySetN =HashSet<String>()
-    private val dotDaySetW =HashSet<String>()
+    private val dotDaySetW =ArrayList<String>()
+    private var weekInt =0
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
 
@@ -121,49 +122,61 @@ class CalendarTile : TileService(){
         lateinit var modifi :ModifiersBuilders
 
         for (a in allDayOfMonth){
+            val strs :List<String> =a.split(".")
+            val strMonthDay ="${strs[0]}.${strs[1]}"
             if (count==0){
                 ttt=LayoutElementBuilders.Row.Builder().setWidth(wrap());
             }
 //            isItem = count==3
-            var dayTextColor =if(!a.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
-                                else if (a.equals(currentDate)) R.color.toDayColor
+            var dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
+                                else if (strMonthDay.equals(currentDate)) R.color.toDayColor
                                 else R.color.currnetMonthDayColor
-
+            isDot=false
+            weekInt=0
             //점찍는곳
             for (str in dotDaySetY){
-                if (str.equals(a)) {
+                if (str.equals(strMonthDay)) {
                     isDot=true
                     scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
                 }
             }
             for (str in dotDaySetM){
-                if (str.equals(a.split(".")[1])) {
+                if (str.equals(strMonthDay.split(".")[1])) {
                     isDot=true
                     scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
                 }
             }
             for (str in dotDaySetN){
-                if (str.equals(a)) {
+                Log.d("도원","${str}  || ${strMonthDay}")
+                if (str.equals(strMonthDay)) {
                     isDot=true
                     scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
                 }
             }
-//            for (str in dotDaySetW){
-//                if (str.equals(a))scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
-//            }
+            if (strs[2]=="Sun")weekInt=7
+            if (strs[2]=="Mon")weekInt=1
+            if (strs[2]=="Tue")weekInt=2
+            if (strs[2]=="Wed")weekInt=3
+            if (strs[2]=="Thu")weekInt=4
+            if (strs[2]=="Fri")weekInt=5
+            if (strs[2]=="Sat")weekInt=6
+            if (weekRepeat.contains(weekInt.toString())){
+                isDot=true
+                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+            }
 
             if (!isDot){
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(0f)).setWidth(dp(0f)).setResourceId("dot_image")
             }
 
-            if (a.equals(currentDate)){
+            if (strMonthDay.equals(currentDate)){
                 ttt.addContent(
                     LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
                         .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP).addContent(
                             LayoutElementBuilders.Column.Builder()
                                 .addContent(
                                     LayoutElementBuilders.Text.Builder()
-                                        .setText(a.split(".")[1])
+                                        .setText(strMonthDay.split(".")[1])
                                         .setFontStyle(
                                             LayoutElementBuilders.FontStyles.caption1(deviceParameters)
                                                 .setColor(ColorBuilders.argb(ContextCompat.getColor(baseContext,dayTextColor)))
@@ -181,7 +194,7 @@ class CalendarTile : TileService(){
                             LayoutElementBuilders.Column.Builder()
                                 .addContent(
                                     LayoutElementBuilders.Text.Builder()
-                                        .setText(a.split(".")[1])
+                                        .setText(strMonthDay.split(".")[1])
                                         .setFontStyle(
                                             LayoutElementBuilders.FontStyles.caption1(deviceParameters)
                                                 .setColor(ColorBuilders.argb(ContextCompat.getColor(baseContext,dayTextColor)))
@@ -260,17 +273,38 @@ class CalendarTile : TileService(){
         }
     }
 
+    private var weekRepeat = HashSet<String>()
     //주마다 반복
     private fun searchTaskOfRepeatWeekInDB(){
         dotDaySetW.clear()
+        weekRepeat.clear()
         try {
             val c2: Cursor =
                 database.rawQuery("SELECT week FROM myTaskTbl WHERE repeatW == 1", null);
             while (c2.moveToNext()) {
                 dotDaySetW.add(c2.getString(0))
             }
+            for (str in dotDaySetW){
+                val weekStrs=str.split("&")
+                checkWeekRepeat(weekStrs)
+            }
+
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
+    fun checkWeekRepeat(weekStr : List<String>){
+        for ( a in 0..weekStr.size){
+            when(a){
+                0-> if (weekStr[a].equals("1")) weekRepeat.add("7") //SUN
+                1-> if (weekStr[a].equals("1")) weekRepeat.add("1") //MON
+                2-> if (weekStr[a].equals("1")) weekRepeat.add("2") //TUE
+                3-> if (weekStr[a].equals("1")) weekRepeat.add("3") //WEN
+                4-> if (weekStr[a].equals("1")) weekRepeat.add("4") //THU
+                5-> if (weekStr[a].equals("1")) weekRepeat.add("5") //FRI
+                6-> if (weekStr[a].equals("1")) weekRepeat.add("6") //SAT
+            }
         }
     }
 
@@ -281,7 +315,10 @@ class CalendarTile : TileService(){
             val c2: Cursor =
                 database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1 AND year == ${currentYear}", null);
             while (c2.moveToNext()) {
-                dotDaySetN.add("${c2.getInt(1)}.${c2.getInt(2)}")
+                val str1 =if (c2.getInt(1).toString().length==1)"0${c2.getInt(1)}" else c2.getInt(1).toString()
+                val str2 =if (c2.getInt(2).toString().length==1)"0${c2.getInt(2)}" else c2.getInt(2).toString()
+                dotDaySetN.add("${str1}.${str2}")
+                Log.d("도원","cursor : ${str1}.${str2}");
             }
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
@@ -300,7 +337,7 @@ class CalendarTile : TileService(){
         val totalDay = DateTimeConstants.DAYS_PER_WEEK * 6
 
         for (i in 0 until totalDay) {
-            list.add(DateTime(startValue.plusDays(i)).toString("MM.dd"))
+            list.add(DateTime(startValue.plusDays(i)).toString("MM.dd.E"))
         }
 
         return list

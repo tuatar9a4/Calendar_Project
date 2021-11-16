@@ -17,13 +17,15 @@ import java.time.Duration
 
 class DataLayerListenerService : WearableListenerService() {
 
+    private lateinit var dbHelper : TaskDatabaseHelper
+    private lateinit var database : SQLiteDatabase
 
 
     override fun onDataChanged(p0: DataEventBuffer) {
 //        super.onDataChanged(p0)
-
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,1);
+        database=dbHelper.readableDatabase
         Log.d("도원","onDataChaned service????")
-        Toast.makeText(applicationContext,"nDataChaned servi",Toast.LENGTH_LONG).show()
         for (event in p0){
             if (event.type == DataEvent.TYPE_CHANGED){
                 val path = event.dataItem.uri.path

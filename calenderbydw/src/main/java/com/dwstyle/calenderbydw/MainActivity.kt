@@ -1,10 +1,12 @@
 package com.dwstyle.calenderbydw
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.databinding.ActivityMainBinding
 import com.dwstyle.calenderbydw.utils.ReceiveDataToFile
 import com.google.android.gms.tasks.Tasks
@@ -57,11 +59,9 @@ class MainActivity : ComponentActivity() ,DataClient.OnDataChangedListener{
         super.onDestroy()
 //        tileUiClient.close()
     }
-
     override fun onDataChanged(p0: DataEventBuffer) {
        Log.d("도원","onDataChanged main")
        Log.d("도원","p0 ${p0.count}")
-
         for (event in p0){
            Log.d("도원","event ${event.type}")
             if (event.type == DataEvent.TYPE_CHANGED){
