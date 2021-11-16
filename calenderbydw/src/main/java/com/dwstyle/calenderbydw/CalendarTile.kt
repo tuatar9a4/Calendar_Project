@@ -1,9 +1,13 @@
 package com.dwstyle.calenderbydw
 
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.*
 import androidx.wear.tiles.DimensionBuilders.*
+import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 
@@ -18,6 +22,15 @@ class CalendarTile : TileService(){
     private var calendarSpace =0f
     private var calendarWeekTextSize=10f
     private var daySpace=9f
+
+    private lateinit var dbHelper : TaskDatabaseHelper
+    private lateinit var database : SQLiteDatabase
+
+    private var isDot = false;
+    private val dotDaySetY =HashSet<String>()
+    private val dotDaySetM =HashSet<String>()
+    private val dotDaySetN =HashSet<String>()
+    private val dotDaySetW =HashSet<String>()
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
 
@@ -115,11 +128,34 @@ class CalendarTile : TileService(){
             var dayTextColor =if(!a.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
                                 else if (a.equals(currentDate)) R.color.toDayColor
                                 else R.color.currnetMonthDayColor
-            if (isItem){
-                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
-            }else{
+
+            //점찍는곳
+            for (str in dotDaySetY){
+                if (str.equals(a)) {
+                    isDot=true
+                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+                }
+            }
+            for (str in dotDaySetM){
+                if (str.equals(a.split(".")[1])) {
+                    isDot=true
+                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+                }
+            }
+            for (str in dotDaySetN){
+                if (str.equals(a)) {
+                    isDot=true
+                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+                }
+            }
+//            for (str in dotDaySetW){
+//                if (str.equals(a))scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+//            }
+
+            if (!isDot){
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(0f)).setWidth(dp(0f)).setResourceId("dot_image")
             }
+
             if (a.equals(currentDate)){
                 ttt.addContent(
                     LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
@@ -181,11 +217,77 @@ class CalendarTile : TileService(){
         currentDate = DateTime(System.currentTimeMillis()).toString("MM.dd")
         currentDate1 = System.currentTimeMillis().toString()
 
+        getDatDayFromDatabase(calendarDate.split(".").get(0))
+
 //        Log.d("도원","이번달 calendarDate : $calendarDate // test : $firstDayOfMonth //test2 : $allDayOfMonth  // ")
 //        Log.d("도원","이번달 currentDate : $currentDate ")
 //        Log.d("도원","다음달 calendarDate : ${DateTime(plus).toString("yyyy.MM")} // test : ${DateTime(plus).toString("MM.dd")} //test2 : ${getMonthList(DateTime(plus))}  // ")
-
     }
+
+    //날짜를 얻어 봅시다
+    private fun getDatDayFromDatabase(year :String){
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,1);
+        database=dbHelper.readableDatabase
+
+        searchTaskOfRepeatYearInDB()
+        searchTaskOfRepeatMonthInDB()
+        searchTaskOfRepeatWeekInDB()
+        searchTaskOfRepeatNoInDB(year)
+    }
+
+    private fun searchTaskOfRepeatYearInDB(){
+        dotDaySetY.clear()
+        try {
+            var c2: Cursor = database.rawQuery("SELECT month,day FROM myTaskTbl WHERE repeatY == 1", null);
+            while (c2.moveToNext()) {
+                dotDaySetY.add("${c2.getInt(0)}.${c2.getInt(1)}")
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
+    //월 마다 반복 TASK 찾기
+    fun searchTaskOfRepeatMonthInDB(){
+        dotDaySetM.clear()
+        try {
+            val c2: Cursor = database.rawQuery("SELECT day FROM myTaskTbl WHERE repeatM == 1", null);
+            while (c2.moveToNext()) {
+                dotDaySetM.add("${c2.getInt(0)}")
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
+    //주마다 반복
+    private fun searchTaskOfRepeatWeekInDB(){
+        dotDaySetW.clear()
+        try {
+            val c2: Cursor =
+                database.rawQuery("SELECT week FROM myTaskTbl WHERE repeatW == 1", null);
+            while (c2.moveToNext()) {
+                dotDaySetW.add(c2.getString(0))
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
+    //반복 안하는 Task 찾기
+    private fun searchTaskOfRepeatNoInDB(currentYear :String){
+        dotDaySetN.clear()
+        try {
+            val c2: Cursor =
+                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1 AND year == ${currentYear}", null);
+            while (c2.moveToNext()) {
+                dotDaySetN.add("${c2.getInt(1)}.${c2.getInt(2)}")
+            }
+        }catch (e : SQLiteException){
+            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+        }
+    }
+
 
     fun getMonthList(dateTime: DateTime): List<String> {
         val list = mutableListOf<String>()

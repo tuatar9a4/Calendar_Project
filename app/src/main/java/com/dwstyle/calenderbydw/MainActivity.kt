@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.core.app.NotificationCompat
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
@@ -26,7 +27,7 @@ import java.nio.file.Files
 class MainActivity : AppCompatActivity() {
     private val calendarFragment=CalendarFragment.newInstance()
     private lateinit var plus : Button
-    @SuppressLint("SdCardPath")
+    private lateinit var send :Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,21 +37,22 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.flmainFragment,calendarFragment)
             .commit()
         plus.setOnClickListener {
-//            makeTaskDialog.show()
-//            makeTaskDialog.showDialog(calendarFragment.getSelectDateInfo(), {
-//
-//                calendarFragment.createTask(makeTaskDialog.getInfo())
-//                makeTaskDialog.dismissDialog()
-//            }, {
-//
-//                makeTaskDialog.dismissDialog()
-//            })
 
+            makeTaskDialog.showDialog(calendarFragment.getSelectDateInfo(), {
+                calendarFragment.createTask(makeTaskDialog.getInfo())
+                makeTaskDialog.dismissDialog()
+            }, {
+
+                makeTaskDialog.dismissDialog()
+            })
             //----테스트
-            changeDBToBytes()
-
-
         }
+
+        send.setOnClickListener(View.OnClickListener {
+            changeDBToBytes()
+        })
+
+
 
 //        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,1).readableDatabase.path
 //        val newPath = TaskDatabaseHelper(applicationContext,"new.db",null,1).readableDatabase
@@ -74,13 +76,14 @@ class MainActivity : AppCompatActivity() {
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
     fun changeDBToBytes(){
         //DB 경로를 구한 한다.
+        Log.d("도원","changeDBToBytes1 : ")
         val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,1).readableDatabase.path
         val dbFile = File(dbPath)
         val dbUri = Uri.fromFile(dbFile)
 //        val realAsset = Asset.createFromUri(dbUri)
         val bytesFromDB = Files.readAllBytes(dbFile.toPath())
         val realAsset = Asset.createFromBytes(bytesFromDB)
-
+        Log.d("도원","changeDBToBytes2 : ")
         sendDBData(realAsset,dbPath)
     }
 
@@ -90,37 +93,37 @@ class MainActivity : AppCompatActivity() {
         val dataMap : PutDataMapRequest = PutDataMapRequest.create("/taskdata")
         dataMap.dataMap.putAsset("taskDB",sendData)
         dataMap.dataMap.putString("taskDBPath",dBPtah)
-
+        Log.d("도원","dBPtah :  ${dBPtah}")
         val request : PutDataRequest= dataMap.asPutDataRequest()
-
-         request.setUrgent()
-
+        request.setUrgent()
         val putTask : Task<DataItem> =Wearable.getDataClient(this).putDataItem(request)
 
-        try {
-
-            Thread(Runnable {
-                val dataItem = Tasks.await(putTask)
-                Log.d("도원","dataItem :  ${dataItem}")
-            }).start()
-
-        }catch (e : Exception){
-
-            Log.d("도원","e :  ${e.localizedMessage}")
-        }
+//        try {
+//
+//            Thread(Runnable {
+//                val dataItem = Tasks.await(putTask)
+//                Log.d("도원","dataItem :  ${dataItem}")
+//            }).start()
+//
+//        }catch (e : Exception){
+//
+//            Log.d("도원","e :  ${e.localizedMessage}")
+//        }
         putTask.addOnSuccessListener {
             Log.d("도원","isSuccessful :  ${putTask.isSuccessful}")
         }
 
         putTask.addOnCompleteListener {
-         Log.d("도원","result :  ${putTask.result}")
+            Log.d("도원","result :  ${putTask.result}")
         }
 
         putTask.addOnFailureListener {
             Log.d("도원","exception :  ${putTask.exception}")
-
         }
 
+        putTask.addOnCanceledListener {
+            Log.d("도원","exception :  ${putTask.isCanceled}")
+        }
 
     }
 
@@ -150,6 +153,7 @@ class MainActivity : AppCompatActivity() {
 
     fun initView(){
         plus=findViewById(R.id.plus)
+        send=findViewById(R.id.send)
     }
 
 

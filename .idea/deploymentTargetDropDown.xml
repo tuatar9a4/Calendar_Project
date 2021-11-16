@@ -6,12 +6,12 @@
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
-            <type value="SERIAL_NUMBER" />
-            <value value="192.168.1.108:5555" />
+            <type value="VIRTUAL_DEVICE_PATH" />
+            <value value="C:\Users\dowon\.android\avd\wearEmul.avd" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2021-11-15T15:32:29.187634200Z" />
+    <timeTargetWasSelectedWithDropDown value="2021-11-16T09:39:09.765964700Z" />
   </component>
 </project>

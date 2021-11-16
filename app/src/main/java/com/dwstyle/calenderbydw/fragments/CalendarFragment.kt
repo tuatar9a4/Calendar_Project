@@ -170,7 +170,7 @@ class CalendarFragment : Fragment() {
         try {
 //        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
             var c2: Cursor =
-                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY = 1", null);
+                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY == 1", null);
             while (c2.moveToNext()) {
 //                생각해보니 날짜만 있으면 될 것 같기도 하고...
 //                Log.d("도원","month : ${c2.getColumnIndex("month")} | " +
@@ -203,7 +203,7 @@ class CalendarFragment : Fragment() {
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
-                database.rawQuery("SELECT day,time,text,notice FROM myTaskTbl WHERE repeatM = 1", null);
+                database.rawQuery("SELECT day,time,text,notice FROM myTaskTbl WHERE repeatM == 1", null);
             while (c2.moveToNext()) {
 //                Log.d("도원","" +
 //                        "day : ${c2.getColumnIndex("day")} | " +
@@ -233,7 +233,7 @@ class CalendarFragment : Fragment() {
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
-                database.rawQuery("SELECT week,time,text,notice FROM myTaskTbl WHERE repeatW = 1", null);
+                database.rawQuery("SELECT week,time,text,notice FROM myTaskTbl WHERE repeatW == 1", null);
             while (c2.moveToNext()) {
 //                Log.d("도원","" +
 //                        "day : ${c2.getColumnIndex("week")} | " +
@@ -264,7 +264,7 @@ class CalendarFragment : Fragment() {
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
-                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN = 1", null);
+                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1", null);
             while (c2.moveToNext()) {
 //                Log.d("도원","" +
 //                        "day : ${c2.getColumnIndex("week")} | " +
