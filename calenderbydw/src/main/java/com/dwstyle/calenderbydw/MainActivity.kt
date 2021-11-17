@@ -40,8 +40,6 @@ class MainActivity : ComponentActivity() ,DataClient.OnDataChangedListener{
 //        )
 //        tileUiClient.connect()
 
-
-
     }
 
     override fun onResume() {

@@ -57,11 +57,27 @@ class CalendarTile : TileService(){
     //타일에서 drawable에 있는 Resource를 사용하려면 onResourcesRequest에서 해당 정도를 요청해서 얻어와야함
     //이경우에는 dot_image 를 요청하는 상황  addIdToImageMapping 의 id 가 가져온 이미지의 id 값이 됨
     override fun onResourcesRequest(requestParams: RequestBuilders.ResourcesRequest): ListenableFuture<ResourceBuilders.Resources> {
+        Log.d("도원","onResourcesRequest")
+
         return Futures.immediateFuture(ResourceBuilders.Resources.Builder().setVersion(
-            RESOURCES_VERSION).addIdToImageMapping("dot_image",ResourceBuilders.ImageResource.Builder()
+            RESOURCES_VERSION)
+            .addIdToImageMapping("dot_year",ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
-                    .setResourceId(R.drawable.testdot)
-                    .build()).build()).build())
+                    .setResourceId(R.drawable.dot_year)
+                    .build()).build())
+            .addIdToImageMapping("dot_month",ResourceBuilders.ImageResource.Builder()
+                .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
+                    .setResourceId(R.drawable.dot_month)
+                    .build()).build())
+            .addIdToImageMapping("dot_day",ResourceBuilders.ImageResource.Builder()
+                .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
+                    .setResourceId(R.drawable.dot_day)
+                    .build()).build())
+            .addIdToImageMapping("dot_week",ResourceBuilders.ImageResource.Builder()
+                .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
+                    .setResourceId(R.drawable.dot_week)
+                    .build()).build())
+            .build())
     }
 
 
@@ -69,13 +85,13 @@ class CalendarTile : TileService(){
     public fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
         //달력 구성을 위한 정보를 미리 가져옴
         getCalendar()
-
         // Column : 타일의 구성 요소를 열(세로) 로 정렬
         // 첫 addContent : (Spacer) 상단에서 30f 만큼의 공간을 만든다 / 워치가 원형이다 보니 중앙으로 구성을 맞추기 위함
         // 둘 addContent : (Text) 글자를 쓰는 Builder / TextAlignmentProp 를 사용하여 text 를 중앙 정렬한다.
+        // 셋 addContent : (Spacer) 공간 만드는 Builder
         val calendarLayout =LayoutElementBuilders.Column.Builder().setWidth(wrap())
         calendarLayout.setHeight(expand())
-            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(30f)).build())
+            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(25f)).build())
             .addContent(
                 //년.월 yyyy.MM
                 LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
@@ -89,16 +105,18 @@ class CalendarTile : TileService(){
             ).addContent(
                 LayoutElementBuilders.Spacer.Builder().setHeight(dp(5f)).build()
             )
-        var weekText = arrayOf("Sun","Mon","The","Wen","Thu","Fri","Sat");
-        var rowBuilderBox =  LayoutElementBuilders.Row.Builder().setWidth(wrap());
-        var weekFontStyle =LayoutElementBuilders.FontStyles.caption1(deviceParameters)
+
+        //상단 요일 만드는 곳
+        val weekText = arrayOf("Sun","Mon","The","Wen","Thu","Fri","Sat");
+        val rowBuilderBox =  LayoutElementBuilders.Row.Builder().setWidth(wrap());
+        val weekFontStyle =LayoutElementBuilders.FontStyles.caption1(deviceParameters)
             .setSize(sp(calendarWeekTextSize))
 
         for (a in weekText){
             if (a.equals("Sun")) weekFontStyle.setColor(ColorBuilders.argb(ContextCompat.getColor(baseContext,R.color.sunColor)))
             else if (a.equals("Sat"))weekFontStyle.setColor(ColorBuilders.argb(ContextCompat.getColor(baseContext,R.color.satColor)))
             else weekFontStyle.setColor(ColorBuilders.argb(ContextCompat.getColor(baseContext,R.color.currnetMonthDayColor)))
-
+            // 가로 행 으로 요일을 하나씩 추가한다.
             rowBuilderBox.addContent(
                 LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).addContent(
                     LayoutElementBuilders.Text.Builder()
@@ -110,14 +128,22 @@ class CalendarTile : TileService(){
                         ).build()
                 ).build()
             ).build()
+            // 토요일이 아닌경우 (마지막이 아닌경우) 옆에 공간을 띄운다.
             if (!a.equals("Sat"))rowBuilderBox.addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(calendarSpace)).build())
         }
+        //열에 아까 만든 요일 행 추가
         calendarLayout.addContent(rowBuilderBox.build())
+        //다음열에 spacer로 공간을 띄운다.
         calendarLayout.addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(5f)).build())
 
+        //날짜를 만드는곳
         var count =0;
         var isItem =false;
-        lateinit var ttt : LayoutElementBuilders.Row.Builder
+        //가로 (row) 행 만들기
+        lateinit var calendarDayRow : LayoutElementBuilders.Row.Builder
+        //점을 담을 Row Builder
+        lateinit var dotContainer :LayoutElementBuilders.Row.Builder
+        //점을 만들기위한 Image Builder
         lateinit var scheduleItem : LayoutElementBuilders.Image.Builder
         lateinit var modifi :ModifiersBuilders
 
@@ -125,34 +151,57 @@ class CalendarTile : TileService(){
             val strs :List<String> =a.split(".")
             val strMonthDay ="${strs[0]}.${strs[1]}"
             if (count==0){
-                ttt=LayoutElementBuilders.Row.Builder().setWidth(wrap());
+                //한줄을 다 채우면 가로(Row) 행 Builder를 새로 만든다.
+                calendarDayRow=LayoutElementBuilders.Row.Builder().setWidth(wrap());
             }
+            dotContainer=LayoutElementBuilders.Row.Builder().setWidth(wrap())
 //            isItem = count==3
+            //날짜의 색상  먼저 전달인지 확인하고 그 후 오늘인지 다음으로 일요일 토요일 평일 순으로 확인
             var dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
                                 else if (strMonthDay.equals(currentDate)) R.color.toDayColor
+                                else if (strs[2].equals("Sun"))R.color.sunColor
+                                else if (strs[2].equals("Sat"))R.color.satColor
                                 else R.color.currnetMonthDayColor
             isDot=false
             weekInt=0
             //점찍는곳
-            for (str in dotDaySetY){
-                if (str.equals(strMonthDay)) {
-                    isDot=true
-                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
-                }
+            if (dotDaySetY.contains(strMonthDay)){
+                isDot=true
+                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_year")
+                dotContainer.addContent(scheduleItem.build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
             }
-            for (str in dotDaySetM){
-                if (str.equals(strMonthDay.split(".")[1])) {
-                    isDot=true
-                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
-                }
+//            for (str in dotDaySetY){
+//                if (str.equals(strMonthDay)) {
+//                    isDot=true
+//                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+//                }
+//            }
+            if (dotDaySetM.contains(strMonthDay.split(".")[1])){
+                isDot=true
+                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_month")
+                dotContainer.addContent(scheduleItem.build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
             }
-            for (str in dotDaySetN){
-                Log.d("도원","${str}  || ${strMonthDay}")
-                if (str.equals(strMonthDay)) {
-                    isDot=true
-                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
-                }
+//            for (str in dotDaySetM){
+//                if (str.equals(strMonthDay.split(".")[1])) {
+//                    isDot=true
+//                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+//                }
+//            }
+            if (dotDaySetN.contains(strMonthDay)){
+                isDot=true
+                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_day")
+                dotContainer.addContent(scheduleItem.build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
             }
+//            for (str in dotDaySetN){
+//                Log.d("도원","${str}  || ${strMonthDay}")
+//                if (str.equals(strMonthDay)) {
+//                    isDot=true
+//                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+//                }
+//            }
             if (strs[2]=="Sun")weekInt=7
             if (strs[2]=="Mon")weekInt=1
             if (strs[2]=="Tue")weekInt=2
@@ -162,15 +211,19 @@ class CalendarTile : TileService(){
             if (strs[2]=="Sat")weekInt=6
             if (weekRepeat.contains(weekInt.toString())){
                 isDot=true
-                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
+                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_week")
+                dotContainer.addContent(scheduleItem.build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
             }
 
-            if (!isDot){
-                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(0f)).setWidth(dp(0f)).setResourceId("dot_image")
-            }
+//            if (!isDot){
+//                scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(0f)).setWidth(dp(0f)).setResourceId("dot_image")
+//            }
 
+            //날짜 하나씩 담는다
+            //오늘날짜
             if (strMonthDay.equals(currentDate)){
-                ttt.addContent(
+                calendarDayRow.addContent(
                     LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
                         .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP).addContent(
                             LayoutElementBuilders.Column.Builder()
@@ -184,11 +237,13 @@ class CalendarTile : TileService(){
                                                 .build()
                                         ).build()
                                 ).addContent(
-                                    scheduleItem.build()
+                                    dotContainer.build()
+//                                    scheduleItem.build()
                                 ).build()
                         ).build())
             }else{
-                ttt.addContent(
+//                오늘을 제외한 날짜
+                calendarDayRow.addContent(
                     LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
                         .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP).addContent(
                             LayoutElementBuilders.Column.Builder()
@@ -202,13 +257,15 @@ class CalendarTile : TileService(){
                                                 .build()
                                         ).build()
                                 ).addContent(
-                                    scheduleItem.build()
+                                    dotContainer.build()
+//                                    scheduleItem.build()
                                 ).build()
                         ).build())
             }
+            //한칸을 다 채우면 Clomu(열) 세로 에 집어 넣는다.
             count++;
             if (count==7){
-                calendarLayout.addContent(ttt.build())
+                calendarLayout.addContent(calendarDayRow.build())
                 count=0
             }
         }
@@ -253,7 +310,9 @@ class CalendarTile : TileService(){
         try {
             var c2: Cursor = database.rawQuery("SELECT month,day FROM myTaskTbl WHERE repeatY == 1", null);
             while (c2.moveToNext()) {
-                dotDaySetY.add("${c2.getInt(0)}.${c2.getInt(1)}")
+                val str1 =if (c2.getInt(0).toString().length==1)"0${c2.getInt(0)}" else c2.getInt(0).toString()
+                val str2 =if (c2.getInt(1).toString().length==1)"0${c2.getInt(1)}" else c2.getInt(1).toString()
+                dotDaySetY.add("${str1}.${str2}")
             }
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
@@ -266,7 +325,8 @@ class CalendarTile : TileService(){
         try {
             val c2: Cursor = database.rawQuery("SELECT day FROM myTaskTbl WHERE repeatM == 1", null);
             while (c2.moveToNext()) {
-                dotDaySetM.add("${c2.getInt(0)}")
+                val str1 =if (c2.getInt(0).toString().length==1)"0${c2.getInt(0)}" else c2.getInt(0).toString()
+                dotDaySetM.add("${str1}")
             }
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
@@ -313,12 +373,11 @@ class CalendarTile : TileService(){
         dotDaySetN.clear()
         try {
             val c2: Cursor =
-                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1 AND year == ${currentYear}", null);
+                database.rawQuery("SELECT year,month,day FROM myTaskTbl WHERE repeatN == 1 AND year == ${currentYear}", null);
             while (c2.moveToNext()) {
                 val str1 =if (c2.getInt(1).toString().length==1)"0${c2.getInt(1)}" else c2.getInt(1).toString()
                 val str2 =if (c2.getInt(2).toString().length==1)"0${c2.getInt(2)}" else c2.getInt(2).toString()
                 dotDaySetN.add("${str1}.${str2}")
-                Log.d("도원","cursor : ${str1}.${str2}");
             }
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
