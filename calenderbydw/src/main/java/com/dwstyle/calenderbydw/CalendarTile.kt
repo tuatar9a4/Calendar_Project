@@ -56,6 +56,7 @@ class CalendarTile : TileService(){
 
     //타일에서 drawable에 있는 Resource를 사용하려면 onResourcesRequest에서 해당 정도를 요청해서 얻어와야함
     //이경우에는 dot_image 를 요청하는 상황  addIdToImageMapping 의 id 가 가져온 이미지의 id 값이 됨
+    //업데이트 함수로 호출이 안되고 타일을 없애고 새로 만드니까 호출이 됨
     override fun onResourcesRequest(requestParams: RequestBuilders.ResourcesRequest): ListenableFuture<ResourceBuilders.Resources> {
         Log.d("도원","onResourcesRequest")
 
