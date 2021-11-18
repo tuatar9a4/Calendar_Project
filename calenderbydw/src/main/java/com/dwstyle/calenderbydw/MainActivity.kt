@@ -1,29 +1,16 @@
 package com.dwstyle.calenderbydw
 
 import android.app.Activity
-import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import android.view.KeyEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.wear.widget.WearableLinearLayoutManager
-import androidx.wear.widget.WearableRecyclerView
 import com.dwstyle.calenderbydw.adapters.MyTaskAdapter
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
-import com.dwstyle.calenderbydw.databinding.ActivityMainBinding
-import com.dwstyle.calenderbydw.utils.ReceiveDataToFile
-import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.wearable.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.dwstyle.calenderbydw.utils.TaskRecyclerViewDecoration
 import org.joda.time.DateTime
-import java.io.*
-import java.lang.Exception
-import java.util.concurrent.*
 
 class MainActivity : Activity() {
 
@@ -37,21 +24,25 @@ class MainActivity : Activity() {
     private val currentPlusSevenDate = ArrayList<String>()
     private val taskLists = HashMap<String,ArrayList<String>>()
 
+    private lateinit var taskAdapter :MyTaskAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("도원","WearApp Open ")
         initView()
         openTheDB()
-
+        getTodayToSeven()
 
         val menuItem = ArrayList<String>()
         menuItem.add("1")
         menuItem.add("22")
         menuItem.add("333")
         menuItem.add("4444")
-        rcTask.adapter=MyTaskAdapter(applicationContext,menuItem)
+        taskAdapter=MyTaskAdapter(this,currentPlusSevenDate,taskLists)
+        rcTask.adapter=taskAdapter
 
+        rcTask.addItemDecoration(TaskRecyclerViewDecoration(this))
 //        타일 새로 고침
 //        TileService.getUpdater(applicationContext).requestUpdate(CalendarTile::class.java)
 //        val rootLayout = findViewById<FrameLayout>(R.id.tile_container)
@@ -84,9 +75,15 @@ class MainActivity : Activity() {
         getTaskFromDateVerWeek(DateTime(System.currentTimeMillis()).toString("yyyy.MM.dd.E"))
         for (a in 1..6){
             currentPlusSevenDate.add(DateTime(System.currentTimeMillis()).plusDays(a).toString("yyyy.MM.dd"))
+            getTaskFromDateVerWeek(DateTime(System.currentTimeMillis()).plusDays(a).toString("yyyy.MM.dd.E"))
         }
 
         getTaskFromDate(DateTime(System.currentTimeMillis()).toString("yyyy.MM.dd.E"))
+
+        taskLists.toSortedMap(Comparator { t, t2 -> if(t>t2) 1 else 2 })
+        Log.d("도원","currentPlusSevenDate : ${currentPlusSevenDate}")
+        Log.d("도원","taskLists : ${taskLists}")
+
     }
 
     //특정 날짜에 해당하는 Task 알기
@@ -99,7 +96,6 @@ class MainActivity : Activity() {
     }
 
     fun getTaskFromDateVerWeek(dateStr :String){
-        val dateSplit = dateStr.split(".")
         getTaskRepeatW(dateStr)
 
     }
@@ -111,10 +107,10 @@ class MainActivity : Activity() {
         while (corsor.moveToNext()){
             if (taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]==null){
                 taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]=
-                    arrayListOf<String>("${corsor.getInt(3)}")
+                    arrayListOf<String>(corsor.getString(2))
             }else{
                 tempTaskList=taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]!!
-                tempTaskList.add("${corsor.getInt(2)}")
+                tempTaskList.add(corsor.getString(2))
                 taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]=tempTaskList
             }
         }
@@ -127,30 +123,67 @@ class MainActivity : Activity() {
         while (corsor.moveToNext()){
             if (taskLists["${year}.${month}.${corsor.getInt(0)}"]==null){
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=
-                    arrayListOf<String>("${corsor.getInt(1)}")
+                    arrayListOf<String>(corsor.getString(1))
             }else{
                 tempTaskList=taskLists["${year}.${month}.${corsor.getInt(0)}"]!!
-                tempTaskList.add("${corsor.getInt(1)}")
+                tempTaskList.add(corsor.getString(1))
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=tempTaskList
             }
         }
     }
+
+    private var weekRepeat = HashSet<String>()
     //주 반복에서 얻기
     fun getTaskRepeatW(weekStr :String){
-        val corsor =database.rawQuery("SELECT day,text FROM myTaskTbl WHERE RepeatW==1",null)
+        val corsor =database.rawQuery("SELECT week,text FROM myTaskTbl WHERE RepeatW==1",null)
         var tempTaskList = ArrayList<String>()
+        weekRepeat.clear()
+        val dateSplit = weekStr.split(".")
+        weekStrTransInt(dateSplit[3])
         while (corsor.moveToNext()){
-            if (taskLists["${weekStr[0]}.${weekStr[1]}.${weekStr[2]}"]==null){
-                taskLists["${weekStr[0]}.${weekStr[1]}.${weekStr[2]}"]=
-                    arrayListOf<String>("${corsor.getInt(1)}")
-            }else{
-                tempTaskList=taskLists["${weekStr[0]}.${weekStr[1]}.${weekStr[2]}"]!!
-                tempTaskList.add("${corsor.getInt(1)}")
-                taskLists["${weekStr[0]}.${weekStr[1]}.${weekStr[2]}"]=tempTaskList
+            checkWeekRepeat(corsor.getString(0).split("&"))
+            if (weekRepeat.contains(weekStrTransInt(dateSplit[3]).toString())){
+                if (taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]==null){
+                    taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]=
+                        arrayListOf<String>(corsor.getString(1))
+                }else{
+                    tempTaskList=taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]!!
+                    tempTaskList.add(corsor.getString(1))
+                    taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]=tempTaskList
+                }
             }
         }
 
     }
+
+    fun checkWeekRepeat(weekStr : List<String>){
+        for ( a in 0..weekStr.size){
+            when(a){
+                0-> if (weekStr[a].equals("1")) weekRepeat.add("7") //SUN
+                1-> if (weekStr[a].equals("1")) weekRepeat.add("1") //MON
+                2-> if (weekStr[a].equals("1")) weekRepeat.add("2") //TUE
+                3-> if (weekStr[a].equals("1")) weekRepeat.add("3") //WEN
+                4-> if (weekStr[a].equals("1")) weekRepeat.add("4") //THU
+                5-> if (weekStr[a].equals("1")) weekRepeat.add("5") //FRI
+                6-> if (weekStr[a].equals("1")) weekRepeat.add("6") //SAT
+            }
+        }
+    }
+
+    fun weekStrTransInt(weekStr : String) :Int{
+        when(weekStr){
+            "Sun"-> return 7//SUN
+            "Mon"-> return 1 //MON
+            "Tue"-> return 2 //Tue
+            "Wen"-> return 3 //WEN
+            "Thu"-> return 4 //THU
+            "Fri"-> return 5 //FRI
+            "Sat"-> return 6 //SAT
+            else -> return 0
+        }
+
+    }
+
     //반복 없음에서 얻기
     fun getTaskRepeatN(year:String,month:String){
         val corsor =database.rawQuery("SELECT day,text FROM myTaskTbl WHERE RepeatN==1 AND year == ${year} AND month == ${month}",null)
@@ -158,14 +191,15 @@ class MainActivity : Activity() {
         while (corsor.moveToNext()){
             if (taskLists["${year}.${month}.${corsor.getInt(0)}"]==null){
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=
-                    arrayListOf<String>("${corsor.getInt(1)}")
+                    arrayListOf<String>(corsor.getString(1))
             }else{
                 tempTaskList=taskLists["${year}.${month}.${corsor.getInt(0)}"]!!
-                tempTaskList.add("${corsor.getInt(1)}")
+                tempTaskList.add(corsor.getString(1))
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=tempTaskList
             }
         }
     }
+
 
 
     override fun onResume() {

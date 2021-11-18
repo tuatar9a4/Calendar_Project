@@ -18,7 +18,7 @@
             android:id="@+id/rcTask"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:scrollbars="vertical"
+            android:scrollbars="none"
             />
     </FrameLayout>
 </androidx.wear.widget.BoxInsetLayout>
