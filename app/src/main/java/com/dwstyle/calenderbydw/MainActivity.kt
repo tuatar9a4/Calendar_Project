@@ -1,27 +1,23 @@
 package com.dwstyle.calenderbydw
 
-import android.annotation.SuppressLint
-import android.app.Notification
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.NotificationCompat
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
+import com.dwstyle.calenderbydw.fragments.TaskListFragment
 import com.dwstyle.calenderbydw.item.TaskItem
-import com.dwstyle.calenderbydw.utils.MakeTaskDialog
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -31,42 +27,81 @@ import java.nio.file.Files
 
 class MainActivity : AppCompatActivity() {
     private val calendarFragment=CalendarFragment.newInstance()
-    private lateinit var plus : Button
-    private lateinit var send :Button
+    private val taskListFragment=TaskListFragment.newInstance()
+    private lateinit var btnPlus : Button
+    private lateinit var btnList :Button
+    private lateinit var btnHome :Button
+    private lateinit var ivSendWatch :ImageView
     private lateinit var resultLauncher : ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
+
         supportFragmentManager.beginTransaction()
-            .replace(R.id.flmainFragment,calendarFragment)
+            .add(R.id.flmainFragment,calendarFragment)
+            .add(R.id.flmainFragment,taskListFragment)
+            .hide(taskListFragment)
             .commit()
 
-        resultLauncher=registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback {
-            if (it.resultCode == RESULT_OK){
-                val intent = it.data
-                if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
-                    calendarFragment.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!)
-                }
-            }
-        })
-
-        plus.setOnClickListener {
-            val intent = Intent(applicationContext,CreateTaskActivity::class.java)
-            intent.putExtra("dateInfo",calendarFragment.getSelectDateInfo())
-            resultLauncher.launch(intent)
-        }
-
-        send.setOnClickListener(View.OnClickListener {
-            changeDBToBytes()
-        })
+        clickFunction()
 
 
 
 
     }
+
+    //clickFun
+    private fun clickFunction(){
+        //달력화면 이동
+        btnHome.setOnClickListener {
+//            supportFragmentManager.beginTransaction().replace(R.id.flmainFragment,calendarFragment).commit()
+            val transaction =supportFragmentManager.beginTransaction()
+            transaction.hide(taskListFragment)
+            transaction.show(calendarFragment)
+            transaction.commit()
+
+
+        }
+
+        //TaskList 화면 이동
+        btnList.setOnClickListener {
+//            supportFragmentManager.beginTransaction().replace(R.id.flmainFragment,taskListFragment).commit()
+            val transaction =supportFragmentManager.beginTransaction()
+            transaction.hide(calendarFragment)
+            transaction.show(taskListFragment)
+            transaction.commit()
+        }
+
+        //일정 생성으로 이동
+        btnPlus.setOnClickListener {
+            val intent = Intent(applicationContext,CreateTaskActivity::class.java)
+            intent.putExtra("dateInfo",calendarFragment.getSelectDateInfo())
+            resultLauncher.launch(intent)
+        }
+
+        resultLauncher=registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+            ActivityResultCallback {
+                //Task 등록 데이터 받는 곳
+                if (it.resultCode == RESULT_OK){
+                    val intent = it.data
+                    if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
+                        calendarFragment.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!)
+                    }
+                }
+            })
+
+
+        //워치로 데이터 전송시키기
+        ivSendWatch.setOnClickListener {
+            changeDBToBytes()
+        }
+
+
+
+    }
+
 
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
     fun changeDBToBytes(){
@@ -147,8 +182,11 @@ class MainActivity : AppCompatActivity() {
 
 
     fun initView(){
-        plus=findViewById(R.id.plus)
-        send=findViewById(R.id.send)
+        btnPlus=findViewById(R.id.btnPlus)
+        btnHome=findViewById(R.id.btnHome)
+        btnList=findViewById(R.id.btnList)
+        ivSendWatch=findViewById(R.id.ivSendWatch)
+
     }
 
 

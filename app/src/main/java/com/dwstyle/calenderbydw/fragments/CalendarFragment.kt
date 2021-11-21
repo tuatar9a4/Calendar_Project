@@ -3,6 +3,7 @@ package com.dwstyle.calenderbydw.fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues
+import android.content.Context
 import android.content.DialogInterface
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -63,6 +64,15 @@ class CalendarFragment : Fragment() {
     private lateinit var database : SQLiteDatabase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState !=null){
+            selectedDate= savedInstanceState.getParcelable<CalendarDay>("calendarDate")!!
+            Log.d("도원","selectedDate0  : ${selectedDate.month}.${selectedDate.day}");
+        }else{
+            selectedDate=CalendarDay.today()
+            Log.d("도원","selectedDate1  : ${selectedDate.month}.${selectedDate.day}");
+        }
+//        Log.d("도원","selectedDate1  : ${selectedDate.month}.${selectedDate.day}");
     }
 
     override fun onCreateView(
@@ -73,7 +83,7 @@ class CalendarFragment : Fragment() {
         val view =inflater.inflate(R.layout.fragment_calendar, container, false)
         AndroidThreeTen.init(view.context)
         initView(view)
-        Log.d("도원","gma..?? ");
+        Log.d("도원","selectedDate2  : ${selectedDate.month}.${selectedDate.day}");
         dbHelper= TaskDatabaseHelper(view.context,"task.db",null,2)
 //        dbHelper.createMonthTBL("myTaskTbl")
 //        database=dbHelper.readableDatabase
@@ -94,6 +104,7 @@ class CalendarFragment : Fragment() {
         //달력 날짜 선택시 이벤트
         calendarView.setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
             selectedDate=date
+            Log.d("도원","selectedDate3  : ${selectedDate.month}.${selectedDate.day}");
             tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
             searchTaskInRepeatWeek(date.month,date.day,date)
             searchTaskInDay(date.month,date.day,date)
@@ -105,7 +116,7 @@ class CalendarFragment : Fragment() {
 
         })
         //현재 날짜 선택
-        selectedDate=CalendarDay.today()
+
         calendarView.selectedDate= selectedDate
         tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
         //타이틀 포맷 변경 yyyy년 MM월
@@ -555,6 +566,11 @@ class CalendarFragment : Fragment() {
 
     fun getSelectDateInfo() = selectedDate
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("calendarDate",selectedDate);
+        Log.d("도원","selectedDate8  : ${selectedDate.month}.${selectedDate.day}");
+    }
 
     companion object {
         @JvmStatic
