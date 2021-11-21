@@ -36,6 +36,11 @@ class MakeTaskDialog(context: Context) {
     private lateinit var btnCancel:Button
     private lateinit var btnWrite :Button
 
+    private lateinit var tvTaskTitle : TextView
+    private lateinit var tvTaskContents :TextView
+    private lateinit var tvTaskRepeat :TextView
+
+
     var taskWeek=0;
     private val sendTaskLiveData =MutableLiveData<String>()
 
@@ -69,6 +74,41 @@ class MakeTaskDialog(context: Context) {
         sendRepeatN =1
         sendPriority=0
     }
+    fun showTask(clickItem: TaskItem){
+        dialog= Dialog(context)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.write_task_layout)
+        val params=dialog.window?.attributes;
+        params?.width=WindowManager.LayoutParams.MATCH_PARENT
+        params?.height=WindowManager.LayoutParams.WRAP_CONTENT
+        dialog.window?.attributes=params
+        dialog.show()
+        initViw(dialog)
+        tvTaskTitle.text=clickItem.title
+        tvTaskContents.text=clickItem.text
+        if (clickItem.repeatY==1) tvTaskRepeat.text = "매년 ${clickItem.month}달 ${clickItem.day}일 반복"
+        if (clickItem.repeatM==1) tvTaskRepeat.text = "매달 ${clickItem.day}일 반복"
+        if (clickItem.repeatN==1) tvTaskRepeat.text = "반복 없음"
+        if (clickItem.repeatW==1) {
+            val weekText =clickItem.week.split("&")
+            var cnt =0
+            tvTaskRepeat.text = "매주 "
+            for (a in 0 .. weekText.size){
+                when(a){
+                    0 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 일"
+                    1 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 월"
+                    2 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 화"
+                    3 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 수"
+                    4 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 목"
+                    5 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 금"
+                    6 ->  if (weekText[a]=="1") tvTaskRepeat.text = "${tvTaskRepeat.text} 토"
+                }
+
+            }
+            tvTaskRepeat.text = "${tvTaskRepeat.text} 반복"
+        }
+    }
+
     //dialog 보여주는 method
     fun showDialog(calendarDay: CalendarDay, writeClickListener : View.OnClickListener, cancelListener: View.OnClickListener){
         initValue()
@@ -190,7 +230,7 @@ class MakeTaskDialog(context: Context) {
                 "${if(repeatFri.isChecked) 1 else 0}&" +
                 "${if(repeatSat.isChecked) 1 else 0}"
         return  TaskItem(
-            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,
+            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,"",
             sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""
         )
     }
@@ -238,6 +278,12 @@ class MakeTaskDialog(context: Context) {
         repeatSun=dialog.findViewById(R.id.repeatSun);
         btnCancel=dialog.findViewById(R.id.btnCancel);
         btnWrite=dialog.findViewById(R.id.btnWrite);
+
+
+        tvTaskTitle=dialog.findViewById(R.id.tvTaskTitle);
+        tvTaskContents=dialog.findViewById(R.id.tvTaskContents)
+        tvTaskRepeat=dialog.findViewById(R.id.tvTaskRepeat)
+
 
     }
 

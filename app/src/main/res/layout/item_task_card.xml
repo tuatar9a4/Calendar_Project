@@ -36,6 +36,15 @@
         android:textStyle="bold"
         android:text="Task 1 : "
         />
+    <TextView
+        android:id="@+id/tvIsContents"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTaskTitle"
+        android:text="눌러서 내용 확인"
+        android:layout_marginLeft="30dp"
+        android:textSize="10sp"
+        />
     <ImageView
         android:id="@+id/ivDeleteTask"
         android:layout_width="20dp"
@@ -49,10 +58,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="7dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="20dp"
-        android:layout_below="@+id/tvTaskTitle"
+        android:layout_below="@+id/tvIsContents"
         android:paddingBottom="10dp"
         >
         <TextView

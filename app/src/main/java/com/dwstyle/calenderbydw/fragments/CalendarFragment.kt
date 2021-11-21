@@ -2,13 +2,11 @@ package com.dwstyle.calenderbydw.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.AbstractThreadedSyncAdapter
 import android.content.ContentValues
 import android.content.DialogInterface
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -23,6 +21,7 @@ import com.dwstyle.calenderbydw.adapters.DailyTaskAdapter
 import com.dwstyle.calenderbydw.calendardacorator.*
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.*
+import com.dwstyle.calenderbydw.utils.MakeTaskDialog
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -33,7 +32,6 @@ import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class CalendarFragment : Fragment() {
@@ -72,18 +70,23 @@ class CalendarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view =inflater.inflate(R.layout.fragment_calendar, container, false);
-        AndroidThreeTen.init(view.context);
+        val view =inflater.inflate(R.layout.fragment_calendar, container, false)
+        AndroidThreeTen.init(view.context)
         initView(view)
-        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
+        Log.d("도원","gma..?? ");
+        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,2)
+//        dbHelper.createMonthTBL("myTaskTbl")
+//        database=dbHelper.readableDatabase
+//        dbHelper.onUpgrade(database,2,3)
 //        dropTable(view,"myTaskTbl");
+//        dbHelper.onCreate(database)
 //        dropTable(view,"y2022");
         initCalendarSetting(view)
 
         return view
     }
 
-    fun initCalendarSetting(view : View){
+    private fun initCalendarSetting(view : View){
         //달력 배경 색 및 선택시 색
         calendarView.background=view.context.getDrawable(R.drawable.calendar_background)
 //        calendarView.selectionColor=Color.parseColor("#cc00cc")
@@ -141,7 +144,7 @@ class CalendarFragment : Fragment() {
         rcTaskList.adapter=dailyTaskAdapter
 
 
-        dailyTaskAdapter.setOnItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
+        dailyTaskAdapter.setOnDeleteItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
             override fun onItemClick(v: View, item: TaskItem, pos: Int) {
                 val builder  =AlertDialog.Builder(context)
 
@@ -157,6 +160,11 @@ class CalendarFragment : Fragment() {
                 val alertDialog =builder.create()
                 alertDialog.show()
 
+            }
+
+            override fun onTaskClick(v: View, item: TaskItem, pos: Int) {
+                val taskDialog =MakeTaskDialog(context!!)
+                taskDialog.showTask(item)
             }
         })
 
@@ -310,6 +318,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("day")),
                         c2.getString(c2.getColumnIndex("week")),
                         c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("title")),
                         c2.getString(c2.getColumnIndex("text")),
                         c2.getInt(c2.getColumnIndex("notice")),
                         c2.getInt(c2.getColumnIndex("repeatY")),
@@ -347,6 +356,7 @@ class CalendarFragment : Fragment() {
                                 c2.getInt(c2.getColumnIndex("day")),
                                 c2.getString(c2.getColumnIndex("week")),
                                 c2.getLong(c2.getColumnIndex("time")),
+                                c2.getString(c2.getColumnIndex("title")),
                                 c2.getString(c2.getColumnIndex("text")),
                                 c2.getInt(c2.getColumnIndex("notice")),
                                 c2.getInt(c2.getColumnIndex("repeatY")),
@@ -392,6 +402,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("day")),
                         c2.getString(c2.getColumnIndex("week")),
                         c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("title")),
                         c2.getString(c2.getColumnIndex("text")),
                         c2.getInt(c2.getColumnIndex("notice")),
                         c2.getInt(c2.getColumnIndex("repeatY")),
@@ -411,6 +422,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("day")),
                         c2.getString(c2.getColumnIndex("week")),
                         c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("title")),
                         c2.getString(c2.getColumnIndex("text")),
                         c2.getInt(c2.getColumnIndex("notice")),
                         c2.getInt(c2.getColumnIndex("repeatY")),
@@ -430,6 +442,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("day")),
                         c2.getString(c2.getColumnIndex("week")),
                         c2.getLong(c2.getColumnIndex("time")),
+                        c2.getString(c2.getColumnIndex("title")),
                         c2.getString(c2.getColumnIndex("text")),
                         c2.getInt(c2.getColumnIndex("notice")),
                         c2.getInt(c2.getColumnIndex("repeatY")),
@@ -485,6 +498,7 @@ class CalendarFragment : Fragment() {
         contentValue.put("day",taskItem.day);
         contentValue.put("week",taskItem.week);
         contentValue.put("time",taskItem.time);
+        contentValue.put("title",taskItem.title);
         contentValue.put("text",taskItem.text);
         contentValue.put("repeatY",taskItem.repeatY);
         contentValue.put("repeatM",taskItem.repeatM);

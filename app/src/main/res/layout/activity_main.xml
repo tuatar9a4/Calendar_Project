@@ -79,6 +79,7 @@
         android:background="#f5f5f5"
         android:elevation="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

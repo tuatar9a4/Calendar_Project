@@ -2,6 +2,7 @@ package com.dwstyle.calenderbydw
 
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -10,9 +11,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationCompat
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
+import com.dwstyle.calenderbydw.item.TaskItem
 import com.dwstyle.calenderbydw.utils.MakeTaskDialog
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -28,24 +33,30 @@ class MainActivity : AppCompatActivity() {
     private val calendarFragment=CalendarFragment.newInstance()
     private lateinit var plus : Button
     private lateinit var send :Button
+    private lateinit var resultLauncher : ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-        val makeTaskDialog=MakeTaskDialog(this)
         supportFragmentManager.beginTransaction()
             .replace(R.id.flmainFragment,calendarFragment)
             .commit()
+
+        resultLauncher=registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+        ActivityResultCallback {
+            if (it.resultCode == RESULT_OK){
+                val intent = it.data
+                if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
+                    calendarFragment.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!)
+                }
+            }
+        })
+
         plus.setOnClickListener {
-
-            makeTaskDialog.showDialog(calendarFragment.getSelectDateInfo(), {
-                calendarFragment.createTask(makeTaskDialog.getInfo())
-                makeTaskDialog.dismissDialog()
-            }, {
-
-                makeTaskDialog.dismissDialog()
-            })
-            //----테스트
+            val intent = Intent(applicationContext,CreateTaskActivity::class.java)
+            intent.putExtra("dateInfo",calendarFragment.getSelectDateInfo())
+            resultLauncher.launch(intent)
         }
 
         send.setOnClickListener(View.OnClickListener {
@@ -54,22 +65,6 @@ class MainActivity : AppCompatActivity() {
 
 
 
-//        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,1).readableDatabase.path
-//        val newPath = TaskDatabaseHelper(applicationContext,"new.db",null,1).readableDatabase
-//        val cursor = newPath.rawQuery("Select * From myTaskTbl",null)
-//        Log.d("도원","! ${cursor.count}")
-//        while (cursor.moveToNext()){
-//            Log.d("도원","! ${cursor.getInt(cursor.getColumnIndex("_id"))}")
-//        }
-//        Log.d("도원","dbPath : ${dbPath}  |||")
-//        val dbFile = File(dbPath)
-//        val dbUri = Uri.fromFile(dbFile)
-//        val realAsset = Asset.createFromUri(dbUri)
-//        val tes = Files.readAllBytes(dbFile.toPath())
-//        Log.d("도원"," ㅅㄷㄴ : ${tes}")
-//        val newFile =File("/data/user/0/com.dwstyle.calenderbydw/databases/newdsdsd.db")
-//        writeBytesToFile(newFile,tes)
-
 
     }
 
@@ -77,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     fun changeDBToBytes(){
         //DB 경로를 구한 한다.
         Log.d("도원","changeDBToBytes1 : ")
-        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,1).readableDatabase.path
+        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,2).readableDatabase.path
         val dbFile = File(dbPath)
         val dbUri = Uri.fromFile(dbFile)
 //        val realAsset = Asset.createFromUri(dbUri)

@@ -2,6 +2,7 @@ package com.dwstyle.calenderbydw.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 
@@ -17,6 +18,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                "day integer,"+
                "week text,"+
                "time integer,"+
+               "title text,"+
                "text text,"+
                "notice integer,"+
                "repeatY integer,"+
@@ -30,13 +32,25 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        Log.d("도원","tblName  onUpgrade: ${tblName}");
-        val sql : String = "DROP TABLE if exists "+tblName
-        db?.let { it.execSQL(sql) }
+        try {
+            if (oldVersion<3){
+                updateColumn(db!!)
+            }
+
+        }catch ( e : SQLiteException){
+            db!!.execSQL("DROP TABLE IF EXISTS myTaskTbl");
+            onCreate(db);
+        }
+//        val sql : String = "DROP TABLE if exists "+tblName
+//        db?.let { it.execSQL(sql) }
     }
 
     fun createMonthTBL(tblName:String){
         this.tblName=tblName;
+    }
+
+    private fun updateColumn(a_db : SQLiteDatabase){
+        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN title TEXT DEFAULT '' ")
     }
 
 

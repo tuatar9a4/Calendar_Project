@@ -34,11 +34,6 @@ class MainActivity : Activity() {
         openTheDB()
         getTodayToSeven()
 
-        val menuItem = ArrayList<String>()
-        menuItem.add("1")
-        menuItem.add("22")
-        menuItem.add("333")
-        menuItem.add("4444")
         taskAdapter=MyTaskAdapter(this,currentPlusSevenDate,taskLists)
         rcTask.adapter=taskAdapter
 
