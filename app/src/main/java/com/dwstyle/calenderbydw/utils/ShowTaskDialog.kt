@@ -4,37 +4,36 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.util.Log
+import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.*
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.MutableLiveData
 import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.time.milliseconds
 
-class MakeTaskDialog(context: Context) {
+class ShowTaskDialog(context: Context) {
 
     private lateinit var tvTaskDate:TextView
     private lateinit var tvTaskTime:TextView
-    private lateinit var edtTaskText:EditText
-    private lateinit var tvRepeat:TextView
-    private lateinit var radioRepeat:RadioGroup
-    private lateinit var repeatWeekBox : LinearLayout
-    private lateinit var repeatMon :CheckBox
-    private lateinit var repeatTue:CheckBox
-    private lateinit var repeatWEN:CheckBox
-    private lateinit var repeatThu:CheckBox
-    private lateinit var repeatFri:CheckBox
-    private lateinit var repeatSat:CheckBox
-    private lateinit var repeatSun:CheckBox
-    private lateinit var btnCancel:Button
-    private lateinit var btnWrite :Button
+//    private lateinit var edtTaskText:EditText
+//    private lateinit var tvRepeat:TextView
+//    private lateinit var radioRepeat:RadioGroup
+//    private lateinit var repeatWeekBox : LinearLayout
+//    private lateinit var repeatMon :CheckBox
+//    private lateinit var repeatTue:CheckBox
+//    private lateinit var repeatWEN:CheckBox
+//    private lateinit var repeatThu:CheckBox
+//    private lateinit var repeatFri:CheckBox
+//    private lateinit var repeatSat:CheckBox
+//    private lateinit var repeatSun:CheckBox
+    private lateinit var btnCancel:ImageView
+    private lateinit var btnDelete :ImageView
+    private lateinit var btnChange :ImageView
 
     private lateinit var tvTaskTitle : TextView
     private lateinit var tvTaskContents :TextView
@@ -62,7 +61,7 @@ class MakeTaskDialog(context: Context) {
     private var sendRepeatN =1
     private var sendPriority=0
 
-    val format =SimpleDateFormat("HH:mm")
+    private val format =SimpleDateFormat("HH:mm",Locale.KOREA)
 
     fun initValue(){
         sendTime = "03:22"
@@ -74,7 +73,7 @@ class MakeTaskDialog(context: Context) {
         sendRepeatN =1
         sendPriority=0
     }
-    fun showTask(clickItem: TaskItem){
+    fun showTask(clickItem: TaskItem,deleteClickListener :View.OnClickListener,changeClickListener : View.OnClickListener){
         dialog= Dialog(context)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.write_task_layout)
@@ -84,9 +83,14 @@ class MakeTaskDialog(context: Context) {
         dialog.window?.attributes=params
         dialog.show()
         initViw(dialog)
+
         tvTaskTitle.text=clickItem.title
         tvTaskContents.text=clickItem.text
-        if (clickItem.repeatY==1) tvTaskRepeat.text = "매년 ${clickItem.month}달 ${clickItem.day}일 반복"
+        tvTaskContents.movementMethod=ScrollingMovementMethod()
+
+        tvTaskTime.text=SimpleDateFormat("HH:mm").format(clickItem.time)
+
+        if (clickItem.repeatY==1) tvTaskRepeat.text = "매년 ${clickItem.month}월 ${clickItem.day}일 반복"
         if (clickItem.repeatM==1) tvTaskRepeat.text = "매달 ${clickItem.day}일 반복"
         if (clickItem.repeatN==1) tvTaskRepeat.text = "반복 없음"
         if (clickItem.repeatW==1) {
@@ -107,6 +111,13 @@ class MakeTaskDialog(context: Context) {
             }
             tvTaskRepeat.text = "${tvTaskRepeat.text} 반복"
         }
+
+        btnDelete.setOnClickListener(deleteClickListener)
+        btnChange.setOnClickListener(changeClickListener)
+        btnCancel.setOnClickListener{
+            dialog.dismiss()
+        }
+
     }
 
     //dialog 보여주는 method
@@ -122,7 +133,7 @@ class MakeTaskDialog(context: Context) {
         dialog.show()
         initViw(dialog)
 
-        btnWrite.isClickable=false
+        btnDelete.isClickable=false
         sendYear=calendarDay.year
         sendMonth=calendarDay.month
         sendDay=calendarDay.day
@@ -162,46 +173,46 @@ class MakeTaskDialog(context: Context) {
         })
 
         //반복
-        radioRepeat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { group, checkedId ->
-            resetWeekRepeat()
-            if (checkedId==R.id.radioNone){
-                sendRepeatY =0
-                sendRepeatM =0
-                sendRepeatW =0
-                sendRepeatN =1
-                sendPriority=4
-                repeatWeekBox.visibility=View.GONE
-            }
-            else if (checkedId==R.id.radioYear){
-                sendRepeatY =1
-                sendRepeatM =0
-                sendRepeatW =0
-                sendRepeatN =0
-                sendPriority=1
-                repeatWeekBox.visibility=View.GONE
-            }
-            else if (checkedId==R.id.radioMonth){
-                sendRepeatY =0
-                sendRepeatM =1
-                sendRepeatW =0
-                sendRepeatN =0
-                sendPriority=2
-                repeatWeekBox.visibility=View.GONE
-            }
-            else if (checkedId==R.id.radioWeek){
-                sendRepeatY =0
-                sendRepeatM =0
-                sendRepeatW =1
-                sendRepeatN =0
-                sendPriority=3
-                repeatWeekBox.visibility=View.VISIBLE
-            }
-        })
+//        radioRepeat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { group, checkedId ->
+//            resetWeekRepeat()
+//            if (checkedId==R.id.radioNone){
+//                sendRepeatY =0
+//                sendRepeatM =0
+//                sendRepeatW =0
+//                sendRepeatN =1
+//                sendPriority=4
+//                repeatWeekBox.visibility=View.GONE
+//            }
+//            else if (checkedId==R.id.radioYear){
+//                sendRepeatY =1
+//                sendRepeatM =0
+//                sendRepeatW =0
+//                sendRepeatN =0
+//                sendPriority=1
+//                repeatWeekBox.visibility=View.GONE
+//            }
+//            else if (checkedId==R.id.radioMonth){
+//                sendRepeatY =0
+//                sendRepeatM =1
+//                sendRepeatW =0
+//                sendRepeatN =0
+//                sendPriority=2
+//                repeatWeekBox.visibility=View.GONE
+//            }
+//            else if (checkedId==R.id.radioWeek){
+//                sendRepeatY =0
+//                sendRepeatM =0
+//                sendRepeatW =1
+//                sendRepeatN =0
+//                sendPriority=3
+//                repeatWeekBox.visibility=View.VISIBLE
+//            }
+//        })
 
-        edtTaskText.doOnTextChanged { text, start, before, count ->
-            btnWrite.isClickable = !text.toString().equals("")
-        }
-        btnWrite.setOnClickListener(writeClickListener)
+//        edtTaskText.doOnTextChanged { text, start, before, count ->
+//            btnWrite.isClickable = !text.toString().equals("")
+//        }
+        btnDelete.setOnClickListener(writeClickListener)
         btnCancel.setOnClickListener(cancelListener)
     }
 
@@ -209,31 +220,31 @@ class MakeTaskDialog(context: Context) {
         dialog.dismiss()
     }
 
-    fun resetWeekRepeat(){
-        repeatSun.isChecked=false
-        repeatMon.isChecked=false
-        repeatTue.isChecked=false
-        repeatWEN.isChecked=false
-        repeatThu.isChecked=false
-        repeatFri.isChecked=false
-        repeatSat.isChecked=false
-    }
+//    fun resetWeekRepeat(){
+//        repeatSun.isChecked=false
+//        repeatMon.isChecked=false
+//        repeatTue.isChecked=false
+//        repeatWEN.isChecked=false
+//        repeatThu.isChecked=false
+//        repeatFri.isChecked=false
+//        repeatSat.isChecked=false
+//    }
 
     //작성 버튼 선택시 작성내용을 보내주는 method
-    fun getInfo() :TaskItem {
-        sendText=edtTaskText.text.toString()
-        sendWeek="${if(repeatSun.isChecked) 1 else 0}&" +
-                "${if(repeatMon.isChecked) 1 else 0}&" +
-                "${if(repeatTue.isChecked) 1 else 0}&" +
-                "${if(repeatWEN.isChecked) 1 else 0}&" +
-                "${if(repeatThu.isChecked) 1 else 0}&" +
-                "${if(repeatFri.isChecked) 1 else 0}&" +
-                "${if(repeatSat.isChecked) 1 else 0}"
-        return  TaskItem(
-            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,"",
-            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""
-        )
-    }
+//    fun getInfo() :TaskItem {
+//        sendText=edtTaskText.text.toString()
+//        sendWeek="${if(repeatSun.isChecked) 1 else 0}&" +
+//                "${if(repeatMon.isChecked) 1 else 0}&" +
+//                "${if(repeatTue.isChecked) 1 else 0}&" +
+//                "${if(repeatWEN.isChecked) 1 else 0}&" +
+//                "${if(repeatThu.isChecked) 1 else 0}&" +
+//                "${if(repeatFri.isChecked) 1 else 0}&" +
+//                "${if(repeatSat.isChecked) 1 else 0}"
+//        return  TaskItem(
+//            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendText,"",
+//            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""
+//        )
+//    }
 
     //날짜로 요일을 확인하는 method 1일 ~ 7토
     private fun getWeekOfDate(inPutDate :String) :Int{
@@ -263,24 +274,27 @@ class MakeTaskDialog(context: Context) {
 
     //뷰 초기화
     private fun initViw(dialog :Dialog){
-        tvTaskDate=dialog.findViewById(R.id.tvTaskDate);
-        tvTaskTime=dialog.findViewById(R.id.tvTaskTime);
-        edtTaskText=dialog.findViewById(R.id.edtTaskText);
-        tvRepeat=dialog.findViewById(R.id.tvRepeat);
-        radioRepeat=dialog.findViewById(R.id.radioRepeat);
-        repeatWeekBox=dialog.findViewById(R.id.repeatWeekBox);
-        repeatMon=dialog.findViewById(R.id.repeatMon);
-        repeatTue=dialog.findViewById(R.id.repeatTue);
-        repeatWEN=dialog.findViewById(R.id.repeatWEN);
-        repeatThu=dialog.findViewById(R.id.repeatThu);
-        repeatFri=dialog.findViewById(R.id.repeatFri);
-        repeatSat=dialog.findViewById(R.id.repeatSat);
-        repeatSun=dialog.findViewById(R.id.repeatSun);
-        btnCancel=dialog.findViewById(R.id.btnCancel);
-        btnWrite=dialog.findViewById(R.id.btnWrite);
+//        edtTaskText=dialog.findViewById(R.id.edtTaskText);
+//        tvRepeat=dialog.findViewById(R.id.tvRepeat);
+//        radioRepeat=dialog.findViewById(R.id.radioRepeat);
+//        repeatWeekBox=dialog.findViewById(R.id.repeatWeekBox);
+//        repeatMon=dialog.findViewById(R.id.repeatMon);
+//        repeatTue=dialog.findViewById(R.id.repeatTue);
+//        repeatWEN=dialog.findViewById(R.id.repeatWEN);
+//        repeatThu=dialog.findViewById(R.id.repeatThu);
+//        repeatFri=dialog.findViewById(R.id.repeatFri);
+//        repeatSat=dialog.findViewById(R.id.repeatSat);
+//        repeatSun=dialog.findViewById(R.id.repeatSun);
 
 
-        tvTaskTitle=dialog.findViewById(R.id.tvTaskTitle);
+        tvTaskDate=dialog.findViewById(R.id.tvTaskDate)
+        tvTaskTime=dialog.findViewById(R.id.tvTaskTime)
+        btnCancel=dialog.findViewById(R.id.btnCancel)
+        btnDelete=dialog.findViewById(R.id.btnDelete)
+        btnChange=dialog.findViewById(R.id.btnChange)
+
+
+        tvTaskTitle=dialog.findViewById(R.id.tvTaskTitle)
         tvTaskContents=dialog.findViewById(R.id.tvTaskContents)
         tvTaskRepeat=dialog.findViewById(R.id.tvTaskRepeat)
 

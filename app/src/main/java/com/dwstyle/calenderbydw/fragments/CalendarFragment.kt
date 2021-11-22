@@ -3,8 +3,8 @@ package com.dwstyle.calenderbydw.fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues
-import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
@@ -15,14 +15,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.dwstyle.calenderbydw.CreateTaskActivity
 import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.adapters.DailyTaskAdapter
 import com.dwstyle.calenderbydw.calendardacorator.*
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.*
-import com.dwstyle.calenderbydw.utils.MakeTaskDialog
+import com.dwstyle.calenderbydw.utils.ShowTaskDialog
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -62,15 +67,17 @@ class CalendarFragment : Fragment() {
 
     private lateinit var dbHelper : TaskDatabaseHelper
     private lateinit var database : SQLiteDatabase
+
+    //수정시 수정 후 돌아올때
+    private lateinit var resultLauncher : ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState !=null){
             selectedDate= savedInstanceState.getParcelable<CalendarDay>("calendarDate")!!
-            Log.d("도원","selectedDate0  : ${selectedDate.month}.${selectedDate.day}");
         }else{
             selectedDate=CalendarDay.today()
-            Log.d("도원","selectedDate1  : ${selectedDate.month}.${selectedDate.day}");
         }
 //        Log.d("도원","selectedDate1  : ${selectedDate.month}.${selectedDate.day}");
     }
@@ -83,7 +90,6 @@ class CalendarFragment : Fragment() {
         val view =inflater.inflate(R.layout.fragment_calendar, container, false)
         AndroidThreeTen.init(view.context)
         initView(view)
-        Log.d("도원","selectedDate2  : ${selectedDate.month}.${selectedDate.day}");
         dbHelper= TaskDatabaseHelper(view.context,"task.db",null,2)
 //        dbHelper.createMonthTBL("myTaskTbl")
 //        database=dbHelper.readableDatabase
@@ -101,10 +107,11 @@ class CalendarFragment : Fragment() {
         calendarView.background=view.context.getDrawable(R.drawable.calendar_background)
 //        calendarView.selectionColor=Color.parseColor("#cc00cc")
 
+        calendarView.setTileHeightDp(50)
+        calendarView.setTileWidthDp(50)
         //달력 날짜 선택시 이벤트
         calendarView.setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
             selectedDate=date
-            Log.d("도원","selectedDate3  : ${selectedDate.month}.${selectedDate.day}");
             tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
             searchTaskInRepeatWeek(date.month,date.day,date)
             searchTaskInDay(date.month,date.day,date)
@@ -154,37 +161,68 @@ class CalendarFragment : Fragment() {
         dailyTaskAdapter=DailyTaskAdapter(view.context)
         rcTaskList.adapter=dailyTaskAdapter
 
-
         dailyTaskAdapter.setOnDeleteItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
+            //삭제 선택시
             override fun onItemClick(v: View, item: TaskItem, pos: Int) {
-                val builder  =AlertDialog.Builder(context)
-
-                builder.setMessage("삭제 ㅋ ")
-
-                builder.setPositiveButton("확인!", DialogInterface.OnClickListener { dialog, which ->
-
-                    deleteTask(item._id.toString())
-                    dailyTaskAdapter.deleteItemOfList(pos)
-                    setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
-                })
-
-                val alertDialog =builder.create()
-                alertDialog.show()
-
+                taskDeleteDialog(item, pos)
             }
-
+            //task Dialog에서 삭제 및 수정 선택시
             override fun onTaskClick(v: View, item: TaskItem, pos: Int) {
-                val taskDialog =MakeTaskDialog(context!!)
-                taskDialog.showTask(item)
+                val taskDialog =ShowTaskDialog(context!!)
+                taskDialog.showTask(item, {
+                    //삭제
+                    taskDeleteDialog(item,pos)
+                    taskDialog.dismissDialog()
+                }, {
+                    //체인지
+                    val intent = Intent(context,CreateTaskActivity::class.java)
+                    intent.putExtra("type","change")
+                    intent.putExtra("taskForChange",item)
+                    resultLauncher.launch(intent)
+                    taskDialog.dismissDialog()
+                })
             }
         })
 
+        resultLauncher=registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultCallback {
+                //Task 등록 데이터 받는 곳
+                if (it.resultCode == AppCompatActivity.RESULT_OK){
+                    val intent = it.data
+//                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                    if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
+                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                        searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
+                        searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
+                        setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
+                    }
+                }
+            })
+
+    }
+
+    //삭제 Dialog
+    private fun taskDeleteDialog(item :TaskItem,pos :Int){
+        val builder  =AlertDialog.Builder(context)
+
+        builder.setMessage("일정을 삭제 하시겠습니까?")
+        builder.setPositiveButton("확인", DialogInterface.OnClickListener { dialog, which ->
+//            deleteTask(item._id.toString())
+            TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+            dailyTaskAdapter.deleteItemOfList(pos)
+            setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+        })
+        builder.setNegativeButton("취소") { dialog, wihch ->
+            dialog.dismiss()
+        }
+        val alertDialog =builder.create()
+        alertDialog.show()
     }
 
     //년마다 반복 task 의 날짜만 (month.day) 찾기
     fun searchTaskOfRepeatYearInDB(){
         dayOfRepeatYear.clear()
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
 //        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
@@ -218,7 +256,6 @@ class CalendarFragment : Fragment() {
     //월 마다 반복 TASK 찾기
     fun searchTaskOfRepeatMonthInDB(){
         dayOfRepeatMonth.clear()
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
@@ -248,7 +285,6 @@ class CalendarFragment : Fragment() {
     //주마다 반복
     fun searchTaskOfRepeatWeekInDB(){
         dayOfRepeatWeek.clear()
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
@@ -279,7 +315,6 @@ class CalendarFragment : Fragment() {
     //반복 안하는 Task 찾기
     fun searchTaskOfRepeatNoInDB(){
         dayOfRepeatNo.clear()
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
             val c2: Cursor =
@@ -314,7 +349,6 @@ class CalendarFragment : Fragment() {
     //해당 월에 맞는 task 찾기
     fun searchTaskInDB(month : Int,year :Int){
         monthlyTaskList.clear()
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
 //        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
@@ -398,7 +432,6 @@ class CalendarFragment : Fragment() {
 
     //선택된 날짜에 맞는 task 찾기
     private fun searchTaskInDay(month :Int,day:Int,calendarDay: CalendarDay){
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.readableDatabase
         try {
             var c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE day = ${day} AND week == '0&0&0&0&0&0&0' ",null);
@@ -488,44 +521,39 @@ class CalendarFragment : Fragment() {
     }
 
     fun deleteTask(_id : String){
-        if (database!=null){
-            database=dbHelper.writableDatabase;
-            var c2:Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
-            Log.d("도원","c2 ${c2.count}")
+        database=dbHelper.writableDatabase;
+        TaskDatabaseHelper.deleteTask(_id,database)
+//        var c2:Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
+//        Log.d("도원","c2 ${c2.count}")
 //            var c2:Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${_id} ",null)
-
-        }
-
     }
 
     //일정 만들기 method
     fun createTask(taskItem: TaskItem){
-        dbHelper.createMonthTBL("myTaskTbl");
         database=dbHelper.writableDatabase
         dbHelper.onCreate(database)
-        var contentValue = ContentValues();
-        contentValue.put("year",taskItem.year)
-        contentValue.put("month",taskItem.month)
-        contentValue.put("day",taskItem.day);
-        contentValue.put("week",taskItem.week);
-        contentValue.put("time",taskItem.time);
-        contentValue.put("title",taskItem.title);
-        contentValue.put("text",taskItem.text);
-        contentValue.put("repeatY",taskItem.repeatY);
-        contentValue.put("repeatM",taskItem.repeatM);
-        contentValue.put("repeatW",taskItem.repeatW);
-        contentValue.put("repeatN",taskItem.repeatN);
-        contentValue.put("notice",taskItem.notice);
-        contentValue.put("priority",taskItem.priority)
-        contentValue.put("expectDay",taskItem.exceptDay)
-
-        database.insert("myTaskTbl",null,contentValue);
+        TaskDatabaseHelper.createTask(taskItem,database)
+//        var contentValue = ContentValues();
+//        contentValue.put("year",taskItem.year)
+//        contentValue.put("month",taskItem.month)
+//        contentValue.put("day",taskItem.day);
+//        contentValue.put("week",taskItem.week);
+//        contentValue.put("time",taskItem.time);
+//        contentValue.put("title",taskItem.title);
+//        contentValue.put("text",taskItem.text);
+//        contentValue.put("repeatY",taskItem.repeatY);
+//        contentValue.put("repeatM",taskItem.repeatM);
+//        contentValue.put("repeatW",taskItem.repeatW);
+//        contentValue.put("repeatN",taskItem.repeatN);
+//        contentValue.put("notice",taskItem.notice);
+//        contentValue.put("priority",taskItem.priority)
+//        contentValue.put("expectDay",taskItem.exceptDay)
+//
+//        database.insert("myTaskTbl",null,contentValue);
 //        var c2: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
 //        while (c2.moveToNext()){
 //            Log.d("도원","month : ${c2.getString(c2.getColumnIndex("month"))} |  day ${c2.getString(c2.getColumnIndex("day"))}   | text :  ${c2.getString(c2.getColumnIndex("text"))} ")
 //        }
-
-
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)

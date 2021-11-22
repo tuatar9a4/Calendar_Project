@@ -110,7 +110,7 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
 
             tvTaskTitle.text = taskItem[position].title
             tvIsContents.text = if (taskItem[position].text.toString().equals("내용 없음"))"내용 없음" else "눌러서 내용 확인"
-            tvTaskDate.text = "Date : ${taskItem[position].month}.${taskItem[position].day}"
+            tvTaskDate.text = "Create Date : ${taskItem[position].month}.${taskItem[position].day}"
 
             val df : DateFormat =SimpleDateFormat("HH:mm")
             val str=df.format(taskItem[position].time)

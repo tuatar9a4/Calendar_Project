@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.widget.doOnTextChanged
@@ -46,7 +45,9 @@ class CreateTaskActivity : AppCompatActivity() {
     private lateinit var tvEditCount :TextView
 
     var taskWeek=0;
+    var type :String?=null
 
+    private var _id = 0
     // DB로 보낼 정보 변수들
     private var sendYear =2021
     private var sendMonth =12
@@ -63,16 +64,32 @@ class CreateTaskActivity : AppCompatActivity() {
     private var sendRepeatN =1
     private var sendPriority=0
 
+
     private val format =SimpleDateFormat("HH:mm")
     private var strT=format.parse(sendTime)
-    private lateinit var calendarDay : CalendarDay
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_task)
         initView()
-        calendarDay=intent.getParcelableExtra<CalendarDay>("dateInfo")!!
-        initValue(calendarDay)
-        clickFun()
+        clickFuncForCreate()
+        type = intent.getStringExtra("type")
+        if (type==null){
+            Toast.makeText(applicationContext,"에러가 발생했습니다. 다시 시도해 주시기 바랍니다.",Toast.LENGTH_LONG).show()
+            finish()
+        }
+        if (type.equals("create")){
+            btnWrite.text = "작성"
+            intent.getParcelableExtra<CalendarDay>("dateInfo")?.let {
+                initValueForCreate(it)
+            }
+        }else if (type.equals("change")){
+            btnWrite.text = "수정"
+            intent.getParcelableExtra<TaskItem>("taskForChange")?.let {
+                _id=it._id
+                initValueForChange(it)
+            }
+        }
+
 
 
     }
@@ -94,34 +111,28 @@ class CreateTaskActivity : AppCompatActivity() {
         radioRepeat=findViewById(R.id.radioRepeat)
         repeatWeekBox=findViewById(R.id.repeatWeekBox)
         repeatMon=findViewById(R.id.repeatMon)
-        repeatMon.isChecked=false
         repeatTue=findViewById(R.id.repeatTue)
-        repeatTue.isChecked=false
         repeatWEN=findViewById(R.id.repeatWEN)
-        repeatWEN.isChecked=false
         repeatThu=findViewById(R.id.repeatThu)
-        repeatThu.isChecked=false
         repeatFri=findViewById(R.id.repeatFri)
-        repeatFri.isChecked=false
         repeatSat=findViewById(R.id.repeatSat)
-        repeatSat.isChecked=false
         repeatSun=findViewById(R.id.repeatSun)
-        repeatSun.isChecked=false
+        resetWeekRepeat()
 
         tvEditCount=findViewById(R.id.tvEditCount);
         tvEditCount.text="0/300"
 
         btnCancel=findViewById(R.id.btnCancel)
 
-        btnWrite=findViewById(R.id.btnWrite)
+        btnWrite=findViewById(R.id.btnDelete)
 
     }
 
-    //값들 초기화
-    private fun initValue(calendarDay: CalendarDay){
-        sendYear = calendarDay.year
-        sendMonth = calendarDay.month
-        sendDay = calendarDay.day
+    //값들 초기화(생성용)
+    private fun initValueForCreate(calendarDay: CalendarDay?){
+        sendYear = calendarDay?.year ?: 2021
+        sendMonth = calendarDay?.month ?: 3
+        sendDay = calendarDay?.day ?: 22
         sendTime = "03:22"
         sendTitle="Title"
         sendText = "No Text"
@@ -133,14 +144,67 @@ class CreateTaskActivity : AppCompatActivity() {
         sendPriority=0
         sendTimemllis=strT.time
 
-        tvTaskDate.text="${calendarDay.year}.${calendarDay.month}.${calendarDay.day}  [${changeWeekIntToString(getWeekOfDate("${calendarDay.year}.${calendarDay.month}.${calendarDay.day}"))}]"
+        tvTaskDate.text="${sendYear}.${sendMonth}.${sendDay}  [${changeWeekIntToString(getWeekOfDate("${sendYear}.${sendMonth}.$sendDay}"))}]"
         tvTaskTime.text="${sendTime}"
+    }
+
+    private fun initValueForChange(item :TaskItem){
+        sendYear =item.year
+        sendMonth = item.month
+        sendDay = item.day
+
+        sendTitle=item.title
+        sendText = item.text
+        sendNotice =item.notice
+        sendRepeatY =item.repeatY
+        sendRepeatM =item.repeatM
+        sendRepeatW =item.repeatW
+        sendRepeatN =item.repeatN
+        sendPriority=item.priority
+        sendTimemllis=item.time
+        sendTime = SimpleDateFormat("HH:mm").format(sendTimemllis)
+        sendWeek= item.week
+
+        changeViewForChange()
+
+    }
+
+    private fun changeViewForChange(){
+        //타이틀
+        edtTaskTitle.setText(sendTitle.toString())
+        edtTaskContents.setText(sendText)
+        tvTaskDate.text = "${sendYear}.${sendMonth}.${sendDay}"
+        tvTaskTime.text = "${sendTime}"
+
+        //반복
+        if (sendRepeatY==1){
+            radioRepeat.check(R.id.radioYear)
+        }else if (sendRepeatM==1){
+            radioRepeat.check(R.id.radioMonth)
+        }else if (sendRepeatW==1){
+            radioRepeat.check(R.id.radioWeek)
+            val tempWeekStr = sendWeek.split("&")
+            for (a in 0..tempWeekStr.size){
+                when(a){
+                    0 -> repeatSun.isChecked= tempWeekStr[a]=="1"
+                    1 -> repeatMon.isChecked= tempWeekStr[a]=="1"
+                    2 -> repeatTue.isChecked= tempWeekStr[a]=="1"
+                    3 -> repeatWEN.isChecked= tempWeekStr[a]=="1"
+                    4 -> repeatThu.isChecked= tempWeekStr[a]=="1"
+                    5 -> repeatFri.isChecked= tempWeekStr[a]=="1"
+                    6 -> repeatSat.isChecked= tempWeekStr[a]=="1"
+                }
+            }
+        }else{
+            radioRepeat.check(R.id.radioNone)
+        }
+
 
 
     }
 
     //클릭 리스너
-    private fun clickFun(){
+    private fun clickFuncForCreate(){
         //날짜 선택
         tvTaskDate.setOnClickListener { ivChangeDate.performClick() }
         ivChangeDate.setOnClickListener {
@@ -154,7 +218,7 @@ class CreateTaskActivity : AppCompatActivity() {
 
                 tvTaskDate.text="${year}.${month+1}.${dayOfMonth}  (${changeWeekIntToString(taskWeek)})"
 
-            },calendarDay.year,calendarDay.month-1,calendarDay.day)
+            },sendYear, sendMonth,sendDay)
             datePickerDialog.show()
         }
 
@@ -245,10 +309,18 @@ class CreateTaskActivity : AppCompatActivity() {
                         "${if(repeatFri.isChecked) 1 else 0}&" +
                         "${if(repeatSat.isChecked) 1 else 0}"
                 val intent =Intent()
-                intent.putExtra("createItem",
-                    TaskItem(
-                        0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendTitle,sendText,
-                        sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""))
+                if (type.equals("create")){
+                    intent.putExtra("createItem",
+                        TaskItem(
+                            0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendTitle,sendText,
+                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""))
+
+                }else if (type.equals("change")){
+                    intent.putExtra("changeItem",
+                        TaskItem(
+                            _id,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendTitle,sendText,
+                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""))
+                }
                 setResult(RESULT_OK,intent)
                 finish()
 

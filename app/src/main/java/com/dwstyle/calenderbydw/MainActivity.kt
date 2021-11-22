@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,7 +18,6 @@ import com.dwstyle.calenderbydw.fragments.TaskListFragment
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHome :Button
     private lateinit var ivSendWatch :ImageView
     private lateinit var resultLauncher : ActivityResultLauncher<Intent>
+
+    private var backKeyPressedTime:Long=0;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         //일정 생성으로 이동
         btnPlus.setOnClickListener {
             val intent = Intent(applicationContext,CreateTaskActivity::class.java)
+            intent.putExtra("type","create")
             intent.putExtra("dateInfo",calendarFragment.getSelectDateInfo())
             resultLauncher.launch(intent)
         }
@@ -84,6 +87,7 @@ class MainActivity : AppCompatActivity() {
         resultLauncher=registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
             ActivityResultCallback {
                 //Task 등록 데이터 받는 곳
+                Log.d("도원","recevie Data ? ")
                 if (it.resultCode == RESULT_OK){
                     val intent = it.data
                     if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
@@ -173,13 +177,21 @@ class MainActivity : AppCompatActivity() {
                 bos?.close()
             }catch (e1 :Exception){
                 Log.d("도원"," 에러에러2   ${e1.localizedMessage}")
-
             }
-
         }
-
     }
 
+    override fun onBackPressed() {
+        if (System.currentTimeMillis()>backKeyPressedTime+2000){
+            backKeyPressedTime= System.currentTimeMillis()
+            Toast.makeText(this,"'뒤로'버튼을 한번 더 누르면 종료 됩니다.",Toast.LENGTH_SHORT).show()
+            return;
+        }
+        if (System.currentTimeMillis()<=backKeyPressedTime+2000){
+            this.finish()
+            return;
+        }
+    }
 
     fun initView(){
         btnPlus=findViewById(R.id.btnPlus)
