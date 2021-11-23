@@ -63,7 +63,7 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
         }
 
 
-        dbHelper= TaskDatabaseHelper(context,"wearTask.db",null,1);
+        dbHelper= TaskDatabaseHelper(context,"wearTask.db",null,2);
         database=dbHelper.readableDatabase
 //        try{
 //            var c2: Cursor =

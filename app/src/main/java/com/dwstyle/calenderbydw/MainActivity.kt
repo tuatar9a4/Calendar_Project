@@ -110,22 +110,20 @@ class MainActivity : AppCompatActivity() {
 
 
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
-    fun changeDBToBytes(){
+    private fun changeDBToBytes(){
         //DB 경로를 구한 한다.
-        Log.d("도원","changeDBToBytes1 : ")
         val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,2).readableDatabase.path
         val dbFile = File(dbPath)
         val dbUri = Uri.fromFile(dbFile)
 //        val realAsset = Asset.createFromUri(dbUri)
         val bytesFromDB = Files.readAllBytes(dbFile.toPath())
         val realAsset = Asset.createFromBytes(bytesFromDB)
-        Log.d("도원","changeDBToBytes2 : ")
         sendDBData(realAsset,dbPath)
     }
 
 
     //Asset 으로 만든 데이터 보내기
-    fun sendDBData(sendData :Asset,dBPtah : String){
+    private fun sendDBData(sendData :Asset,dBPtah : String){
         val dataMap : PutDataMapRequest = PutDataMapRequest.create("/taskdata")
         dataMap.dataMap.putAsset("taskDB",sendData)
         dataMap.dataMap.putString("taskDBPath",dBPtah)

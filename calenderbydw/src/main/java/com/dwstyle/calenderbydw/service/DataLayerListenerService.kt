@@ -23,7 +23,7 @@ class DataLayerListenerService : WearableListenerService() {
 
     override fun onDataChanged(p0: DataEventBuffer) {
 //        super.onDataChanged(p0)
-        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,1);
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,2);
         database=dbHelper.readableDatabase
         Log.d("도원","onDataChaned service????")
         for (event in p0){

@@ -297,7 +297,7 @@ class CalendarTile : TileService(){
 
     //날짜를 얻어 봅시다
     private fun getDatDayFromDatabase(year :String){
-        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,1);
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,2);
         database=dbHelper.readableDatabase
 
         searchTaskOfRepeatYearInDB()
