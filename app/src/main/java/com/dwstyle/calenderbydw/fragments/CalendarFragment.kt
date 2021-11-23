@@ -27,6 +27,7 @@ import com.dwstyle.calenderbydw.adapters.DailyTaskAdapter
 import com.dwstyle.calenderbydw.calendardacorator.*
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.*
+import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.dwstyle.calenderbydw.utils.ShowTaskDialog
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -164,15 +165,25 @@ class CalendarFragment : Fragment() {
         dailyTaskAdapter.setOnDeleteItemClickListener(object : DailyTaskAdapter.OnItemClickListener{
             //삭제 선택시
             override fun onItemClick(v: View, item: TaskItem, pos: Int) {
-                taskDeleteDialog(item, pos)
+                CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
+                    TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+                    dailyTaskAdapter.deleteItemOfList(pos)
+                    setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+                    dialog.dismiss()
+                })
             }
             //task Dialog에서 삭제 및 수정 선택시
             override fun onTaskClick(v: View, item: TaskItem, pos: Int) {
                 val taskDialog =ShowTaskDialog(context!!)
                 taskDialog.showTask(item, {
                     //삭제
-                    taskDeleteDialog(item,pos)
-                    taskDialog.dismissDialog()
+                    CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
+                        TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+                        dailyTaskAdapter.deleteItemOfList(pos)
+                        setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+                        dialog.dismiss()
+                        taskDialog.dismissDialog()
+                    })
                 }, {
                     //체인지
                     val intent = Intent(context,CreateTaskActivity::class.java)
@@ -202,23 +213,29 @@ class CalendarFragment : Fragment() {
 
     }
 
-    //삭제 Dialog
-    private fun taskDeleteDialog(item :TaskItem,pos :Int){
-        val builder  =AlertDialog.Builder(context)
-
-        builder.setMessage("일정을 삭제 하시겠습니까?")
-        builder.setPositiveButton("확인", DialogInterface.OnClickListener { dialog, which ->
-//            deleteTask(item._id.toString())
-            TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
-            dailyTaskAdapter.deleteItemOfList(pos)
-            setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
-        })
-        builder.setNegativeButton("취소") { dialog, wihch ->
-            dialog.dismiss()
-        }
-        val alertDialog =builder.create()
-        alertDialog.show()
+    fun refreshTaskList(){
+        setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
+        searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
+        searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
     }
+
+    //삭제 Dialog
+//    private fun taskDeleteDialog(item :TaskItem,pos :Int){
+//        val builder  =AlertDialog.Builder(context)
+//
+//        builder.setMessage("일정을 삭제 하시겠습니까?")
+//        builder.setPositiveButton("확인", DialogInterface.OnClickListener { dialog, which ->
+////            deleteTask(item._id.toString())
+//            TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+//            dailyTaskAdapter.deleteItemOfList(pos)
+//            setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+//        })
+//        builder.setNegativeButton("취소") { dialog, wihch ->
+//            dialog.dismiss()
+//        }
+//        val alertDialog =builder.create()
+//        alertDialog.show()
+//    }
 
     //년마다 반복 task 의 날짜만 (month.day) 찾기
     fun searchTaskOfRepeatYearInDB(){
@@ -529,10 +546,8 @@ class CalendarFragment : Fragment() {
     }
 
     //일정 만들기 method
-    fun createTask(taskItem: TaskItem){
+    fun notifydataChange(){
         database=dbHelper.writableDatabase
-        dbHelper.onCreate(database)
-        TaskDatabaseHelper.createTask(taskItem,database)
 //        var contentValue = ContentValues();
 //        contentValue.put("year",taskItem.year)
 //        contentValue.put("month",taskItem.month)

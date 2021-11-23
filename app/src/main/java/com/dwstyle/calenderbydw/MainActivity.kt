@@ -1,11 +1,11 @@
 package com.dwstyle.calenderbydw
 
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -36,22 +36,20 @@ class MainActivity : AppCompatActivity() {
 
     private var backKeyPressedTime:Long=0;
 
+    private lateinit var dbHelper : TaskDatabaseHelper
+    private lateinit var database : SQLiteDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-
+        dbHelper=TaskDatabaseHelper(applicationContext,"task.db",null,2)
         supportFragmentManager.beginTransaction()
             .add(R.id.flmainFragment,calendarFragment)
             .add(R.id.flmainFragment,taskListFragment)
             .hide(taskListFragment)
             .commit()
-
         clickFunction()
-
-
-
-
     }
 
     //clickFun
@@ -63,8 +61,7 @@ class MainActivity : AppCompatActivity() {
             transaction.hide(taskListFragment)
             transaction.show(calendarFragment)
             transaction.commit()
-
-
+            calendarFragment.refreshTaskList()
         }
 
         //TaskList 화면 이동
@@ -73,6 +70,7 @@ class MainActivity : AppCompatActivity() {
             val transaction =supportFragmentManager.beginTransaction()
             transaction.hide(calendarFragment)
             transaction.show(taskListFragment)
+            taskListFragment.setCalendarDay(calendarFragment.getSelectDateInfo())
             transaction.commit()
         }
 
@@ -91,7 +89,11 @@ class MainActivity : AppCompatActivity() {
                 if (it.resultCode == RESULT_OK){
                     val intent = it.data
                     if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
-                        calendarFragment.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!)
+                        database=dbHelper.writableDatabase
+                        dbHelper.onCreate(database)
+                        TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database)
+                        calendarFragment.notifydataChange()
+                        taskListFragment.notifydataChange()
                     }
                 }
             })

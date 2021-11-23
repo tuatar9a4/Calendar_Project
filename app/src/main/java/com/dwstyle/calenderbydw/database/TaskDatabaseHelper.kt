@@ -89,6 +89,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
         }
 
         fun createTask(taskItem: TaskItem,database : SQLiteDatabase){
+
             val contentValue = ContentValues();
             contentValue.put("year",taskItem.year)
             contentValue.put("month",taskItem.month)
