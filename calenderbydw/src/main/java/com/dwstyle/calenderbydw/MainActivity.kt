@@ -57,7 +57,7 @@ class MainActivity : Activity() {
     }
 
     fun openTheDB(){
-        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,1)
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,2)
         database=dbHelper.readableDatabase
     }
 
@@ -181,15 +181,15 @@ class MainActivity : Activity() {
 
     //반복 없음에서 얻기
     fun getTaskRepeatN(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,text FROM myTaskTbl WHERE RepeatN==1 AND year == ${year} AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT day,text,title FROM myTaskTbl WHERE RepeatN==1 AND year == ${year} AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
             if (taskLists["${year}.${month}.${corsor.getInt(0)}"]==null){
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=
-                    arrayListOf<String>(corsor.getString(1))
+                    arrayListOf<String>(corsor.getString(2))
             }else{
                 tempTaskList=taskLists["${year}.${month}.${corsor.getInt(0)}"]!!
-                tempTaskList.add(corsor.getString(1))
+                tempTaskList.add(corsor.getString(2))
                 taskLists["${year}.${month}.${corsor.getInt(0)}"]=tempTaskList
             }
         }
