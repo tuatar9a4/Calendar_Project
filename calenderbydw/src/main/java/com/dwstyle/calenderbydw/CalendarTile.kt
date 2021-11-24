@@ -101,6 +101,14 @@ class CalendarTile : TileService(){
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.dot_week)
                     .build()).build())
+            .addIdToImageMapping("next_icon",ResourceBuilders.ImageResource.Builder()
+                .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
+                    .setResourceId(R.drawable.next_month_icon)
+                    .build()).build())
+            .addIdToImageMapping("pre_icon",ResourceBuilders.ImageResource.Builder()
+                .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
+                    .setResourceId(R.drawable.pre_month_icon)
+                    .build()).build())
             .build())
     }
 
@@ -120,6 +128,16 @@ class CalendarTile : TileService(){
                 LayoutElementBuilders.Row.Builder().setWidth(wrap()).setVerticalAlignment(LayoutElementBuilders.VerticalAlignmentProp.Builder()
                     .setValue(VERTICAL_ALIGN_CENTER).build())
                     .addContent(
+                        LayoutElementBuilders.Image.Builder().setHeight(dp(7f)).setWidth(dp(20f))
+                            .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                            .setClickable(
+                                ModifiersBuilders.Clickable.Builder()
+                                    .setId("Minus")
+                                    .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                    .build()).build())
+                            .setResourceId("next_icon").build()
+                    )
+                    .addContent(
                         LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
                         LayoutElementBuilders.TEXT_ALIGN_CENTER).build())
                         .setText("<")
@@ -133,14 +151,16 @@ class CalendarTile : TileService(){
                             .setSize(sp(13f))
                             .build()
 
-                        ).build())
+                        ).build()
+                    )
                     .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(13f))
                         .setModifiers(ModifiersBuilders.Modifiers.Builder()
                             .setClickable(
                                 ModifiersBuilders.Clickable.Builder()
                                     .setId("Plus")
                                     .setOnClick(ActionBuilders.LoadAction.Builder().build())
-                                    .build()).build()).build())
+                                    .build()).build()).build()
+                    )
                     .addContent(
                         //년.월 yyyy.MM
                         LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
@@ -154,16 +174,16 @@ class CalendarTile : TileService(){
                                         .build()).build())
                             .setFontStyle(LayoutElementBuilders.FontStyles.caption1(deviceParameters)
                                 .setSize(sp(calendarTopTextSize))
-                                .build()
-
-                        ).build())
+                                .build()).build()
+                    )
                     .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(13f))
                         .setModifiers(ModifiersBuilders.Modifiers.Builder()
                         .setClickable(
                             ModifiersBuilders.Clickable.Builder()
                                 .setId("Plus")
                                 .setOnClick(ActionBuilders.LoadAction.Builder().build())
-                                .build()).build()).build())
+                                .build()).build()).build()
+                    )
                     .addContent(
                         //년.월 yyyy.MM
                         LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
@@ -177,15 +197,26 @@ class CalendarTile : TileService(){
                                         .build()).build())
                             .setFontStyle(LayoutElementBuilders.FontStyles.caption1(deviceParameters)
                                 .setSize(sp(13f))
-                                .build()
-
-                            ).build()
-                    ).build()
-
-            ).addContent(
-                LayoutElementBuilders.Spacer.Builder().setHeight(dp(5f)).build()
-            )
-
+                                .build()).build()
+                    )
+                    .addContent(
+                        LayoutElementBuilders.Image.Builder().setHeight(dp(7f)).setWidth(dp(20f))
+                            .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                                .setClickable(
+                                    ModifiersBuilders.Clickable.Builder()
+                                        .setId("Plus")
+                                        .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                        .build()).build())
+                            .setResourceId("pre_icon").build()
+                    )
+                    .build())
+                    .addContent(
+                        LayoutElementBuilders.Spacer.Builder().setHeight(dp(3f)).build()
+                    )
+//<a href="https://www.streamlinehq.com">Free Navigation Right 3 PNG icon by Streamline</a> next icon
+//        <a href="https://www.streamlinehq.com">Free Navigation Left 3 PNG icon by Streamline</a> pre icon
+//        <a href="https://www.streamlinehq.com">Free Move Left 3 PNG icon by Streamline</a> move_next
+//        <a href="https://www.streamlinehq.com">Free Move Right 2 PNG icon by Streamline</a> move_preview
         //상단 요일 만드는 곳
         val weekText = arrayOf("Sun","Mon","The","Wen","Thu","Fri","Sat");
         val rowBuilderBox =  LayoutElementBuilders.Row.Builder().setWidth(wrap());

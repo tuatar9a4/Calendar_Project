@@ -202,6 +202,7 @@ class CalendarFragment : Fragment() {
                 if (it.resultCode == AppCompatActivity.RESULT_OK){
                     val intent = it.data
 //                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                    Log.d("도원","d뭐여 ${intent?.getParcelableExtra<TaskItem>("changeItem")}")
                     if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
                         TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
                         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)

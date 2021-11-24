@@ -65,7 +65,6 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
 
 
         fun changeTask(taskItem: TaskItem,database: SQLiteDatabase){
-
             if (database!=null){
                 var c2: Cursor =database.rawQuery(
                     "UPDATE myTaskTbl SET " +
@@ -73,8 +72,8 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                             "month=${taskItem.month}," +
                             "day=${taskItem.day}," +
                             "time=${taskItem.time}," +
-                            "title=\"${taskItem.title}\"," +
-                            "text=\"${taskItem.text}\"," +
+                            "title='${taskItem.title}'," +
+                            "text='${taskItem.text}'," +
                             "week='${taskItem.week}'," +
                             "repeatY=${taskItem.repeatY}," +
                             "repeatM=${taskItem.repeatM}," +
