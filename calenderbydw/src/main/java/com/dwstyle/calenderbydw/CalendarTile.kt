@@ -1,5 +1,7 @@
 package com.dwstyle.calenderbydw
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
@@ -7,6 +9,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.*
 import androidx.wear.tiles.DimensionBuilders.*
+import androidx.wear.tiles.LayoutElementBuilders.VERTICAL_ALIGN_CENTER
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -32,25 +35,45 @@ class CalendarTile : TileService(){
     private val dotDaySetN =HashSet<String>()
     private val dotDaySetW =ArrayList<String>()
     private var weekInt =0
+    lateinit var sharedPreferences:SharedPreferences
+    private final val settingMillis : String ="SETTINGMILLS"
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
 
+        sharedPreferences =applicationContext.getSharedPreferences("sharedData", Context.MODE_PRIVATE)
+        if (sharedPreferences.getLong(settingMillis,0)==0L){
+            sharedPreferences.edit().putLong(settingMillis,DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis).apply()
+        }
         // setFreshnessIntervalMillis : 타일의 새로 고침 간격 (밀리초) / 날짜의 변화가 있어야해서 1시간에 한번 씩 새로고침함
         // setTimeline : 화면을 구성을 set 함 보통 LayoutElementBuilders.LayoutElement 를 반환하는 method를 만든 후 거기에서 타일을 구성함
-
+        Log.d("도원","requestPareams : "+requestParams.state?.lastClickableId)
+        if (requestParams.state?.lastClickableId!=null){
+            if (requestParams.state!!.lastClickableId.equals("Minus")){
+                getCalendar("Minus")
+            }else if (requestParams.state!!.lastClickableId.equals("Plus")){
+                getCalendar("Plus")
+            }else if (requestParams.state!!.lastClickableId.equals("Today")){
+                getCalendar("Today")
+            }else{
+                getCalendar("none")
+            }
+        }else{
+            getCalendar("none")
+        }
         val tile = TileBuilders.Tile.Builder()
             .setResourcesVersion(RESOURCES_VERSION)
             .setFreshnessIntervalMillis(1000*60*60)
             .setTimeline(
                 TimelineBuilders.Timeline.Builder()
-                .addTimelineEntry(
-                    TimelineBuilders.TimelineEntry.Builder().setLayout(
-                        LayoutElementBuilders.Layout.Builder().setRoot(
-                            myLayout(requestParams.deviceParameters!!)
+                    .addTimelineEntry(
+                        TimelineBuilders.TimelineEntry.Builder().setLayout(
+                            LayoutElementBuilders.Layout.Builder().setRoot(
+                                myLayout(requestParams.deviceParameters!!)
+                            ).build()
                         ).build()
                     ).build()
-                ).build()
             ).build()
+
         return Futures.immediateFuture(tile)
     }
 
@@ -85,7 +108,7 @@ class CalendarTile : TileService(){
     // 타일의 구성을 위한 method
     public fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
         //달력 구성을 위한 정보를 미리 가져옴
-        getCalendar()
+
         // Column : 타일의 구성 요소를 열(세로) 로 정렬
         // 첫 addContent : (Spacer) 상단에서 30f 만큼의 공간을 만든다 / 워치가 원형이다 보니 중앙으로 구성을 맞추기 위함
         // 둘 addContent : (Text) 글자를 쓰는 Builder / TextAlignmentProp 를 사용하여 text 를 중앙 정렬한다.
@@ -94,15 +117,71 @@ class CalendarTile : TileService(){
         calendarLayout.setHeight(expand())
             .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(25f)).build())
             .addContent(
-                //년.월 yyyy.MM
-                LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
-                    LayoutElementBuilders.TEXT_ALIGN_CENTER).build())
-                        .setText(calendarDate)
+                LayoutElementBuilders.Row.Builder().setWidth(wrap()).setVerticalAlignment(LayoutElementBuilders.VerticalAlignmentProp.Builder()
+                    .setValue(VERTICAL_ALIGN_CENTER).build())
+                    .addContent(
+                        LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
+                        LayoutElementBuilders.TEXT_ALIGN_CENTER).build())
+                        .setText("<")
+                        .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                            .setClickable(
+                                ModifiersBuilders.Clickable.Builder()
+                                .setId("Minus")
+                                    .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                    .build()).build())
                         .setFontStyle(LayoutElementBuilders.FontStyles.caption1(deviceParameters)
-                            .setSize(sp(calendarTopTextSize))
+                            .setSize(sp(13f))
                             .build()
 
+                        ).build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(13f))
+                        .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                            .setClickable(
+                                ModifiersBuilders.Clickable.Builder()
+                                    .setId("Plus")
+                                    .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                    .build()).build()).build())
+                    .addContent(
+                        //년.월 yyyy.MM
+                        LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
+                            LayoutElementBuilders.TEXT_ALIGN_CENTER).build())
+                            .setText(calendarDate)
+                            .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                                .setClickable(
+                                    ModifiersBuilders.Clickable.Builder()
+                                        .setId("Today")
+                                        .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                        .build()).build())
+                            .setFontStyle(LayoutElementBuilders.FontStyles.caption1(deviceParameters)
+                                .setSize(sp(calendarTopTextSize))
+                                .build()
+
+                        ).build())
+                    .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(13f))
+                        .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                        .setClickable(
+                            ModifiersBuilders.Clickable.Builder()
+                                .setId("Plus")
+                                .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                .build()).build()).build())
+                    .addContent(
+                        //년.월 yyyy.MM
+                        LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
+                            LayoutElementBuilders.TEXT_ALIGN_CENTER).build())
+                            .setText(">")
+                            .setModifiers(ModifiersBuilders.Modifiers.Builder()
+                                .setClickable(
+                                    ModifiersBuilders.Clickable.Builder()
+                                        .setId("Plus")
+                                        .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                                        .build()).build())
+                            .setFontStyle(LayoutElementBuilders.FontStyles.caption1(deviceParameters)
+                                .setSize(sp(13f))
+                                .build()
+
+                            ).build()
                     ).build()
+
             ).addContent(
                 LayoutElementBuilders.Spacer.Builder().setHeight(dp(5f)).build()
             )
@@ -278,13 +357,27 @@ class CalendarTile : TileService(){
     private lateinit var allDayOfMonth : List<String>
     private lateinit var currentDate :String
     private lateinit var currentDate1 :String
-    fun getCalendar(){
-        var start:Long =DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis
 
-        var plus =DateTime(start).plusMonths(1).millis
-        calendarDate=DateTime(start).toString("yyyy.MM")
-        firstDayOfMonth = DateTime(start).toString("MM.dd")
-        allDayOfMonth = getMonthList(DateTime(start))
+    private fun getCalendar(type :String) {
+
+        var currentDateTime = sharedPreferences.getLong(settingMillis, 0)
+
+        if (currentDateTime==0L){
+            currentDateTime= DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis
+            sharedPreferences.edit().putLong(settingMillis,currentDateTime).apply()
+        }else if (type.equals("Plus")){
+            currentDateTime=DateTime(currentDateTime).plusMonths(1).millis
+            sharedPreferences.edit().putLong(settingMillis,currentDateTime).apply()
+        }else if (type.equals("Minus")){
+            currentDateTime=DateTime(currentDateTime).minusMonths(1).millis
+            sharedPreferences.edit().putLong(settingMillis,currentDateTime).apply()
+        }else if (type.equals("Today")){
+            currentDateTime=DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis
+            sharedPreferences.edit().putLong(settingMillis,currentDateTime).apply()
+        }
+        calendarDate=DateTime(currentDateTime).toString("yyyy.MM")
+        firstDayOfMonth = DateTime(currentDateTime).toString("MM.dd")
+        allDayOfMonth = getMonthList(DateTime(currentDateTime))
         currentDate = DateTime(System.currentTimeMillis()).toString("MM.dd")
         currentDate1 = System.currentTimeMillis().toString()
 
