@@ -42,6 +42,7 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     val views = RemoteViews(context.packageName, R.layout.calendar_widget)
     val intent =Intent(context,WidgetAdapter::class.java)
     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetId)
+
     intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)))
 
     views.setRemoteAdapter(R.id.gvCalendar,intent)
