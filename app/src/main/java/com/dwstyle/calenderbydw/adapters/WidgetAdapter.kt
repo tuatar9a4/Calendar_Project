@@ -1,11 +1,13 @@
 package com.dwstyle.calenderbydw.adapters
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.dwstyle.calenderbydw.CalendarWidget
 import com.dwstyle.calenderbydw.R
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
@@ -57,7 +59,7 @@ class WidgetAdapter : RemoteViewsService(){
             val totalDay = DateTimeConstants.DAYS_PER_WEEK * 6
 
             for (i in 0 until totalDay) {
-                list.add(DateTime(startValue.plusDays(i)).toString("MM.dd.E"))
+                list.add(DateTime(startValue.plusDays(i)).toString("MM.dd"))
             }
 
             return list
@@ -94,11 +96,8 @@ class WidgetAdapter : RemoteViewsService(){
                 rv.setViewVisibility(R.id.tvTask, View.VISIBLE)
             }
             rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position).toString())
-            val extras : Bundle = Bundle()
-            extras.putInt("dd",position);
-            val fillIntent = Intent()
-            fillIntent.putExtras(extras)
-            rv.setOnClickFillInIntent(R.id.tvDate,fillIntent)
+
+            rv.setOnClickPendingIntent(R.id.calendarContainer,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
 
             return rv
         }
@@ -117,6 +116,12 @@ class WidgetAdapter : RemoteViewsService(){
 
         override fun hasStableIds(): Boolean {
             return false
+        }
+
+        fun getPenddingSelfIntent (context: Context,code1 :String, code:String): PendingIntent{
+            val intent : Intent = Intent(context,CalendarWidget::class.java).setAction("2274")
+            intent.putExtra("date",code)
+            return PendingIntent.getBroadcast(context,0,intent,0)
         }
 
     }

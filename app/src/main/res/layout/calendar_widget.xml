@@ -28,6 +28,7 @@
 
                 />
             <TextView
+                android:id="@+id/tvTopDate"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:text="2021.11.23"
