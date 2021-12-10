@@ -21,7 +21,7 @@ class WidgetAdapter : RemoteViewsService(){
 
 
     }
-//
+
 
     class StackRemoteViewsFactory(private val context:Context,private val intent : Intent?) :
         RemoteViewsService.RemoteViewsFactory {
