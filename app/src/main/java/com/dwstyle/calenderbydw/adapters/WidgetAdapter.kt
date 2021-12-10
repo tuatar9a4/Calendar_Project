@@ -97,7 +97,12 @@ class WidgetAdapter : RemoteViewsService(){
             }
             rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position).toString())
 
-            rv.setOnClickPendingIntent(R.id.calendarContainer,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
+            val fillIntent = Intent()
+            fillIntent.putExtra("item",1)
+            rv.setOnClickFillInIntent(R.id.tvTask,fillIntent)
+
+
+            rv.setOnClickPendingIntent(R.id.tvTask,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
 
             return rv
         }
@@ -118,10 +123,10 @@ class WidgetAdapter : RemoteViewsService(){
             return false
         }
 
-        fun getPenddingSelfIntent (context: Context,code1 :String, code:String): PendingIntent{
+        private fun getPenddingSelfIntent (context: Context, code1 :String, code:String): PendingIntent{
             val intent : Intent = Intent(context,CalendarWidget::class.java).setAction("2274")
             intent.putExtra("date",code)
-            return PendingIntent.getBroadcast(context,0,intent,0)
+            return PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
     }
