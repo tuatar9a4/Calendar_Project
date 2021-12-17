@@ -14,6 +14,8 @@
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.dwstyle.calenderbydw.COLLECTION_VIEW_ACTION"/>
+                <action android:name="com.dwstyle.calenderbydw.BT_REFRESH_ACTION"/>
             </intent-filter>
 
             <meta-data

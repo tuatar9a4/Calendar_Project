@@ -1,6 +1,7 @@
 package com.dwstyle.calenderbydw.adapters
 
 import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -22,7 +23,7 @@ class WidgetAdapter : RemoteViewsService(){
 
     }
 
-
+//
     class StackRemoteViewsFactory(private val context:Context,private val intent : Intent?) :
         RemoteViewsService.RemoteViewsFactory {
 
@@ -33,9 +34,13 @@ class WidgetAdapter : RemoteViewsService(){
         private var monthDayList= listOf<String>()
         private val dateT =DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis
 
+        private var mAppWidgetId =0
 
 
         override fun onCreate() {
+            if (intent != null) {
+                mAppWidgetId=intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID)
+            }
             val weekStr = arrayListOf<String>("Sun","Mon","Tue","Wen","Thu","Fri","Sat")
             for (i in weekStr){
                 mWidgetItem.add("${i}")
@@ -98,11 +103,11 @@ class WidgetAdapter : RemoteViewsService(){
             rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position).toString())
 
             val fillIntent = Intent()
-            fillIntent.putExtra("item",1)
-            rv.setOnClickFillInIntent(R.id.tvTask,fillIntent)
+            fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA,position)
+            rv.setOnClickFillInIntent(R.id.calendarContainer,fillIntent)
 
 
-            rv.setOnClickPendingIntent(R.id.tvTask,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
+//            rv.setOnClickPendingIntent(R.id.tvTask,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
 
             return rv
         }
@@ -112,7 +117,7 @@ class WidgetAdapter : RemoteViewsService(){
         }
 
         override fun getViewTypeCount(): Int {
-            return 2
+            return 1
         }
 
         override fun getItemId(position: Int): Long {
@@ -120,7 +125,7 @@ class WidgetAdapter : RemoteViewsService(){
         }
 
         override fun hasStableIds(): Boolean {
-            return false
+            return true
         }
 
         private fun getPenddingSelfIntent (context: Context, code1 :String, code:String): PendingIntent{
