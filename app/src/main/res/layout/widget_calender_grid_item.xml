@@ -1,41 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/calendarContainer"
-    android:layout_width="60dp"
+    android:layout_width="45dp"
+    android:padding="3dp"
     android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_alignStart="@id/tvTask"
-        android:layout_alignEnd="@+id/tvTask"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/tvTask1"
+        android:layout_alignEnd="@+id/tvTask1"
+        android:gravity="left|top"
+        android:paddingLeft="5dp"
         android:text="0"
         android:textColor="@color/black"
-        android:textSize="18dp" />
+        android:textSize="9dp" />
     <TextView
-        android:id="@+id/tvTask"
+        android:id="@+id/tvTask1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvDate"
-        android:text="is Empty"
-        android:lines="2"
+        android:text=""
+        android:maxLines="1"
         android:textColor="@color/black"
         android:ellipsize="end"
-        android:layout_marginTop="10dp"
-        android:textSize="12sp"
+        android:layout_marginTop="3dp"
+        android:textSize="8sp"
+        />
+    <TextView
+        android:id="@+id/tvTask2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTask1"
+        android:text=""
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:ellipsize="end"
+        android:layout_marginTop="2dp"
+        android:textSize="8sp"
         />
     <TextView
         android:id="@+id/tvTaskCnt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvTask"
+        android:layout_below="@+id/tvTask2"
         android:gravity="bottom|right"
-        android:text="+2"
+        android:text=""
         android:lines="1"
         android:textColor="@color/black"
-        android:textSize="13sp"
+        android:textSize="7sp"
         />
 
 </RelativeLayout>

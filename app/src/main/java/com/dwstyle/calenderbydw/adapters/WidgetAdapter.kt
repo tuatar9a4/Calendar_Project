@@ -4,12 +4,17 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.dwstyle.calenderbydw.CalendarWidget
 import com.dwstyle.calenderbydw.R
+import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
+import com.prolificinteractive.materialcalendarview.CalendarDay
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 
@@ -36,8 +41,15 @@ class WidgetAdapter : RemoteViewsService(){
 
         private var mAppWidgetId =0
 
+        private lateinit var dbHelper : TaskDatabaseHelper
+        private lateinit var database : SQLiteDatabase
 
-        override fun onCreate() {
+        private lateinit var selectMonth : DateTime
+        //일정 hashMap
+        private val taskMap = HashMap<String,String>()
+
+
+    override fun onCreate() {
             if (intent != null) {
                 mAppWidgetId=intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID)
             }
@@ -48,8 +60,9 @@ class WidgetAdapter : RemoteViewsService(){
             monthDayList=getMonthList(DateTime().withDayOfMonth(1))
             for (i in monthDayList){
                 val tempDayStr = i.split(".")
-                mWidgetItem.add("${tempDayStr[1]}")
+                mWidgetItem.add("${i}")
             }
+            getTaskInfo(monthDayList)
 
         }
 
@@ -58,13 +71,13 @@ class WidgetAdapter : RemoteViewsService(){
 
             val date = dateTime.withDayOfMonth(1)
             val prev = getPrevOffSet(date)
-
+            selectMonth=date
             val startValue = date.minusDays(prev)
 
             val totalDay = DateTimeConstants.DAYS_PER_WEEK * 6
 
             for (i in 0 until totalDay) {
-                list.add(DateTime(startValue.plusDays(i)).toString("MM.dd"))
+                list.add(DateTime(startValue.plusDays(i)).toString("YYYY.MM.dd"))
             }
 
             return list
@@ -96,17 +109,46 @@ class WidgetAdapter : RemoteViewsService(){
             if (mWidgetItem.get(position).equals("Mon") || mWidgetItem.get(position).equals("Tue") ||mWidgetItem.get(position).equals("Wen")
                 ||mWidgetItem.get(position).equals("Thu") || mWidgetItem.get(position).equals("Fri") ||mWidgetItem.get(position).equals("Sat") ||
                     mWidgetItem.get(position).equals("Sun")){
-                rv.setViewVisibility(R.id.tvTask, View.GONE)
+                rv.setViewVisibility(R.id.tvTask1, View.GONE)
+                rv.setViewVisibility(R.id.tvTask2, View.GONE)
+                rv.setViewVisibility(R.id.tvTaskCnt,View.GONE)
+                rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position))
             }else{
-                rv.setViewVisibility(R.id.tvTask, View.VISIBLE)
+                //일단 전부 안보이게 처리
+                rv.setViewVisibility(R.id.tvTask1, View.INVISIBLE)
+                rv.setViewVisibility(R.id.tvTask2, View.INVISIBLE)
+                rv.setViewVisibility(R.id.tvTaskCnt,View.INVISIBLE)
+                //날짜는 적어주고
+                rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position).split(".")[2])
+
+                //해당 날짜가 taskMap에 들어가 있으면 작성
+                if (taskMap.containsKey(mWidgetItem.get(position).toString())){
+                    val temp = taskMap[mWidgetItem.get(position)].toString().split("&")
+                    if (temp.size==1){
+                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
+                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                    }else if(temp.size==2){
+                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
+                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                        rv.setTextViewText(R.id.tvTask2,temp[1].toString())
+                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                    }else {
+                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
+                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                        rv.setTextViewText(R.id.tvTask2,temp[1].toString())
+                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                        rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
+                        rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
+                    }
+//                    rv.setTextViewText(R.id.tvTask1,taskMap[mWidgetItem.get(position)].toString())
+                }
             }
-            rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position).toString())
 
+
+            //보내는 intent
             val fillIntent = Intent()
-            fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA,position)
+            fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA,mWidgetItem.get(position))
             rv.setOnClickFillInIntent(R.id.calendarContainer,fillIntent)
-
-
 //            rv.setOnClickPendingIntent(R.id.tvTask,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
 
             return rv
@@ -128,11 +170,89 @@ class WidgetAdapter : RemoteViewsService(){
             return true
         }
 
-        private fun getPenddingSelfIntent (context: Context, code1 :String, code:String): PendingIntent{
-            val intent : Intent = Intent(context,CalendarWidget::class.java).setAction("2274")
-            intent.putExtra("date",code)
-            return PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        private fun getTaskInfo( monthDayList : List<String>){
+            taskMap.clear()
+            dbHelper= TaskDatabaseHelper(context,"task.db",null,2)
+            database=dbHelper.readableDatabase
+            getYearTask(database,monthDayList)
+            getMonthTask(database,monthDayList)
+            getDayTask(database,monthDayList)
         }
+
+        private fun getYearTask(database : SQLiteDatabase,monthDayList:List<String>){
+            val cursor =TaskDatabaseHelper.searchDBOfYearRepeat(database)
+            if (cursor!=null) {
+                while (cursor.moveToNext()) {
+                    val tempMonth :String= if ((cursor.getInt(cursor.getColumnIndex("month")).toString().length)==1 )
+                        "0${(cursor.getInt(cursor.getColumnIndex("month")).toString())}" else (cursor.getInt(cursor.getColumnIndex("month")).toString())
+                    val tempDay :String= if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length)==1 )
+                                        "0${(cursor.getInt(cursor.getColumnIndex("day")).toString())}" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
+                    for (a in monthDayList){
+                        val split =a.split(".")
+                        if (tempMonth.equals(split[1]) &&
+                            tempDay.equals(split[2])){
+                            val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
+                            val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
+                            if (taskMap[tempStr1] ==null){
+                                taskMap[tempStr1] = tempStr2
+                            }else{
+                                taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun getMonthTask(database : SQLiteDatabase,monthDayList:List<String>){
+            val cursor =TaskDatabaseHelper.searchDBOfMonthRepeat(database)
+            if (cursor!=null) {
+                while (cursor.moveToNext()) {
+                    val tempDay :String= if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length)==1 )
+                        "0${(cursor.getInt(cursor.getColumnIndex("day")).toString())}" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
+                    for (a in monthDayList){
+                        val split =a.split(".")
+                        if (tempDay.equals(split[2])){
+                            val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
+                            val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
+                            if (taskMap[tempStr1] ==null){
+                                taskMap[tempStr1] = tempStr2
+                            }else{
+                                taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    private fun getDayTask(database : SQLiteDatabase,monthDayList:List<String>){
+        val cursor =TaskDatabaseHelper.searchDBOfNoRepeat(database)
+        if (cursor!=null) {
+            while (cursor.moveToNext()) {
+                val tempYear :String=cursor.getInt(cursor.getColumnIndex("year")).toString()
+                val tempMonth :String= if ((cursor.getInt(cursor.getColumnIndex("month")).toString().length)==1 )
+                    "0${(cursor.getInt(cursor.getColumnIndex("month")).toString())}" else (cursor.getInt(cursor.getColumnIndex("month")).toString())
+                val tempDay :String= if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length)==1)
+                    "0${(cursor.getInt(cursor.getColumnIndex("day")).toString())}" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
+                for (a in monthDayList){
+                    val split =a.split(".")
+                    if (tempYear.equals(split[0]) && tempMonth.equals(split[1]) &&tempDay.equals(split[2])){
+                        val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
+                        val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
+                        if (taskMap[tempStr1] ==null){
+                            taskMap[tempStr1] = tempStr2
+                        }else{
+                            taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     }
 }

@@ -108,6 +108,47 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
             database.insert("myTaskTbl",null,contentValue);
         }
 
+        //년마다 반복 task 의 날짜만 (month.day) 찾기
+        fun searchDBOfYearRepeat(database : SQLiteDatabase) : Cursor?{
+            try {
+                var c2: Cursor =
+                    database.rawQuery("SELECT month,day,time,title,notice FROM myTaskTbl WHERE repeatY == 1", null);
+                return c2
+            }catch (e : SQLiteException){
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+            }
+            return null
+        }
+
+        //달마다 반복하는 Task  찾기
+        fun searchDBOfMonthRepeat(database : SQLiteDatabase) : Cursor? {
+            try {
+                val c2: Cursor =
+                    database.rawQuery(
+                        "SELECT day,time,title,notice FROM myTaskTbl WHERE repeatM == 1",
+                        null
+                    );
+                return c2
+            } catch (e: SQLiteException) {
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+            }
+            return null
+        }
+
+        //반복 안하는 Task 찾기
+        fun searchDBOfNoRepeat(database : SQLiteDatabase) : Cursor?{
+            try {
+                val c2: Cursor =
+                    database.rawQuery("SELECT year,month,day,time,title,notice FROM myTaskTbl WHERE repeatN == 1", null);
+                return c2
+            }catch (e : SQLiteException){
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+            }
+            return null
+        }
+
     }
 
 

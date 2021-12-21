@@ -242,62 +242,75 @@ class CalendarFragment : Fragment() {
     fun searchTaskOfRepeatYearInDB(){
         dayOfRepeatYear.clear()
         database=dbHelper.readableDatabase
-        try {
-//        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
-            var c2: Cursor =
-                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY == 1", null);
-            while (c2.moveToNext()) {
-//                생각해보니 날짜만 있으면 될 것 같기도 하고...
-//                Log.d("도원","month : ${c2.getColumnIndex("month")} | " +
-//                        "day : ${c2.getColumnIndex("day")} | " +
-//                        "time : ${c2.getColumnIndex("time")} | " +
-//                        "text : ${c2.getColumnIndex("text")} | " +
-//                        "notice : ${c2.getColumnIndex("notice")} | ")
-//                yearRepeatTaskList.add(
-//                    YearRepeatTaskItem(
-//                        c2.getInt(c2.getColumnIndex("month")),
-//                        c2.getInt(c2.getColumnIndex("day")),
-//                        c2.getLong(c2.getColumnIndex("time")),
-//                        c2.getString(c2.getColumnIndex("text")),
-//                        c2.getInt(c2.getColumnIndex("notice"))
-//                    )
-//                )
-//
-//              아무래도 HashMap Contain으로 보는게 편해서
-                dayOfRepeatYear.add("${c2.getInt(c2.getColumnIndex("month"))}.${c2.getInt(c2.getColumnIndex("day"))}");
+
+        val yearCursor = TaskDatabaseHelper.searchDBOfYearRepeat(database)
+        if (yearCursor!=null){
+            while (yearCursor.moveToNext()) {
+                dayOfRepeatYear.add("${yearCursor.getInt(yearCursor.getColumnIndex("month"))}.${yearCursor.getInt(yearCursor.getColumnIndex("day"))}");
             }
-        }catch (e : SQLiteException){
-            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
         }
+//        try {
+////        var c: Cursor = database.rawQuery("SELECT * FROM y${selectedDate.year.toString()}",null);
+//            var c2: Cursor =
+//                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY == 1", null);
+//            while (c2.moveToNext()) {
+////                생각해보니 날짜만 있으면 될 것 같기도 하고...
+////                Log.d("도원","month : ${c2.getColumnIndex("month")} | " +
+////                        "day : ${c2.getColumnIndex("day")} | " +
+////                        "time : ${c2.getColumnIndex("time")} | " +
+////                        "text : ${c2.getColumnIndex("text")} | " +
+////                        "notice : ${c2.getColumnIndex("notice")} | ")
+////                yearRepeatTaskList.add(
+////                    YearRepeatTaskItem(
+////                        c2.getInt(c2.getColumnIndex("month")),
+////                        c2.getInt(c2.getColumnIndex("day")),
+////                        c2.getLong(c2.getColumnIndex("time")),
+////                        c2.getString(c2.getColumnIndex("text")),
+////                        c2.getInt(c2.getColumnIndex("notice"))
+////                    )
+////                )
+////
+////              아무래도 HashMap Contain으로 보는게 편해서
+//
+//            }
+//        }catch (e : SQLiteException){
+//            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+//        }
     }
 
     //월 마다 반복 TASK 찾기
     fun searchTaskOfRepeatMonthInDB(){
         dayOfRepeatMonth.clear()
         database=dbHelper.readableDatabase
-        try {
-            val c2: Cursor =
-                database.rawQuery("SELECT day,time,text,notice FROM myTaskTbl WHERE repeatM == 1", null);
-            while (c2.moveToNext()) {
-//                Log.d("도원","" +
-//                        "day : ${c2.getColumnIndex("day")} | " +
-//                        "time : ${c2.getColumnIndex("time")} | " +
-//                        "text : ${c2.getColumnIndex("text")} | " +
-//                        "notice : ${c2.getColumnIndex("notice")} | ")
-//                monthRepeatTaskList.add(
-//                    MonthRepeatTaskItem(
-//                        c2.getInt(c2.getColumnIndex("day")),
-//                        c2.getLong(c2.getColumnIndex("time")),
-//                        c2.getString(c2.getColumnIndex("text")),
-//                        c2.getInt(c2.getColumnIndex("notice"))
-//                    )
-//                )
-                dayOfRepeatMonth.add(c2.getInt(c2.getColumnIndex("day")).toString())
-            }
-        }catch (e : SQLiteException){
-            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
 
+        val monthCursor = TaskDatabaseHelper.searchDBOfMonthRepeat(database)
+        if (monthCursor!=null){
+            while (monthCursor.moveToNext()) {
+                dayOfRepeatMonth.add(monthCursor.getInt(monthCursor.getColumnIndex("day")).toString())            }
         }
+//        try {
+//            val c2: Cursor =
+//                database.rawQuery("SELECT day,time,text,notice FROM myTaskTbl WHERE repeatM == 1", null);
+//            while (c2.moveToNext()) {
+////                Log.d("도원","" +
+////                        "day : ${c2.getColumnIndex("day")} | " +
+////                        "time : ${c2.getColumnIndex("time")} | " +
+////                        "text : ${c2.getColumnIndex("text")} | " +
+////                        "notice : ${c2.getColumnIndex("notice")} | ")
+////                monthRepeatTaskList.add(
+////                    MonthRepeatTaskItem(
+////                        c2.getInt(c2.getColumnIndex("day")),
+////                        c2.getLong(c2.getColumnIndex("time")),
+////                        c2.getString(c2.getColumnIndex("text")),
+////                        c2.getInt(c2.getColumnIndex("notice"))
+////                    )
+////                )
+//                dayOfRepeatMonth.add(c2.getInt(c2.getColumnIndex("day")).toString())
+//            }
+//        }catch (e : SQLiteException){
+//            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+//
+//        }
     }
 
     //주마다 반복
@@ -334,33 +347,41 @@ class CalendarFragment : Fragment() {
     fun searchTaskOfRepeatNoInDB(){
         dayOfRepeatNo.clear()
         database=dbHelper.readableDatabase
-        try {
-            val c2: Cursor =
-                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1", null);
-            while (c2.moveToNext()) {
-//                Log.d("도원","" +
-//                        "day : ${c2.getColumnIndex("week")} | " +
-//                        "time : ${c2.getColumnIndex("time")} | " +
-//                        "text : ${c2.getColumnIndex("text")} | " +
-//                        "notice : ${c2.getColumnIndex("notice")} | ")
-//                noRepeatTaskList.add(
-//                    NoRepeatTaskItem(
-//                        c2.getInt(c2.getColumnIndex("year")),
-//                        c2.getInt(c2.getColumnIndex("month")),
-//                        c2.getInt(c2.getColumnIndex("day")),
-//                        c2.getLong(c2.getColumnIndex("time")),
-//                        c2.getString(c2.getColumnIndex("text")),
-//                        c2.getInt(c2.getColumnIndex("notice"))
-//                    )
-//                )
-                dayOfRepeatNo.add("${c2.getInt(c2.getColumnIndex("year"))}" +
-                        ".${c2.getInt(c2.getColumnIndex("month"))}." +
-                        "${c2.getInt(c2.getColumnIndex("day"))}")
+        val noRepeatTask =TaskDatabaseHelper.searchDBOfNoRepeat(database)
+        if (noRepeatTask!=null){
+            while (noRepeatTask.moveToNext()){
+                dayOfRepeatNo.add("${noRepeatTask.getInt(noRepeatTask.getColumnIndex("year"))}" +
+                        ".${noRepeatTask.getInt(noRepeatTask.getColumnIndex("month"))}." +
+                        "${noRepeatTask.getInt(noRepeatTask.getColumnIndex("day"))}")
             }
-        }catch (e : SQLiteException){
-            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
-
         }
+//        try {
+//            val c2: Cursor =
+//                database.rawQuery("SELECT year,month,day,time,text,notice FROM myTaskTbl WHERE repeatN == 1", null);
+//            while (c2.moveToNext()) {
+////                Log.d("도원","" +
+////                        "day : ${c2.getColumnIndex("week")} | " +
+////                        "time : ${c2.getColumnIndex("time")} | " +
+////                        "text : ${c2.getColumnIndex("text")} | " +
+////                        "notice : ${c2.getColumnIndex("notice")} | ")
+////                noRepeatTaskList.add(
+////                    NoRepeatTaskItem(
+////                        c2.getInt(c2.getColumnIndex("year")),
+////                        c2.getInt(c2.getColumnIndex("month")),
+////                        c2.getInt(c2.getColumnIndex("day")),
+////                        c2.getLong(c2.getColumnIndex("time")),
+////                        c2.getString(c2.getColumnIndex("text")),
+////                        c2.getInt(c2.getColumnIndex("notice"))
+////                    )
+////                )
+//                dayOfRepeatNo.add("${c2.getInt(c2.getColumnIndex("year"))}" +
+//                        ".${c2.getInt(c2.getColumnIndex("month"))}." +
+//                        "${c2.getInt(c2.getColumnIndex("day"))}")
+//            }
+//        }catch (e : SQLiteException){
+//            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+//
+//        }
 
     }
 
