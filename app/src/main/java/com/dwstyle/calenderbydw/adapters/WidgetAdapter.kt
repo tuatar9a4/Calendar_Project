@@ -22,9 +22,7 @@ class WidgetAdapter : RemoteViewsService(){
 
 
     override fun onGetViewFactory(intent: Intent?): RemoteViewsFactory {
-
         return StackRemoteViewsFactory(this.applicationContext,intent)
-
 
     }
 

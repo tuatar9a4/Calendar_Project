@@ -83,6 +83,8 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                             "priority=${taskItem.priority}," +
                             "expectDay='${taskItem.expectDay}'" +
                             " WHERE _id == ${taskItem._id} ",null)
+                while (c2.moveToNext()){
+                }
             }
 
         }

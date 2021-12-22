@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--    android:minWidth="40dp=>한칸"-->
+<!--    android:minHeight="40dp=>한칸"-->
+<!--    android:minResizeHeight="40dp=>한칸"-->
+<!--    android:minResizeWidth="40dp=>한칸"-->
+<!--    android:updatePeriodMillis="86400000 => ms 로 24시간이라는뜻"-->
+<!--    android:previewImage="앱 위젯 선택할 때 보이는 이미지 설정"-->
+<!--    android:resizeMode="horizontal|vertical"
+        //사용자가 위젯 크기를 다시 재정의할 수 있는지 설정 ,none이면 불가
+        //none이 아닐 때 최소 크기 지정하는 minResizeHeight/Width 등도 있다-->
+<!--    android:widgetCategory="home_screen"-->
+<!--    android:initialKeyguardLayout="잠금화면용 위젯 설정"-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="800dp"
-    android:minHeight="800dp"
+    android:minWidth="200dp"
+    android:minHeight="200dp"
     android:minResizeHeight="200dp"
     android:minResizeWidth="200dp"
     android:updatePeriodMillis="86400000"

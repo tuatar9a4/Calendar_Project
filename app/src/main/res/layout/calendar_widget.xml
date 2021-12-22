@@ -22,10 +22,10 @@
             android:gravity="center"
             >
             <ImageView
+                android:id="@+id/btnPreMonth"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/pre_month_icon"
-
                 />
             <TextView
                 android:id="@+id/tvTopDate"
@@ -38,6 +38,7 @@
                 android:gravity="center"
                 />
             <ImageView
+                android:id="@+id/btnNextMonth"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/next_month_icon"
