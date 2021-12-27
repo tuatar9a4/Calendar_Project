@@ -3,7 +3,6 @@ package com.dwstyle.calenderbydw.adapters
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.util.Log
@@ -44,7 +43,6 @@ class WidgetAdapter : RemoteViewsService(){
         private lateinit var selectMonth : DateTime
         //일정 hashMap
         private val taskMap = HashMap<String,String>()
-
 
         private var receiveTime:Long =0L;
 
@@ -143,15 +141,43 @@ class WidgetAdapter : RemoteViewsService(){
                 rv.setTextViewText(R.id.tvDate,str[2])
 
                 //날짜 색상
-                if (str[3]=="일"){
-                    rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
-                }else if(str[3]=="토"){
-                    rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+                val monthStr =selectMonth.toString("MM")
+                Log.d("도원","")
+                //다른달
+                if (str[1] != monthStr){
+                    if (str[3]=="일"){
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#88FF0000"))
+                    }else if(str[3]=="토"){
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#880000FF"))
+                    }else{
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#88000000"))
+                    }
+                }else{
+                    //같은달
+                    if (str[3]=="일"){
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
+                    }else if(str[3]=="토"){
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+                    }else{
+                        rv.setTextColor(R.id.tvDate, Color.parseColor("#000000"))
+                    }
                 }
-
+                var taskStr=""
                 //해당 날짜가 taskMap에 들어가 있으면 작성
-                if (taskMap.containsKey("${str[0]}.${str[1]}.${str[2]}")){
-                    val temp = taskMap["${str[0]}.${str[1]}.${str[2]}"].toString().split("&")
+                if (taskMap.containsKey("${str[0]}.${str[1]}.${str[2]}") ){
+                    taskStr=taskMap["${str[0]}.${str[1]}.${str[2]}"].toString()
+//                    rv.setTextViewText(R.id.tvTask1,taskMap[mWidgetItem.get(position)].toString())
+                }
+                if (taskMap.containsKey(str[3])){
+                    if (taskStr!=""){
+                        taskStr="${taskStr}&${taskMap[str[3]].toString()}"
+                    }else{
+                        taskStr= taskMap[str[3]].toString()
+                    }
+
+                }
+                if (taskStr!=""){
+                    val temp = taskStr.toString().split("&")
                     if (temp.size==1){
                         rv.setTextViewText(R.id.tvTask1,temp[0].toString())
                         rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
@@ -168,9 +194,7 @@ class WidgetAdapter : RemoteViewsService(){
                         rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
                         rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
                     }
-//                    rv.setTextViewText(R.id.tvTask1,taskMap[mWidgetItem.get(position)].toString())
                 }
-
             }
 
 
@@ -206,6 +230,7 @@ class WidgetAdapter : RemoteViewsService(){
             getYearTask(database,monthDayList)
             getMonthTask(database,monthDayList)
             getDayTask(database,monthDayList)
+            getWeekTask(database,monthDayList)
         }
 
         private fun getYearTask(database : SQLiteDatabase,monthDayList:List<String>){
@@ -276,6 +301,45 @@ class WidgetAdapter : RemoteViewsService(){
                         }
                     }
                 }
+            }
+        }
+    }
+
+
+    private fun getWeekTask(database : SQLiteDatabase,monthDayList: List<String>){
+        val cursor =TaskDatabaseHelper.searchDBOfWeekRepeat(database)
+        cursor?.let {
+            while (it.moveToNext()){
+                val temp =it.getString(it.getColumnIndex("week")).split("&")
+                val task =it.getString(it.getColumnIndex("title"))
+                for (dayList in monthDayList){
+                    for (a in temp.indices){
+                        if (temp[a]=="1"){
+                            when(a) {
+                                0-> if (dayList.split(".")[3]=="일")putWeekTaskMap("일",task)//SUN
+                                1-> if (dayList.split(".")[3]=="월")putWeekTaskMap("월",task) //MON
+                                2-> if (dayList.split(".")[3]=="화")putWeekTaskMap("화",task)//TUE
+                                3-> if (dayList.split(".")[3]=="수")putWeekTaskMap("수",task) //WEN
+                                4-> if (dayList.split(".")[3]=="목")putWeekTaskMap("목",task)//THU
+                                5-> if (dayList.split(".")[3]=="금")putWeekTaskMap("금",task) //FRI
+                                6-> if (dayList.split(".")[3]=="토")putWeekTaskMap("토",task)//SAT
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+
+    }
+
+    private fun putWeekTaskMap(key:String,value : String){
+        if (taskMap[key] ==null){
+            taskMap[key] = value
+        }else{
+            if (!taskMap[key].equals(value)){
+                taskMap[key] = "${taskMap[key]}&${value}"
             }
         }
     }

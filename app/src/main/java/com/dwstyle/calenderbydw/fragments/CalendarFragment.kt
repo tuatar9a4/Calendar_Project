@@ -1,8 +1,6 @@
 package com.dwstyle.calenderbydw.fragments
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
@@ -286,7 +284,8 @@ class CalendarFragment : Fragment() {
         val monthCursor = TaskDatabaseHelper.searchDBOfMonthRepeat(database)
         if (monthCursor!=null){
             while (monthCursor.moveToNext()) {
-                dayOfRepeatMonth.add(monthCursor.getInt(monthCursor.getColumnIndex("day")).toString())            }
+                dayOfRepeatMonth.add(monthCursor.getInt(monthCursor.getColumnIndex("day")).toString())
+            }
         }
 //        try {
 //            val c2: Cursor =
@@ -317,29 +316,36 @@ class CalendarFragment : Fragment() {
     fun searchTaskOfRepeatWeekInDB(){
         dayOfRepeatWeek.clear()
         database=dbHelper.readableDatabase
-        try {
-            val c2: Cursor =
-                database.rawQuery("SELECT week,time,text,notice FROM myTaskTbl WHERE repeatW == 1", null);
-            while (c2.moveToNext()) {
-//                Log.d("도원","" +
-//                        "day : ${c2.getColumnIndex("week")} | " +
-//                        "time : ${c2.getColumnIndex("time")} | " +
-//                        "text : ${c2.getColumnIndex("text")} | " +
-//                        "notice : ${c2.getColumnIndex("notice")} | ")
-//                weekRepeatTaskList.add(
-//                    WeekRepeatTaskItem(
-//                        c2.getString(c2.getColumnIndex("week")),
-//                        c2.getLong(c2.getColumnIndex("time")),
-//                        c2.getString(c2.getColumnIndex("text")),
-//                        c2.getInt(c2.getColumnIndex("notice"))
-//                    )
-//                )
-                dayOfRepeatWeek.add(c2.getString(c2.getColumnIndex("week")))
-            }
-        }catch (e : SQLiteException){
-            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
 
+        val weekCursor = TaskDatabaseHelper.searchDBOfWeekRepeat(database)
+        if (weekCursor!=null){
+            while (weekCursor.moveToNext()){
+                dayOfRepeatWeek.add(weekCursor.getString(weekCursor.getColumnIndex("week")))
+            }
         }
+//        try {
+//            val c2: Cursor =
+//                database.rawQuery("SELECT week,time,text,notice FROM myTaskTbl WHERE repeatW == 1", null);
+//            while (c2.moveToNext()) {
+////                Log.d("도원","" +
+////                        "day : ${c2.getColumnIndex("week")} | " +
+////                        "time : ${c2.getColumnIndex("time")} | " +
+////                        "text : ${c2.getColumnIndex("text")} | " +
+////                        "notice : ${c2.getColumnIndex("notice")} | ")
+////                weekRepeatTaskList.add(
+////                    WeekRepeatTaskItem(
+////                        c2.getString(c2.getColumnIndex("week")),
+////                        c2.getLong(c2.getColumnIndex("time")),
+////                        c2.getString(c2.getColumnIndex("text")),
+////                        c2.getInt(c2.getColumnIndex("notice"))
+////                    )
+////                )
+//                dayOfRepeatWeek.add(c2.getString(c2.getColumnIndex("week")))
+//            }
+//        }catch (e : SQLiteException){
+//            //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+//
+//        }
 
     }
 

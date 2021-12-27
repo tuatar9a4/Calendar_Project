@@ -14,8 +14,9 @@
         android:gravity="left|top"
         android:paddingLeft="5dp"
         android:text="0"
+        android:textStyle="bold"
         android:textColor="@color/black"
-        android:textSize="9dp" />
+        android:textSize="10dp" />
     <TextView
         android:id="@+id/tvTask1"
         android:layout_width="match_parent"
@@ -26,7 +27,7 @@
         android:textColor="@color/black"
         android:ellipsize="end"
         android:layout_marginTop="3dp"
-        android:textSize="8sp"
+        android:textSize="9sp"
         />
     <TextView
         android:id="@+id/tvTask2"
@@ -38,7 +39,7 @@
         android:textColor="@color/black"
         android:ellipsize="end"
         android:layout_marginTop="2dp"
-        android:textSize="8sp"
+        android:textSize="9sp"
         />
     <TextView
         android:id="@+id/tvTaskCnt"
@@ -49,7 +50,7 @@
         android:text=""
         android:lines="1"
         android:textColor="@color/black"
-        android:textSize="7sp"
+        android:textSize="8sp"
         />
 
 </RelativeLayout>

@@ -151,6 +151,19 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
             return null
         }
 
+        //주마다 반복하는 Task 찾기
+        fun searchDBOfWeekRepeat(database: SQLiteDatabase) : Cursor?{
+            try {
+                val c2: Cursor =
+                    database.rawQuery("SELECT week,time,title,notice FROM myTaskTbl WHERE repeatW == 1", null);
+                return c2
+            }catch (e : SQLiteException){
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+
+            }
+            return null
+        }
+
     }
 
 
