@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.RemoteViews
 import com.dwstyle.calenderbydw.CalendarWidget.Companion.RECEIVE_ADAPTER
 import com.dwstyle.calenderbydw.adapters.WidgetAdapter
+import com.dwstyle.calenderbydw.utils.SharedDataUtils
 import org.joda.time.DateTime
 
 /**
@@ -61,6 +62,7 @@ class CalendarWidget : AppWidgetProvider() {
                 val newDate = originalDate.minusMonths(1)
                 setCalendarMillis(it,newDate.millis)
                 val manager =AppWidgetManager.getInstance(it)
+                manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
                 this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
                 Log.d("도원","pre onUpdate ${getCalendarSharedData(it)}")
             }
@@ -71,6 +73,7 @@ class CalendarWidget : AppWidgetProvider() {
                 val newDate = originalDate.plusMonths(1)
                 setCalendarMillis(it,newDate.millis)
                 val manager =AppWidgetManager.getInstance(it)
+                manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
                 this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
                 Log.d("도원","next onUpdate ${getCalendarSharedData(it)}")
             }
@@ -78,7 +81,7 @@ class CalendarWidget : AppWidgetProvider() {
         else if (RECEIVE_ADAPTER == intent?.action){
             val receiveDate = intent.getStringExtra(COLLECTION_VIEW_EXTRA);
             Log.d("도원"," Code : ${receiveDate}  =>> currentReceiveDate : ${currentReceiveDate}")
-            if (currentReceiveDate.equals(receiveDate)){
+            if (currentReceiveDate == receiveDate){
                 val mainIntent = Intent(context,MainActivity::class.java)
                 mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 mainIntent.putExtra("sendDate",currentReceiveDate)
@@ -101,14 +104,13 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     views.setOnClickPendingIntent(R.id.btnPreMonth, getPendingSelfIntent(context,"PreMonth","??"))
 
     views.setOnClickPendingIntent(R.id.btnNextMonth, getPendingSelfIntent(context,"NextMonth","??"))
-
     //그리드 뷰에 어댑터 셋팅
     val intent =Intent(context,WidgetAdapter::class.java)
     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetId)
-    intent.putExtra("showDate",DateTime(getCalendarSharedData(context)))
+    intent.putExtra("showDate",getCalendarSharedData(context))
 //    intent.data = Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME))
     views.setRemoteAdapter(appWidgetId,R.id.gvCalendar,intent)
-
+    views.setEmptyView(R.id.gvCalendar,R.id.tvTask1)
     //어댑터 터치 기능 셋팅
     val gridIntent =Intent(context,CalendarWidget::class.java)
     gridIntent.action = RECEIVE_ADAPTER
@@ -117,7 +119,8 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     val pendingIntent = PendingIntent.getBroadcast(context,0,gridIntent,PendingIntent.FLAG_UPDATE_CURRENT)
     views.setPendingIntentTemplate(R.id.gvCalendar,pendingIntent)
     val showDateTime : DateTime = DateTime(getCalendarSharedData(context))
-    views.setTextViewText(R.id.tvTopDate,"${showDateTime.toLocalDate().year}.${showDateTime.toLocalDate().monthOfYear}.${showDateTime.toLocalDate().dayOfMonth}")
+    Log.d("도원","showDateTime : ${showDateTime.year}.${showDateTime.monthOfYear}.${showDateTime.dayOfMonth}")
+    views.setTextViewText(R.id.tvTopDate,"${showDateTime.year}.${showDateTime.monthOfYear}.${showDateTime.dayOfMonth}")
 
     // Instruct the widget manager to update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -131,23 +134,26 @@ fun getPendingSelfIntent (context: Context,code1 :String, code:String): PendingI
 }
 
 fun getCalendarSharedData(context : Context ) : Long{
-    val widgetPreferences = context.getSharedPreferences("WidgetData",Context.MODE_PRIVATE)
-    val editor = widgetPreferences.edit()
+//    val widgetPreferences = context.getSharedPreferences("WidgetData",Context.MODE_PRIVATE)
+//    val editor = widgetPreferences.edit()
     var showTime = 0L
-    if (widgetPreferences.getLong("ShowCalendarMillis",0)==0L){
-        editor.putLong("ShowCalendarMillis",System.currentTimeMillis());
-        editor.commit()
+    if (SharedDataUtils.getDateMillis(context)==0L){
+        SharedDataUtils.setDateMillis(context,System.currentTimeMillis())
+//        editor.putLong("ShowCalendarMillis",System.currentTimeMillis());
+//        editor.commit()
         showTime=System.currentTimeMillis()
     }else{
-        showTime=widgetPreferences.getLong("ShowCalendarMillis",0)
+//        showTime=widgetPreferencesetPreferences.getLong("ShowCalendarMillis",0)
+        showTime=SharedDataUtils.getDateMillis(context)
     }
     return showTime
 }
 
 private fun setCalendarMillis(context : Context,millis : Long){
-    val widgetPreferences = context.getSharedPreferences("WidgetData",Context.MODE_PRIVATE)
-    val editor = widgetPreferences.edit()
-    editor.putLong("ShowCalendarMillis",millis);
-    editor.commit()
+    SharedDataUtils.setDateMillis(context,millis)
+//    val widgetPreferences = context.getSharedPreferences("WidgetData",Context.MODE_PRIVATE)
+//    val editor = widgetPreferences.edit()
+//    editor.putLong("ShowCalendarMillis",millis);
+//    editor.commit()
 
 }
