@@ -26,14 +26,13 @@ class WidgetAdapter : RemoteViewsService(){
 
 //
     class StackRemoteViewsFactory(private val context:Context,private val intent : Intent?) :
-        RemoteViewsService.RemoteViewsFactory {
+        RemoteViewsFactory {
 
 
-        private val mCount = 49;
+        private val mCount = 49
         private val mWidgetItem =ArrayList<String>()
 
         private var monthDayList= listOf<String>()
-        private val dateT =DateTime().withDayOfMonth(1).withTimeAtStartOfDay().millis
 
         private var mAppWidgetId =0
 
@@ -44,28 +43,28 @@ class WidgetAdapter : RemoteViewsService(){
         //일정 hashMap
         private val taskMap = HashMap<String,String>()
 
-        private var receiveTime:Long =0L;
 
-    override fun onCreate() {
+        private var receiveTime:Long =0L
+
+        override fun onCreate() {
             if (intent != null) {
                 mAppWidgetId=intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID)
                 receiveTime = intent.getLongExtra("showDate",0)
             }
             Log.d("도원","onCreate")
-            val weekStr = arrayListOf<String>("Sun","Mon","Tue","Wen","Thu","Fri","Sat")
+            val weekStr = arrayListOf("Sun","Mon","Tue","Wen","Thu","Fri","Sat")
             for (i in weekStr){
                 mWidgetItem.add(i)
             }
             monthDayList=getMonthList(DateTime(receiveTime).withDayOfMonth(1))
             for (i in monthDayList){
-                val tempDayStr = i.split(".")
                 mWidgetItem.add(i)
             }
             getTaskInfo(monthDayList)
 
         }
 
-        fun getMonthList(dateTime: DateTime): List<String> {
+        private fun getMonthList(dateTime: DateTime): List<String> {
             val list = mutableListOf<String>()
 
             val date = dateTime.withDayOfMonth(1)
@@ -93,13 +92,12 @@ class WidgetAdapter : RemoteViewsService(){
         override fun onDataSetChanged() {
             mWidgetItem.clear()
             Log.d("도원","onDataSetChanged")
-            val weekStr = arrayListOf<String>("Sun","Mon","Tue","Wen","Thu","Fri","Sat")
+            val weekStr = arrayListOf("Sun","Mon","Tue","Wen","Thu","Fri","Sat")
             for (i in weekStr){
                 mWidgetItem.add(i)
             }
             monthDayList=getMonthList(DateTime(SharedDataUtils.getDateMillis(context)).withDayOfMonth(1))
             for (i in monthDayList){
-                val tempDayStr = i.split(".")
                 mWidgetItem.add(i)
             }
             getTaskInfo(monthDayList)
@@ -130,69 +128,80 @@ class WidgetAdapter : RemoteViewsService(){
                 }else if(mWidgetItem[position]=="Sat"){
                     rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
                 }
-                rv.setTextViewText(R.id.tvDate,mWidgetItem.get(position))
+                rv.setTextViewText(R.id.tvDate, mWidgetItem[position])
             }else{
                 //일단 전부 안보이게 처리
                 rv.setViewVisibility(R.id.tvTask1, View.INVISIBLE)
                 rv.setViewVisibility(R.id.tvTask2, View.INVISIBLE)
                 rv.setViewVisibility(R.id.tvTaskCnt,View.INVISIBLE)
-                val str=mWidgetItem.get(position).split(".")
+                val str= mWidgetItem[position].split(".")
                 //날짜는 적어주고
                 rv.setTextViewText(R.id.tvDate,str[2])
-
                 //날짜 색상
                 val monthStr =selectMonth.toString("MM")
                 Log.d("도원","")
                 //다른달
                 if (str[1] != monthStr){
-                    if (str[3]=="일"){
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#88FF0000"))
-                    }else if(str[3]=="토"){
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#880000FF"))
-                    }else{
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#88000000"))
+                    when {
+                        str[3]=="일" -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#88FF0000"))
+                        }
+                        str[3]=="토" -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#880000FF"))
+                        }
+                        else -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#88000000"))
+                        }
                     }
                 }else{
                     //같은달
-                    if (str[3]=="일"){
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
-                    }else if(str[3]=="토"){
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
-                    }else{
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#000000"))
+                    when {
+                        str[3]=="일" -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
+                        }
+                        str[3]=="토" -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+                        }
+                        else -> {
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#000000"))
+                        }
                     }
                 }
                 var taskStr=""
-                //해당 날짜가 taskMap에 들어가 있으면 작성
+                //해당 날짜가 taskMap 에 들어가 있으면 작성
                 if (taskMap.containsKey("${str[0]}.${str[1]}.${str[2]}") ){
                     taskStr=taskMap["${str[0]}.${str[1]}.${str[2]}"].toString()
 //                    rv.setTextViewText(R.id.tvTask1,taskMap[mWidgetItem.get(position)].toString())
                 }
                 if (taskMap.containsKey(str[3])){
-                    if (taskStr!=""){
-                        taskStr="${taskStr}&${taskMap[str[3]].toString()}"
-                    }else{
-                        taskStr= taskMap[str[3]].toString()
-                    }
+                    taskStr = if (taskStr!=""){
+                             "${taskStr}&${taskMap[str[3]].toString()}"
+                            }else{
+                                taskMap[str[3]].toString()
+                            }
 
                 }
                 if (taskStr!=""){
-                    val temp = taskStr.toString().split("&")
-                    if (temp.size==1){
-                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                    }else if(temp.size==2){
-                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                        rv.setTextViewText(R.id.tvTask2,temp[1].toString())
-                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
-                    }else {
-                        rv.setTextViewText(R.id.tvTask1,temp[0].toString())
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                        rv.setTextViewText(R.id.tvTask2,temp[1].toString())
-                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
-                        rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
-                        rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
+                    val temp = taskStr.split("&")
+                    when (temp.size) {
+                        1 -> {
+                            rv.setTextViewText(R.id.tvTask1, temp[0])
+                            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                        }
+                        2 -> {
+                            rv.setTextViewText(R.id.tvTask1, temp[0])
+                            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                            rv.setTextViewText(R.id.tvTask2, temp[1])
+                            rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                        }
+                        else -> {
+                            rv.setTextViewText(R.id.tvTask1, temp[0])
+                            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                            rv.setTextViewText(R.id.tvTask2, temp[1])
+                            rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                            rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
+                            rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
+                        }
                     }
                 }
             }
@@ -200,9 +209,8 @@ class WidgetAdapter : RemoteViewsService(){
 
             //보내는 intent
             val fillIntent = Intent()
-            fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA,mWidgetItem.get(position))
+            fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA, mWidgetItem[position])
             rv.setOnClickFillInIntent(R.id.calendarContainer,fillIntent)
-//            rv.setOnClickPendingIntent(R.id.tvTask,getPenddingSelfIntent(context,"2234",mWidgetItem.get(position).toString()))
 
             return rv
         }
@@ -266,7 +274,7 @@ class WidgetAdapter : RemoteViewsService(){
                         "0${(cursor.getInt(cursor.getColumnIndex("day")).toString())}" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
                     for (a in monthDayList){
                         val split =a.split(".")
-                        if (tempDay.equals(split[2])){
+                        if (tempDay == split[2]){
                             val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
                             val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
                             if (taskMap[tempStr1] ==null){
@@ -291,7 +299,7 @@ class WidgetAdapter : RemoteViewsService(){
                     "0${(cursor.getInt(cursor.getColumnIndex("day")).toString())}" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
                 for (a in monthDayList){
                     val split =a.split(".")
-                    if (tempYear.equals(split[0]) && tempMonth.equals(split[1]) &&tempDay.equals(split[2])){
+                    if (tempYear == split[0] && tempMonth == split[1] && tempDay == split[2]){
                         val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
                         val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
                         if (taskMap[tempStr1] ==null){
