@@ -30,7 +30,6 @@ class CalendarWidget : AppWidgetProvider() {
     //위젯이 설치 될 때 마다 호출되는 함수
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         // There may be multiple widgets active, so update all of them
-        Log.d("도원","onUpdate  : $appWidgetIds  || ${getCalendarSharedData(context)}")
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -48,12 +47,16 @@ class CalendarWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         super.onReceive(context, intent)
-        Log.d("도원"," ??intent Code : ${intent?.action}")
-        if ("Today" == intent?.action){
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            val testWidge = ComponentName(context!!, CalendarWidget::class.java)
-            val widgetIds = appWidgetManager.getAppWidgetIds(testWidge)
-            this.onUpdate(context,appWidgetManager,widgetIds)
+        if ("MoveToday" == intent?.action){
+            context?.let {
+                val originalDate = DateTime(System.currentTimeMillis())
+                val newDate = originalDate.withDayOfMonth(1)
+                SharedDataUtils.setClickDate(it,"${originalDate.toString("YYYY.MM.dd.E")}")
+                setCalendarMillis(it,newDate.millis)
+                val manager =AppWidgetManager.getInstance(it)
+                manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
+                this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
+            }
         }
         else if("PreMonth" == intent?.action){
             context?.let {
@@ -78,17 +81,31 @@ class CalendarWidget : AppWidgetProvider() {
             }
         }
         else if (RECEIVE_ADAPTER == intent?.action){
-            val receiveDate = intent.getStringExtra(COLLECTION_VIEW_EXTRA)
-            Log.d("도원"," Code : $receiveDate  =>> currentReceiveDate : $currentReceiveDate")
-            if (currentReceiveDate == receiveDate){
-                val mainIntent = Intent(context,MainActivity::class.java)
-                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                mainIntent.putExtra("sendDate",currentReceiveDate)
-                context!!.startActivity(mainIntent)
-            }else{
-                if (receiveDate != null) {
-                    currentReceiveDate=receiveDate
+            context?.let {
+                val receiveDate = intent.getStringExtra(COLLECTION_VIEW_EXTRA)
+                Log.d("도원"," Code : $receiveDate  =>> currentReceiveDate : $currentReceiveDate")
+                if (currentReceiveDate == receiveDate){
+                    val mainIntent = Intent(it,MainActivity::class.java)
+                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    mainIntent.putExtra("sendDate",currentReceiveDate)
+                    it.startActivity(mainIntent)
+                }else{
+                    if (receiveDate != null) {
+                        SharedDataUtils.setClickDate(it,receiveDate)
+                        currentReceiveDate=receiveDate
+                        val manager =AppWidgetManager.getInstance(it)
+                        manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
+                        this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
+
+                    }
                 }
+
+            }
+        }else if ("Recycler"==intent?.action){
+            context?.let {
+                val manager =AppWidgetManager.getInstance(it)
+                manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
+                this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
             }
         }
     }
@@ -98,11 +115,14 @@ class CalendarWidget : AppWidgetProvider() {
 internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
     // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.calendar_widget)
-    views.setOnClickPendingIntent(R.id.tvTopDate, getPendingSelfIntent(context,"Today","gi~?"))
 
     views.setOnClickPendingIntent(R.id.btnPreMonth, getPendingSelfIntent(context,"PreMonth","??"))
 
     views.setOnClickPendingIntent(R.id.btnNextMonth, getPendingSelfIntent(context,"NextMonth","??"))
+
+    views.setOnClickPendingIntent(R.id.ivMoveToToday, getPendingSelfIntent(context,"MoveToday","??"))
+
+    views.setOnClickPendingIntent(R.id.ivSearchDate, getPendingSelfIntent(context,"Recycler","??"))
     //그리드 뷰에 어댑터 셋팅
     val intent =Intent(context,WidgetAdapter::class.java)
     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetId)
@@ -118,7 +138,6 @@ internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManage
     val pendingIntent = PendingIntent.getBroadcast(context,0,gridIntent,PendingIntent.FLAG_UPDATE_CURRENT)
     views.setPendingIntentTemplate(R.id.gvCalendar,pendingIntent)
     val showDateTime = DateTime(getCalendarSharedData(context))
-    Log.d("도원","showDateTime : ${showDateTime.year}.${showDateTime.monthOfYear}.${showDateTime.dayOfMonth}")
     views.setTextViewText(R.id.tvTopDate,"${showDateTime.year}.${showDateTime.monthOfYear}.${showDateTime.dayOfMonth}")
 
     // Instruct the widget manager to update the widget

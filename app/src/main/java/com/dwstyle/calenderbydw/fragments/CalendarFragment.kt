@@ -212,7 +212,10 @@ class CalendarFragment : Fragment() {
 
     }
 
-    fun refreshTaskList(){
+    fun refreshTaskList(calendarDay: CalendarDay?){
+        if (calendarDay!=null){
+            selectedDate=calendarDay
+        }
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)

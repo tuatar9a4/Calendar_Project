@@ -1,36 +1,42 @@
 package com.dwstyle.calenderbydw
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
 import com.dwstyle.calenderbydw.fragments.TaskListFragment
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
+import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Exception
 import java.nio.file.Files
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private val calendarFragment=CalendarFragment.newInstance()
     private val taskListFragment=TaskListFragment.newInstance()
-    private lateinit var btnPlus : Button
-    private lateinit var btnList :Button
-    private lateinit var btnHome :Button
+    private lateinit var btnPlus : ImageView
+    private lateinit var btnList :ImageView
+    private lateinit var btnHome :ImageView
     private lateinit var ivSendWatch :ImageView
     private lateinit var resultLauncher : ActivityResultLauncher<Intent>
 
@@ -38,6 +44,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var dbHelper : TaskDatabaseHelper
     private lateinit var database : SQLiteDatabase
+
+    private lateinit var mainTopToolbar : Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +68,9 @@ class MainActivity : AppCompatActivity() {
             val transaction =supportFragmentManager.beginTransaction()
             transaction.hide(taskListFragment)
             transaction.show(calendarFragment)
+            mainTopToolbar.visibility= View.VISIBLE
             transaction.commit()
-            calendarFragment.refreshTaskList()
+            calendarFragment.refreshTaskList(taskListFragment.getSelectDateInfo())
         }
 
         //TaskList 화면 이동
@@ -70,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             val transaction =supportFragmentManager.beginTransaction()
             transaction.hide(calendarFragment)
             transaction.show(taskListFragment)
+            mainTopToolbar.visibility=View.GONE
             taskListFragment.setCalendarDay(calendarFragment.getSelectDateInfo())
             transaction.commit()
         }
@@ -78,8 +88,18 @@ class MainActivity : AppCompatActivity() {
         btnPlus.setOnClickListener {
             val intent = Intent(applicationContext,CreateTaskActivity::class.java)
             intent.putExtra("type","create")
-            intent.putExtra("dateInfo",calendarFragment.getSelectDateInfo())
-            resultLauncher.launch(intent)
+            Log.d("도원","taskListFragment.isVisible : ${taskListFragment.isVisible}")
+            Log.d("도원","calendarFragment.isVisible : ${calendarFragment.isVisible}")
+            var sendCalendar :CalendarDay? =null
+            if (calendarFragment.isVisible)
+                sendCalendar=calendarFragment.getSelectDateInfo()
+            if (taskListFragment.isVisible && taskListFragment.getSelectDateInfo()!=null)
+                sendCalendar=taskListFragment.getSelectDateInfo()
+
+            sendCalendar?.let {
+                intent.putExtra("dateInfo",it)
+                resultLauncher.launch(intent)
+            }
         }
 
         resultLauncher=registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
@@ -94,6 +114,7 @@ class MainActivity : AppCompatActivity() {
                         TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database)
                         calendarFragment.notifydataChange()
                         taskListFragment.notifydataChange()
+                        updateWidgetData()
                     }
                 }
             })
@@ -108,6 +129,27 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        intent.getStringExtra("sendDate")?.let {
+            val str = it.split(".")
+            val transaction =supportFragmentManager.beginTransaction()
+            transaction.hide(calendarFragment)
+            transaction.show(taskListFragment)
+            mainTopToolbar.visibility=View.GONE
+            taskListFragment.setCalendarDay(CalendarDay.from(str[0].toInt(),str[1].toInt(),str[2].toInt()))
+            transaction.commit()
+        }
+    }
+
+    //위젯 업데이트
+    private fun updateWidgetData(){
+        val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+        val appwidgetIds = appWidgetManager.getAppWidgetIds(
+            ComponentName(applicationContext,CalendarWidget::class.java)
+        )
+        appWidgetManager.notifyAppWidgetViewDataChanged(appwidgetIds,R.layout.calendar_widget)
+    }
 
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
     private fun changeDBToBytes(){
@@ -198,6 +240,7 @@ class MainActivity : AppCompatActivity() {
         btnHome=findViewById(R.id.btnHome)
         btnList=findViewById(R.id.btnList)
         ivSendWatch=findViewById(R.id.ivSendWatch)
+        mainTopToolbar=findViewById(R.id.mainTopToolbar)
 
     }
 

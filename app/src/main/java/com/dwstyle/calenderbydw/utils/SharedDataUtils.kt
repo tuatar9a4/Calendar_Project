@@ -21,5 +21,16 @@ class SharedDataUtils {
             return getSharedPreferences(context).getLong(PREFERENCE_WIDGET_DATE, 0)
         }
 
+        private  const val WIDGET_CLICK_DATE ="CLICK_WIDGET_DATE"
+
+        fun setClickDate(context: Context,date :String) {
+            val editor = getSharedPreferences(context).edit()
+            editor.putString(WIDGET_CLICK_DATE, date).apply()
+        }
+
+        fun getClickDate(context: Context) : String? {
+            return getSharedPreferences(context).getString(WIDGET_CLICK_DATE,null)
+        }
+
     }
 }

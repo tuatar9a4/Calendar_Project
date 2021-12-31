@@ -1,9 +1,11 @@
 package com.dwstyle.calenderbydw.fragments
 
+import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -11,16 +13,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dwstyle.calenderbydw.R
+import com.dwstyle.calenderbydw.adapters.DateOfListAdapter
 import com.dwstyle.calenderbydw.adapters.TaskListOfSelectDateAdapter
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
+import com.dwstyle.calenderbydw.item.DateOfListItem
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.prolificinteractive.materialcalendarview.CalendarDay
-import kotlinx.android.synthetic.main.fragment_task_list.*
+import org.joda.time.DateTime
+import org.threeten.bp.ZoneOffset
 
 class TaskListFragment : Fragment() {
 
@@ -28,6 +34,13 @@ class TaskListFragment : Fragment() {
     private lateinit var preDate:Button
     private lateinit var nextDate:Button
     private lateinit var rcSelectTaskList :RecyclerView
+    private lateinit var searchDate:ImageView
+
+    private lateinit var tvMonthOfList : TextView
+    private lateinit var RCScheduledDate : RecyclerView
+    private lateinit var dateOfListAdapter: DateOfListAdapter
+    private var dateItems = ArrayList<DateOfListItem>()
+    private val taskCntEach=ArrayList<TaskItem>()
 
     private lateinit var taskListOfSelectDateAdapter :TaskListOfSelectDateAdapter
 
@@ -54,6 +67,7 @@ class TaskListFragment : Fragment() {
 
         selectedCalendarDay?.let {
             tvDay.text="${it.year}.${it.month}.${it.day}"
+            tvMonthOfList.text="${it.year}.${it.month}"
         }
 
         preDate.setOnClickListener {
@@ -72,6 +86,18 @@ class TaskListFragment : Fragment() {
 
         taskListOfSelectDateAdapter=TaskListOfSelectDateAdapter(view.context)
         rcSelectTaskList.adapter=taskListOfSelectDateAdapter
+        dateOfListAdapter= DateOfListAdapter(view.context)
+        RCScheduledDate.adapter=dateOfListAdapter
+        dateOfListAdapter.setOnItemClickListener(object :DateOfListAdapter.OnItemClickListener{
+            override fun onItemClickListener(v: View, year: Int, month: Int, day: Int,position :Int) {
+                selectedCalendarDay=CalendarDay.from(year,month,day)
+                tvDay.text="${selectedCalendarDay?.year}.${selectedCalendarDay?.month}.${selectedCalendarDay?.day}"
+                tvMonthOfList.text="${selectedCalendarDay?.year}.${selectedCalendarDay?.month}"
+                searchTaskOfSelectedDay(selectedCalendarDay!!)
+                dateOfListAdapter.selectPosition(position)
+            }
+        })
+
         taskListOfSelectDateAdapter.setOnDeleteItemClickListener(object :TaskListOfSelectDateAdapter.OnDeleteClickListener{
             override fun OnDeleteClick(v: View, item: TaskItem, pos: Int) {
                 database=dbHelper.writableDatabase
@@ -82,6 +108,15 @@ class TaskListFragment : Fragment() {
                 })
             }
         })
+
+        searchDate.setOnClickListener{
+            val datePickerDialog = DatePickerDialog(view.context, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+                setCalendarDay(CalendarDay.from(year,month+1,dayOfMonth))
+
+            },selectedCalendarDay?.year!!, selectedCalendarDay?.month!!-1,selectedCalendarDay?.day!!)
+            datePickerDialog.show()
+
+        }
         return view
     }
 
@@ -91,17 +126,60 @@ class TaskListFragment : Fragment() {
         nextDate=view.findViewById(R.id.nextDate)
         rcSelectTaskList=view.findViewById(R.id.rcSelectTaskList)
         rcSelectTaskList.layoutManager=LinearLayoutManager(view.context,LinearLayoutManager.VERTICAL,false)
+        searchDate=view.findViewById(R.id.searchDate)
+
+
+        RCScheduledDate=view.findViewById(R.id.RCScheduledDate)
+        RCScheduledDate.layoutManager=LinearLayoutManager(view.context,LinearLayoutManager.HORIZONTAL,false)
+        tvMonthOfList=view.findViewById(R.id.tvMonthOfList)
+        RCScheduledDate.addItemDecoration(HorizontalSpaceDecorate(30))
+
     }
+
+    fun getSelectDateInfo() = selectedCalendarDay
 
     fun setCalendarDay(calendarDay: CalendarDay){
+        dateItems.clear()
         selectedCalendarDay=calendarDay
         tvDay.text="${selectedCalendarDay?.year}.${selectedCalendarDay?.month}.${selectedCalendarDay?.day}"
+        tvMonthOfList.text="${selectedCalendarDay?.year}.${selectedCalendarDay?.month}"
         searchTaskOfSelectedDay(selectedCalendarDay!!)
+        setTopDateList()
     }
 
+    fun setTopDateList(){
+        val calendarDay=selectedCalendarDay!!
+        var currentMonthDate = DateTime(calendarDay.date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
+        currentMonthDate=currentMonthDate.withDayOfMonth(1)
+        var oldMonth :Int=0;
+        while (true){
+            taskCntEach.clear()
+            searchTaskInRepeatWeek(currentMonthDate.dayOfWeek,taskCntEach)
+            searchTaskInDay(currentMonthDate.year,currentMonthDate.monthOfYear,currentMonthDate.dayOfMonth,taskCntEach)
+            val taskCnt= taskCntEach.size
+            val temp =DateOfListItem(
+                currentMonthDate.dayOfWeek.toString(),
+                currentMonthDate.dayOfMonth.toString(),
+                currentMonthDate.year.toString(),
+                currentMonthDate.monthOfYear.toString(),
+                taskCnt
+            )
+            dateItems.add(temp)
+            oldMonth=currentMonthDate.monthOfYear
+            currentMonthDate=currentMonthDate.plusDays(1)
+            if (oldMonth!=currentMonthDate.monthOfYear){
+                break
+            }
+        }
+        dateOfListAdapter.setDateItems(dateItems)
+        RCScheduledDate.scrollToPosition(calendarDay.day-1)
+        dateOfListAdapter.selectPosition((calendarDay.day-1))
+    }
     fun searchTaskOfSelectedDay(calendarDay: CalendarDay){
-        searchTaskInRepeatWeek(calendarDay)
-        searchTaskInDay(calendarDay)
+        dailyTaskList.clear()
+        searchTaskInRepeatWeek(calendarDay.date.dayOfWeek.value,dailyTaskList)
+        searchTaskInDay(calendarDay.year,calendarDay.month,calendarDay.day,dailyTaskList)
+        taskListOfSelectDateAdapter.setTaskItem(dailyTaskList)
     }
 
     fun notifydataChange(){
@@ -110,9 +188,10 @@ class TaskListFragment : Fragment() {
         }
     }
 
-    private fun searchTaskInRepeatWeek(calendarDay: CalendarDay){
+    //매주 반복
+    private fun searchTaskInRepeatWeek(week : Int,taskList : ArrayList<TaskItem>){
         database=dbHelper.readableDatabase
-        dailyTaskList.clear()
+
         try {
             val c2: Cursor =
                 database.rawQuery("SELECT * FROM myTaskTbl WHERE week != '0&0&0&0&0&0&0' ", null);
@@ -122,7 +201,7 @@ class TaskListFragment : Fragment() {
                     if (tempStr[a].equals("1")) {
                         var pos = a;
                         if (a == 0) pos = 7
-                        if (pos == calendarDay.date.dayOfWeek.value) {
+                        if (pos == week) {
                             val tempTask = TaskItem(
                                 c2.getInt(c2.getColumnIndex("_id")),
                                 c2.getInt(c2.getColumnIndex("year")),
@@ -140,7 +219,7 @@ class TaskListFragment : Fragment() {
                                 c2.getInt(c2.getColumnIndex("priority")),
                                 ""
                             )
-                            dailyTaskList.add(tempTask)
+                            taskList.add(tempTask)
                         }
                     }
                 }
@@ -153,14 +232,14 @@ class TaskListFragment : Fragment() {
     }
 
     //선택된 날짜에 맞는 task 찾기
-    private fun searchTaskInDay(calendarDay: CalendarDay){
+    private fun searchTaskInDay(year:Int, month:Int, day:Int, taskList : ArrayList<TaskItem>){
         database=dbHelper.readableDatabase
         try {
-            val c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE day = ${calendarDay.day} AND week == '0&0&0&0&0&0&0' ",null);
+            val c2: Cursor = database.rawQuery("SELECT * FROM myTaskTbl WHERE day = ${day} AND week == '0&0&0&0&0&0&0' ",null);
             while (c2.moveToNext()){
                 if (c2.getInt(c2.getColumnIndex("repeatN"))==1 &&
-                    calendarDay.month==c2.getInt(c2.getColumnIndex("month")) &&
-                    calendarDay.year == c2.getInt(c2.getColumnIndex("year"))){
+                    month==c2.getInt(c2.getColumnIndex("month")) &&
+                    year == c2.getInt(c2.getColumnIndex("year"))){
                     val tempTask = TaskItem(
                         c2.getInt(c2.getColumnIndex("_id")),
                         c2.getInt(c2.getColumnIndex("year")),
@@ -178,9 +257,9 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("priority")),
                         ""
                     )
-                    dailyTaskList.add(tempTask)
+                    taskList.add(tempTask)
                 }else if (c2.getInt(c2.getColumnIndex("repeatY"))==1 &&
-                    calendarDay.month==c2.getInt(c2.getColumnIndex("month"))){
+                    month==c2.getInt(c2.getColumnIndex("month"))){
                     val tempTask = TaskItem(
                         c2.getInt(c2.getColumnIndex("_id")),
                         c2.getInt(c2.getColumnIndex("year")),
@@ -198,9 +277,9 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("priority")),
                         ""
                     )
-                    dailyTaskList.add(tempTask)
+                    taskList.add(tempTask)
                 }else if (c2.getInt(c2.getColumnIndex("repeatM"))==1&&
-                    calendarDay.day==c2.getInt(c2.getColumnIndex("day"))){
+                    day==c2.getInt(c2.getColumnIndex("day"))){
                     val tempTask = TaskItem(
                         c2.getInt(c2.getColumnIndex("_id")),
                         c2.getInt(c2.getColumnIndex("year")),
@@ -218,12 +297,10 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("priority")),
                         ""
                     )
-                    dailyTaskList.add(tempTask)
+                    taskList.add(tempTask)
                 }
 
             }
-            taskListOfSelectDateAdapter.setTaskItem(dailyTaskList)
-            Log.d("도원","아이템 사이즈 : ${dailyTaskList.size}")
 //            Log.d("도원","dailyTaskList2 : ${dailyTaskList} | ")
 
             c2.close()
@@ -234,6 +311,18 @@ class TaskListFragment : Fragment() {
 //        rcTaskList.adapter
     }
 
+    inner class HorizontalSpaceDecorate(private val horizontalSpaceHeight: Int) : RecyclerView.ItemDecoration(){
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            super.getItemOffsets(outRect, view, parent, state)
+            outRect.right = horizontalSpaceHeight
+
+        }
+    }
 
 
     companion object {

@@ -82,14 +82,12 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
         notifyDataSetChanged()
     }
 
-    public class DailyTaskVH :RecyclerView.ViewHolder{
+    class DailyTaskVH(itemView: View, mListener: OnItemClickListener?) :
+        RecyclerView.ViewHolder(itemView) {
 
         private lateinit var dbHelper : TaskDatabaseHelper
         private lateinit var database : SQLiteDatabase
         private var clickListener : OnItemClickListener? =null
-        constructor(itemView: View,mListener : OnItemClickListener?) : super(itemView) {
-            this.clickListener=mListener ?: null
-        }
 
         val tvTaskTitle=itemView.findViewById<TextView>(R.id.tvTaskTitle);
         val tvTaskDate=itemView.findViewById<TextView>(R.id.tvTaskDate);
@@ -109,7 +107,9 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
             if (taskItem[position].repeatN==1)topViewOfTaskKind.setBackgroundColor(context.getColor(R.color.dayTopColor))
 
             tvTaskTitle.text = taskItem[position].title
-            tvIsContents.text = if (taskItem[position].text.toString().equals("내용 없음"))"내용 없음" else "눌러서 내용 확인"
+            tvIsContents.text =
+                if (taskItem[position].text.toString().equals("내용 없음"))"내용 없음"
+                else "<눌러서 자세히보기>\n${taskItem[position].text}"
             tvTaskDate.text = "Create Date : ${taskItem[position].month}.${taskItem[position].day}"
 
             val df : DateFormat =SimpleDateFormat("HH:mm")
@@ -134,6 +134,10 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
 
 
 
+        }
+
+        init {
+            this.clickListener=mListener ?: null
         }
 
 

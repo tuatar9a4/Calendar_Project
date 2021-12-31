@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dwstyle.calenderbydw.R
@@ -37,7 +38,6 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
 
     fun setTaskItem(taskList : ArrayList<TaskItem>){
         this.selectTaskList=taskList
-        Log.d("도원","setSize : ${selectTaskList.size}")
         notifyDataSetChanged()
     }
 
@@ -59,6 +59,7 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
         val tvCreateDate:TextView=itemView.findViewById(R.id.tvCreateDate);
         val tvTaskTime:TextView =itemView.findViewById(R.id.tvTaskTime)
         val ivDeleteTask:ImageView = itemView.findViewById(R.id.ivDeleteTask)
+        val rlTaskLayout:RelativeLayout =itemView.findViewById(R.id.rlTaskLayout)
 
         private var mListener :OnDeleteClickListener? =null
         constructor(itemView: View,mListener : OnDeleteClickListener?)  : super(itemView) {
@@ -81,6 +82,11 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
                 if (pos !=-1){
                     mListener?.OnDeleteClick(itemView,taskItem,pos)
                 }
+            }
+
+            val linearLayout = rlTaskLayout.apply {
+                measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                clipToOutline= true
             }
 
         }

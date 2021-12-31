@@ -15,35 +15,62 @@
         android:orientation="vertical"
         android:layout_margin="8dp"
         >
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
             >
+
             <ImageView
                 android:id="@+id/btnPreMonth"
                 android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/pre_month_icon"
-                />
+                android:layout_height="40dp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/pre_month_icon" />
+
             <TextView
                 android:id="@+id/tvTopDate"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="2021.11.23"
-                android:textColor="@color/black"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@+id/btnPreMonth"
                 android:gravity="center"
-                />
+                android:text="2021.11.23"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
             <ImageView
                 android:id="@+id/btnNextMonth"
                 android:layout_width="20dp"
+                android:layout_height="40dp"
+                android:layout_toRightOf="@+id/tvTopDate"
+                android:src="@drawable/next_month_icon" />
+
+            <ImageView
+                android:id="@+id/ivMoveToToday"
+                android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/next_month_icon"
+                android:layout_alignTop="@+id/btnNextMonth"
+                android:layout_alignBottom="@+id/btnNextMonth"
+                android:layout_marginRight="20dp"
+                android:layout_toLeftOf="@+id/ivSearchDate"
+                android:src="@drawable/today_calendar" />
+
+
+            <ImageView
+                android:id="@+id/ivSearchDate"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/btnNextMonth"
+                android:layout_alignBottom="@+id/btnNextMonth"
+                android:layout_marginRight="20dp"
+                android:src="@drawable/recycle_calendar"
                 />
-        </LinearLayout>
+
+        </RelativeLayout>
         <GridView
             android:id="@+id/gvCalendar"
             android:layout_width="match_parent"

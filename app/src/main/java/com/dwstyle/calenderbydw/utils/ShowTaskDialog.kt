@@ -4,11 +4,14 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.MutableLiveData
 import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.item.TaskItem
@@ -38,6 +41,7 @@ class ShowTaskDialog(context: Context) {
     private lateinit var tvTaskTitle : TextView
     private lateinit var tvTaskContents :TextView
     private lateinit var tvTaskRepeat :TextView
+    private lateinit var clWriteLayout:ConstraintLayout
 
 
     var taskWeek=0;
@@ -77,6 +81,7 @@ class ShowTaskDialog(context: Context) {
         dialog= Dialog(context)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.write_task_layout)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val params=dialog.window?.attributes;
         params?.width=WindowManager.LayoutParams.MATCH_PARENT
         params?.height=WindowManager.LayoutParams.WRAP_CONTENT
@@ -84,10 +89,14 @@ class ShowTaskDialog(context: Context) {
         dialog.show()
         initViw(dialog)
 
+
         tvTaskTitle.text=clickItem.title
         tvTaskContents.text=clickItem.text
         tvTaskContents.movementMethod=ScrollingMovementMethod()
-
+        clWriteLayout.apply {
+            measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            clipToOutline= true
+        }
         tvTaskTime.text=SimpleDateFormat("HH:mm").format(clickItem.time)
 
         if (clickItem.repeatY==1) tvTaskRepeat.text = "매년 ${clickItem.month}월 ${clickItem.day}일 반복"
@@ -297,6 +306,7 @@ class ShowTaskDialog(context: Context) {
         tvTaskTitle=dialog.findViewById(R.id.tvTaskTitle)
         tvTaskContents=dialog.findViewById(R.id.tvTaskContents)
         tvTaskRepeat=dialog.findViewById(R.id.tvTaskRepeat)
+        clWriteLayout=dialog.findViewById(R.id.clWriteLayout)
 
 
     }

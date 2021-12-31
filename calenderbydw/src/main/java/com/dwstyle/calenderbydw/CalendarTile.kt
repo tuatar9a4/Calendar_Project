@@ -217,6 +217,8 @@ class CalendarTile : TileService(){
 //        <a href="https://www.streamlinehq.com">Free Navigation Left 3 PNG icon by Streamline</a> pre icon
 //        <a href="https://www.streamlinehq.com">Free Move Left 3 PNG icon by Streamline</a> move_next
 //        <a href="https://www.streamlinehq.com">Free Move Right 2 PNG icon by Streamline</a> move_preview
+//        <a href="https://www.streamlinehq.com">Free Calendar Refresh PNG icon by Streamline</a> recycler
+//        <a href="https://www.streamlinehq.com">Free Calendar Date PNG icon by Streamline</a> todayCllaendr
         //상단 요일 만드는 곳
         val weekText = arrayOf("Sun","Mon","The","Wen","Thu","Fri","Sat");
         val rowBuilderBox =  LayoutElementBuilders.Row.Builder().setWidth(wrap());

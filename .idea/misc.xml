@@ -5,13 +5,29 @@
       <map>
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/calendar_background.xml" value="0.2564102564102564" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/calendar_select_gradiant.xml" value="0.2564102564102564" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/custom_repeat_checkbox.xml" value="0.2657407407407407" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/edit_background_round_10.xml" value="0.2564102564102564" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/main_create_btn_img.xml" value="0.2657407407407407" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/main_home_btn_img.xml" value="0.2657407407407407" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/select_background.xml" value="0.2657407407407407" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/select_ractangle.xml" value="0.1925925925925926" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/select_ring.xml" value="0.2657407407407407" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/task_layout_radius.xml" value="0.2657407407407407" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/widget_basic_background_circle.xml" value="0.20277777777777778" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/widget_container_background_basic.xml" value="0.2611111111111111" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/widget_container_background_select.xml" value="0.2611111111111111" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/widget_today_background_circle.xml" value="0.1925925925925926" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/write_layout_radius.xml" value="0.2657407407407407" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/activity_create_task.xml" value="0.25" />
-        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/activity_main.xml" value="0.18" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/activity_main.xml" value="0.21" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/blank_layout.xml" value="0.3578125" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/calendar_widget.xml" value="0.16944444444444445" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/fragment_calendar.xml" value="0.24427083333333333" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/fragment_task_list.xml" value="0.22" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/item_task_card.xml" value="0.2" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/task_date_layout.xml" value="0.5" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/task_list_item_layout.xml" value="0.25" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/widget_calender_grid_item.xml" value="0.67" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/write_task_layout.xml" value="0.22" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_main.xml" value="0.6862745098039216" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_tile.xml" value="0.6862745098039216" />
