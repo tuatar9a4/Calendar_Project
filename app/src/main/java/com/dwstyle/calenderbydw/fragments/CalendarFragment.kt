@@ -27,6 +27,7 @@ import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.*
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.dwstyle.calenderbydw.utils.ShowTaskDialog
+import com.dwstyle.calenderbydw.utils.WidgetUtils
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -167,6 +168,9 @@ class CalendarFragment : Fragment() {
                     TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
                     dailyTaskAdapter.deleteItemOfList(pos)
                     setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+                    context?.let {
+                        WidgetUtils.updateWidgetData(it)
+                    }
                     dialog.dismiss()
                 })
             }
@@ -179,6 +183,9 @@ class CalendarFragment : Fragment() {
                         TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
                         dailyTaskAdapter.deleteItemOfList(pos)
                         setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
+                        context?.let {
+                            WidgetUtils.updateWidgetData(it)
+                        }
                         dialog.dismiss()
                         taskDialog.dismissDialog()
                     })
@@ -206,6 +213,9 @@ class CalendarFragment : Fragment() {
                         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
                         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
                         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
+                        context?.let {
+                            WidgetUtils.updateWidgetData(it)
+                        }
                     }
                 }
             })
@@ -215,6 +225,8 @@ class CalendarFragment : Fragment() {
     fun refreshTaskList(calendarDay: CalendarDay?){
         if (calendarDay!=null){
             selectedDate=calendarDay
+//            tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+            calendarView.selectedDate = selectedDate
         }
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
@@ -568,13 +580,6 @@ class CalendarFragment : Fragment() {
 //        database.delete(tblName,null,null)
     }
 
-    fun deleteTask(_id : String){
-        database=dbHelper.writableDatabase;
-        TaskDatabaseHelper.deleteTask(_id,database)
-//        var c2:Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
-//        Log.d("도원","c2 ${c2.count}")
-//            var c2:Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${_id} ",null)
-    }
 
     //일정 만들기 method
     fun notifydataChange(){

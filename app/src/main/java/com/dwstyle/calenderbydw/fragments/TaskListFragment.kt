@@ -24,6 +24,7 @@ import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.DateOfListItem
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
+import com.dwstyle.calenderbydw.utils.WidgetUtils
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import org.joda.time.DateTime
 import org.threeten.bp.ZoneOffset
@@ -104,6 +105,9 @@ class TaskListFragment : Fragment() {
                 CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
                     TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
                     searchTaskOfSelectedDay(selectedCalendarDay!!)
+                    context?.let {
+                        WidgetUtils.updateWidgetData(it)
+                    }
                     dialog.dismiss()
                 })
             }

@@ -20,6 +20,7 @@ import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
 import com.dwstyle.calenderbydw.fragments.TaskListFragment
 import com.dwstyle.calenderbydw.item.TaskItem
+import com.dwstyle.calenderbydw.utils.WidgetUtils
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -114,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                         TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database)
                         calendarFragment.notifydataChange()
                         taskListFragment.notifydataChange()
-                        updateWidgetData()
+                        WidgetUtils.updateWidgetData(applicationContext)
                     }
                 }
             })
@@ -142,14 +143,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //위젯 업데이트
-    private fun updateWidgetData(){
-        val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-        val appwidgetIds = appWidgetManager.getAppWidgetIds(
-            ComponentName(applicationContext,CalendarWidget::class.java)
-        )
-        appWidgetManager.notifyAppWidgetViewDataChanged(appwidgetIds,R.layout.calendar_widget)
-    }
 
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
     private fun changeDBToBytes(){
