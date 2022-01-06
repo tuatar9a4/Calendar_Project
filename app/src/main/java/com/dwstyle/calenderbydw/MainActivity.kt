@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         clickFunction()
         val testRetrofit : HolidayRetrofit =HolidayRetrofit()
         CoroutineScope(Dispatchers.Main).launch {
-            testRetrofit.getHoliday(applicationContext)
+            testRetrofit.getHoliday(applicationContext,"2021")
         }
 
     }

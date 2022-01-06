@@ -32,13 +32,13 @@ class HolidayRetrofit {
 
     private val holidayRetroService: HolidayRetroService =holidayRetro.create(HolidayRetroService::class.java)
 
-    suspend fun getHoliday(context:Context)= withContext(Dispatchers.IO){
+    suspend fun getHoliday(context:Context,year :String)= withContext(Dispatchers.IO){
         val bodyMap = HashMap<String,String>()
         bodyMap["ServiceKey"]=context.getString(R.string.encoding_key)
         bodyMap["solYear"]="2021"
         bodyMap["numOfRows"]="100"
         val check = URL("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=2015")
-        val jsoup =Jsoup.connect("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=2015")
+        val jsoup =Jsoup.connect("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=${year}&numOfRows=100")
         val doc = jsoup.get()
         Log.d("도원","성공 , ${doc.toString()}")
 
