@@ -20,10 +20,14 @@ import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
 import com.dwstyle.calenderbydw.fragments.TaskListFragment
 import com.dwstyle.calenderbydw.item.TaskItem
+import com.dwstyle.calenderbydw.retrofit.HolidayRetrofit
 import com.dwstyle.calenderbydw.utils.WidgetUtils
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -59,6 +63,11 @@ class MainActivity : AppCompatActivity() {
             .hide(taskListFragment)
             .commit()
         clickFunction()
+        val testRetrofit : HolidayRetrofit =HolidayRetrofit()
+        CoroutineScope(Dispatchers.Main).launch {
+            testRetrofit.getHoliday(applicationContext)
+        }
+
     }
 
     //clickFun
