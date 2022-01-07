@@ -16,9 +16,11 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
 import com.dwstyle.calenderbydw.fragments.TaskListFragment
+import com.dwstyle.calenderbydw.item.HolidayItem
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.dwstyle.calenderbydw.retrofit.HolidayRetrofit
 import com.dwstyle.calenderbydw.utils.WidgetUtils
@@ -35,6 +37,7 @@ import java.io.IOException
 import java.lang.Exception
 import java.nio.file.Files
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private val calendarFragment=CalendarFragment.newInstance()
@@ -52,21 +55,36 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainTopToolbar : Toolbar
 
+    private val testRetrofit : HolidayRetrofit =HolidayRetrofit()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-        dbHelper=TaskDatabaseHelper(applicationContext,"task.db",null,2)
+        dbHelper=TaskDatabaseHelper(applicationContext,"task.db",null,3)
         supportFragmentManager.beginTransaction()
             .add(R.id.flmainFragment,calendarFragment)
             .add(R.id.flmainFragment,taskListFragment)
             .hide(taskListFragment)
             .commit()
+        binddata()
         clickFunction()
-        val testRetrofit : HolidayRetrofit =HolidayRetrofit()
-        CoroutineScope(Dispatchers.Main).launch {
-            testRetrofit.getHoliday(applicationContext,"2021")
-        }
+
+//        CoroutineScope(Dispatchers.Main).launch {
+////            testRetrofit.getHoliday(applicationContext,"2022")
+//            Log.d("도원","myTaskTbl : check |${TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"myTaskTbl")}")
+//            Log.d("도원","myTaskTbwwl :  check |${TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"myTaskTbwwl")}")
+//            Log.d("도원","holiday2021Tbl : check |${TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday2021Tbl")}")
+//        }
+
+    }
+
+    private fun binddata(){
+//        testRetrofit.getholidayItms().observe(this,object  : Observer<ArrayList<HolidayItem>>{
+//            override fun onChanged(t: ArrayList<HolidayItem>?) {
+//                Log.d("도원","onChange ${t}")
+//            }
+//        })
 
     }
 
@@ -133,6 +151,7 @@ class MainActivity : AppCompatActivity() {
         //워치로 데이터 전송시키기
         ivSendWatch.setOnClickListener {
             changeDBToBytes()
+            Toast.makeText(applicationContext,"sending....",Toast.LENGTH_SHORT).show()
         }
 
 
@@ -156,7 +175,7 @@ class MainActivity : AppCompatActivity() {
     //데이터 전송하기 전에 DB를 byteArray형태로 변경
     private fun changeDBToBytes(){
         //DB 경로를 구한 한다.
-        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,2).readableDatabase.path
+        val dbPath = TaskDatabaseHelper(applicationContext,"task.db",null,3).readableDatabase.path
         val dbFile = File(dbPath)
         val dbUri = Uri.fromFile(dbFile)
 //        val realAsset = Asset.createFromUri(dbUri)
@@ -187,20 +206,25 @@ class MainActivity : AppCompatActivity() {
 //
 //            Log.d("도원","e :  ${e.localizedMessage}")
 //        }
+
         putTask.addOnSuccessListener {
-            Log.d("도원","isSuccessful :  ${putTask.isSuccessful}")
+            Log.d("도원","isSuccessful :  ${putTask.isCanceled}")
+            Toast.makeText(applicationContext,"send Successful!!",Toast.LENGTH_SHORT).show()
         }
 
         putTask.addOnCompleteListener {
             Log.d("도원","result :  ${putTask.result}")
+            Log.d("도원","result :   ${it.isSuccessful} | ${it.exception}")
         }
 
         putTask.addOnFailureListener {
             Log.d("도원","exception :  ${putTask.exception}")
+            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
         }
 
         putTask.addOnCanceledListener {
             Log.d("도원","exception :  ${putTask.isCanceled}")
+            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
         }
 
     }

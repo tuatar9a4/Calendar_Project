@@ -2,24 +2,18 @@ package com.dwstyle.calenderbydw.retrofit
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.dwstyle.calenderbydw.R
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
+import com.dwstyle.calenderbydw.item.HolidayItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
-import org.w3c.dom.Document
-import org.w3c.dom.Element
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Query
 import java.net.URL
 
@@ -32,6 +26,8 @@ class HolidayRetrofit {
 
     private val holidayRetroService: HolidayRetroService =holidayRetro.create(HolidayRetroService::class.java)
 
+    private val holidayLiveData :MutableLiveData<ArrayList<HolidayItem>> =MutableLiveData()
+    private val holidayListItems =ArrayList<HolidayItem>()
     suspend fun getHoliday(context:Context,year :String)= withContext(Dispatchers.IO){
         val bodyMap = HashMap<String,String>()
         bodyMap["ServiceKey"]=context.getString(R.string.encoding_key)
@@ -40,35 +36,31 @@ class HolidayRetrofit {
         val check = URL("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=2015")
         val jsoup =Jsoup.connect("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=${year}&numOfRows=100")
         val doc = jsoup.get()
-        Log.d("도원","성공 , ${doc.toString()}")
+//        Log.d("도원","성공 , ${doc.toString()}")
 
         val elements: Elements = doc.select("body").select("items").select("item")
-        Log.d("도원","성공 , ${elements.size}")
-
+        Log.d("도원","${year}_성공 , ${elements.size}")
+        holidayListItems.clear()
         for (ele in elements){
             ele.run {
-                Log.d("도원","dateKind :  ${select("dateKind").eachText()[0]} \n dateName : ${select("dateName").eachText()[0]} \n isHoliday : ${select("isHoliday").eachText()[0]} \n" +
-                        "locdate : ${select("locdate").eachText()[0]}")
+//                Log.d("도원","HolidayItem <= dateKind :  ${select("dateKind").eachText()[0]} \n dateName : ${select("dateName").eachText()[0]} \n isHoliday : ${select("isHoliday").eachText()[0]} \n" +
+//                        "locdate : ${select("locdate").eachText()[0]}")
+//                val temp =HolidayItem(1,2,3,4,"")
+                val holidayDate =select("locdate").eachText()[0]
+//                Log.d("도원","HolidayItem => year : ${holidayDate.substring(0,4)} | month : ${holidayDate.substring(4,6).toInt()} | day ${holidayDate.substring(6).toInt()}")
+                val temp =HolidayItem(holidayDate.substring(0,4).toInt(),holidayDate.substring(4,6).toInt(),holidayDate.substring(6).toInt(),
+                    (if (select("isHoliday").eachText()[0]=="Y") 1 else 0),select("dateName").eachText()[0])
+                holidayListItems.add(temp)
+
             }
         }
+        holidayLiveData.postValue(holidayListItems)
 
-//        holidayRetroService.getHoliday(context.getString(R.string.encoding_key),"2021").enqueue(object :Callback<ResponseBody>{
-//
-//            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-//                if (response.isSuccessful){
-//
-//                    Log.d("도원","성공 , ${response.body().toString()}")
-//                }else{
-//                    Log.d("도원","실패 ,${response.errorBody().toString()}")
-//
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-//                Log.d("도원","실패 이유  ${t.localizedMessage}")
-//            }
-//        })
+    }
 
+
+    fun getHolidayItems() : MutableLiveData<ArrayList<HolidayItem>>{
+        return holidayLiveData
     }
 
 

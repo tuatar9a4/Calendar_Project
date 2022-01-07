@@ -255,7 +255,7 @@ class WidgetAdapter : RemoteViewsService(){
 
         private fun getTaskInfo( monthDayList : List<String>){
             taskMap.clear()
-            dbHelper= TaskDatabaseHelper(context,"task.db",null,2)
+            dbHelper= TaskDatabaseHelper(context,"task.db",null,3)
             database=dbHelper.readableDatabase
             getYearTask(database,monthDayList)
             getMonthTask(database,monthDayList)

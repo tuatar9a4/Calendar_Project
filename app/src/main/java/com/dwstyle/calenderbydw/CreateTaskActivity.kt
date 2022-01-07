@@ -218,7 +218,7 @@ class CreateTaskActivity : AppCompatActivity() {
 
                 tvTaskDate.text="${year}.${month+1}.${dayOfMonth}  (${changeWeekIntToString(taskWeek)})"
 
-            },sendYear, sendMonth,sendDay)
+            },sendYear, sendMonth-1,sendDay)
             datePickerDialog.show()
         }
 

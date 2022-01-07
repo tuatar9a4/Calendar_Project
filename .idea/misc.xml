@@ -38,11 +38,13 @@
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/drawable/custom_checkbox.xml" value="0.30427350427350425" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/drawable/select_background.xml" value="0.30427350427350425" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/drawable/select_ractangle.xml" value="0.30427350427350425" />
+        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/drawable/task_layout_radius.xml" value="0.17051282051282052" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/activity_create_task.xml" value="0.2" />
-        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/activity_main.xml" value="0.2125" />
+        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/calendar_widget.xml" value="0.25" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/fragment_calendar.xml" value="0.1517094017094017" />
-        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/item_task_card.xml" value="0.1517094017094017" />
+        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/fragment_task_list.xml" value="0.15726495726495726" />
+        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/item_task_card.xml" value="0.33" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/widget_calender_grid_item.xml" value="0.25" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/app/src/main/res/layout/write_task_layout.xml" value="0.18" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/dot_day.xml" value="0.25052083333333336" />
