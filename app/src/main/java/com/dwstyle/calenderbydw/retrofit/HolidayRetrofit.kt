@@ -29,25 +29,15 @@ class HolidayRetrofit {
     private val holidayLiveData :MutableLiveData<ArrayList<HolidayItem>> =MutableLiveData()
     private val holidayListItems =ArrayList<HolidayItem>()
     suspend fun getHoliday(context:Context,year :String)= withContext(Dispatchers.IO){
-        val bodyMap = HashMap<String,String>()
-        bodyMap["ServiceKey"]=context.getString(R.string.encoding_key)
-        bodyMap["solYear"]="2021"
-        bodyMap["numOfRows"]="100"
-        val check = URL("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=2015")
         val jsoup =Jsoup.connect("http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${context.getString(R.string.encoding_key)}&solYear=${year}&numOfRows=100")
         val doc = jsoup.get()
-//        Log.d("도원","성공 , ${doc.toString()}")
 
         val elements: Elements = doc.select("body").select("items").select("item")
         Log.d("도원","${year}_성공 , ${elements.size}")
         holidayListItems.clear()
         for (ele in elements){
             ele.run {
-//                Log.d("도원","HolidayItem <= dateKind :  ${select("dateKind").eachText()[0]} \n dateName : ${select("dateName").eachText()[0]} \n isHoliday : ${select("isHoliday").eachText()[0]} \n" +
-//                        "locdate : ${select("locdate").eachText()[0]}")
-//                val temp =HolidayItem(1,2,3,4,"")
                 val holidayDate =select("locdate").eachText()[0]
-//                Log.d("도원","HolidayItem => year : ${holidayDate.substring(0,4)} | month : ${holidayDate.substring(4,6).toInt()} | day ${holidayDate.substring(6).toInt()}")
                 val temp =HolidayItem(holidayDate.substring(0,4).toInt(),holidayDate.substring(4,6).toInt(),holidayDate.substring(6).toInt(),
                     (if (select("isHoliday").eachText()[0]=="Y") 1 else 0),select("dateName").eachText()[0])
                 holidayListItems.add(temp)

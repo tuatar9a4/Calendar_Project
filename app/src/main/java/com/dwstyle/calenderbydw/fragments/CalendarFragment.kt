@@ -1,11 +1,13 @@
 package com.dwstyle.calenderbydw.fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -105,17 +107,21 @@ class CalendarFragment : Fragment() {
         dbHelper= TaskDatabaseHelper(view.context,"task.db",null,3)
 //        dbHelper.createMonthTBL("myTaskTbl")
         database=dbHelper.writableDatabase
-        dbHelper.onUpgrade(database,2,3)
+        dbHelper.onUpgrade(database,database.version,3)
 //        dropTable(view,"myTaskTbl");
 //        dbHelper.onCreate(database)
 //        dropTable(view,"y2022");
         bindData(view)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            for (a in selectedDate.year-1..selectedDate.year+1){
-                Log.d("도원","a : $a")
-                holidayRetrofit.getHoliday(view.context,a.toString())
+        var check =false;
+        for (a in selectedDate.year-1..selectedDate.year+1){
+            if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${a}Tbl")){
+                checkHolidayForCreateDB(a,view.context)
+                check=true;
             }
+        }
+        if (!check){
+            initCalendarSetting(view)
         }
         return view
     }
@@ -133,8 +139,7 @@ class CalendarFragment : Fragment() {
                 }
                 if (!justDb){
                     initCalendarSetting(v)
-                }else{
-                    justDb=false
+                    justDb=true
                 }
             })
 
@@ -144,13 +149,15 @@ class CalendarFragment : Fragment() {
         //달력 배경 색 및 선택시 색
         calendarView.background=view.context.getDrawable(R.drawable.calendar_background)
 //        calendarView.selectionColor=Color.parseColor("#cc00cc")
-
-        calendarView.setTileHeightDp(50)
+        for(a in 0 until calendarView.childCount){
+            calendarView.getChildAt(a).clipToOutline=false
+        }
+        calendarView.setTileHeightDp(40)
         calendarView.setTileWidthDp(50)
         //달력 날짜 선택시 이벤트
         calendarView.setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
             selectedDate=date
-            tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+            settingSelectedDate(selectedDate)
             searchTaskInRepeatWeek(date.month,date.day,date)
             searchTaskInDay(date.month,date.day,date)
         })
@@ -160,12 +167,10 @@ class CalendarFragment : Fragment() {
             currentY=date.year
             if (currentY!=oldY){
                 justDb=true
-                CoroutineScope(Dispatchers.Main).launch {
-                    for (a in currentY-1..currentY+1){
-                        Log.d("도원","a : $a")
-                        holidayRetrofit.getHoliday(view.context,a.toString())
-                    }
+                for (a in currentY-1..currentY+1){
+                    checkHolidayForCreateDB(a,view.context)
                 }
+
             }
             oldY=currentY
             //달이 변경 될때마다 데코레이터 새로 초기화 해줘야함 안그러면 중복됨
@@ -175,7 +180,7 @@ class CalendarFragment : Fragment() {
         //현재 날짜 선택
 
         calendarView.selectedDate= selectedDate
-        tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+
         //타이틀 포맷 변경 yyyy년 MM월
         calendarView.setTitleFormatter(TitleFormatter {
             val calendarFormat =SimpleDateFormat("yyyy 년 MM 월")
@@ -187,6 +192,7 @@ class CalendarFragment : Fragment() {
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
+        settingSelectedDate(selectedDate)
         //월의 최값의 이전 날들, 최대값의 이후 날들 표시
         calendarView.showOtherDates=MaterialCalendarView.SHOW_OTHER_MONTHS
 
@@ -194,7 +200,7 @@ class CalendarFragment : Fragment() {
         calendarView.setOnTitleClickListener(View.OnClickListener {
             selectedDate=CalendarDay.today()
             //타이틀 변경
-            tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+            settingSelectedDate(selectedDate)
             //날짜 이동
             calendarView.selectedDate = selectedDate
             //달력 이동
@@ -638,6 +644,22 @@ class CalendarFragment : Fragment() {
 
         Log.d("도원","c2  ${c2} || ${database.version}")
 //        database.delete(tblName,null,null)
+    }
+
+    private fun checkHolidayForCreateDB(year : Int, context: Context){
+        CoroutineScope(Dispatchers.Main).launch {
+            holidayRetrofit.getHoliday(context,year.toString())
+        }
+    }
+
+    private fun settingSelectedDate(selectDay :CalendarDay){
+        if (holidayOfDay[selectDay.day.toString()] !=null){
+            tvSelectedDate.text="${selectDay.year}.${selectDay.month}.${selectDay.day} [${holidayOfDay[selectDay.day.toString()]}]"
+            tvSelectedDate.setTextColor(Color.parseColor("#FF0000"))
+        }else{
+            tvSelectedDate.text="${selectDay.year}.${selectDay.month}.${selectDay.day}"
+            tvSelectedDate.setTextColor(Color.parseColor("#000000"))
+        }
     }
 
 

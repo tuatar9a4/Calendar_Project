@@ -52,11 +52,12 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         try {
-            if (oldVersion<4){
+            if (oldVersion<3){
                 updateColumn(db!!)
             }
 
         }catch ( e : SQLiteException){
+            Log.d("ehdnjs","sql exception ${e.localizedMessage}")
             db!!.execSQL("DROP TABLE IF EXISTS myTaskTbl");
             onCreate(db);
         }
@@ -65,7 +66,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     }
 
     private fun updateColumn(a_db : SQLiteDatabase){
-        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN isHoliday integer DEFAULT 0 ;")
+        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN isHoliday integer DEFAULT 0;")
     }
 
     companion object{
