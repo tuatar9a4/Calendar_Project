@@ -1,11 +1,13 @@
 package com.dwstyle.calenderbydw.fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -17,6 +19,11 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginBottom
+import androidx.core.view.marginLeft
+import androidx.core.view.marginRight
+import androidx.core.view.marginTop
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dwstyle.calenderbydw.CreateTaskActivity
@@ -25,6 +32,7 @@ import com.dwstyle.calenderbydw.adapters.DailyTaskAdapter
 import com.dwstyle.calenderbydw.calendardacorator.*
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.item.*
+import com.dwstyle.calenderbydw.retrofit.HolidayRetrofit
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.dwstyle.calenderbydw.utils.ShowTaskDialog
 import com.dwstyle.calenderbydw.utils.WidgetUtils
@@ -34,10 +42,14 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class CalendarFragment : Fragment() {
@@ -55,14 +67,19 @@ class CalendarFragment : Fragment() {
     private val weekRepeatTaskList : ArrayList<WeekRepeatTaskItem> =ArrayList()
     private val noRepeatTaskList : ArrayList<NoRepeatTaskItem> =ArrayList()
 
+    private val finishSearch = MutableLiveData<Boolean>()
     private val dailyTaskList :ArrayList<TaskItem> = ArrayList()
     private lateinit var dailyTaskAdapter: DailyTaskAdapter
 
-    //년도 반복 ,달마다 반복, 주마다 반복, 반복 없음 task
+    //년도 반복 ,달마다 반복, 주마다 반복, 반복 없음 task , 공휴일
     private val dayOfRepeatYear=HashSet<String>()
     private val dayOfRepeatMonth=HashSet<String>()
     private val dayOfRepeatWeek=HashSet<String>()
     private val dayOfRepeatNo=HashSet<String>()
+    private val holidayOfDay=HashMap<String,String>()
+    private var currentY=0;
+    private var oldY=0;
+    private var justDb=false;
 
 
     private lateinit var dbHelper : TaskDatabaseHelper
@@ -71,6 +88,7 @@ class CalendarFragment : Fragment() {
     //수정시 수정 후 돌아올때
     private lateinit var resultLauncher : ActivityResultLauncher<Intent>
 
+    private val holidayRetrofit : HolidayRetrofit = HolidayRetrofit()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -78,6 +96,8 @@ class CalendarFragment : Fragment() {
             selectedDate= savedInstanceState.getParcelable<CalendarDay>("calendarDate")!!
         }else{
             selectedDate=CalendarDay.today()
+            currentY=selectedDate.year
+            oldY=selectedDate.year
         }
 //        Log.d("도원","selectedDate1  : ${selectedDate.month}.${selectedDate.day}");
     }
@@ -90,34 +110,74 @@ class CalendarFragment : Fragment() {
         val view =inflater.inflate(R.layout.fragment_calendar, container, false)
         AndroidThreeTen.init(view.context)
         initView(view)
-        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,2)
+        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,3)
 //        dbHelper.createMonthTBL("myTaskTbl")
-//        database=dbHelper.readableDatabase
-//        dbHelper.onUpgrade(database,2,3)
+        database=dbHelper.writableDatabase
+        dbHelper.onUpgrade(database,database.version,3)
 //        dropTable(view,"myTaskTbl");
 //        dbHelper.onCreate(database)
 //        dropTable(view,"y2022");
-        initCalendarSetting(view)
+        bindData(view)
 
+        var check =false;
+        for (a in selectedDate.year-1..selectedDate.year+1){
+            if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${a}Tbl")){
+                checkHolidayForCreateDB(a,view.context)
+                check=true;
+            }
+        }
+        if (!check){
+            initCalendarSetting(view)
+        }
         return view
+    }
+
+    private fun bindData(v: View){
+        holidayRetrofit.getHolidayItems().observe(viewLifecycleOwner,
+            { t :ArrayList<HolidayItem> ->
+                if (t.size>0){
+                    if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${t[0].year}Tbl")){
+                        dbHelper.createHolidayTbl(dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
+                        for ((i,item) in t.withIndex()){
+                            TaskDatabaseHelper.createHoliday(item,dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
+                        }
+                    }
+                }
+                if (!justDb){
+                    initCalendarSetting(v)
+                    justDb=true
+                }
+            })
+
     }
 
     private fun initCalendarSetting(view : View){
         //달력 배경 색 및 선택시 색
         calendarView.background=view.context.getDrawable(R.drawable.calendar_background)
 //        calendarView.selectionColor=Color.parseColor("#cc00cc")
+        Log.d("도원"," dount : ${calendarView.childCount}")
 
-        calendarView.setTileHeightDp(50)
+        calendarView.setTileHeightDp(40)
         calendarView.setTileWidthDp(50)
         //달력 날짜 선택시 이벤트
         calendarView.setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
             selectedDate=date
-            tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+            settingSelectedDate(selectedDate)
             searchTaskInRepeatWeek(date.month,date.day,date)
             searchTaskInDay(date.month,date.day,date)
         })
 
         calendarView.setOnMonthChangedListener(OnMonthChangedListener { widget, date ->
+            //년도 바뀔때 마다 앞 뒤 년도 공휴일 가져오기
+            currentY=date.year
+            if (currentY!=oldY){
+                justDb=true
+                for (a in currentY-1..currentY+1){
+                    checkHolidayForCreateDB(a,view.context)
+                }
+
+            }
+            oldY=currentY
             //달이 변경 될때마다 데코레이터 새로 초기화 해줘야함 안그러면 중복됨
             setDecorateForCalender(date.year,date.month,calendarView.currentDate)
 
@@ -125,7 +185,7 @@ class CalendarFragment : Fragment() {
         //현재 날짜 선택
 
         calendarView.selectedDate= selectedDate
-        tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+
         //타이틀 포맷 변경 yyyy년 MM월
         calendarView.setTitleFormatter(TitleFormatter {
             val calendarFormat =SimpleDateFormat("yyyy 년 MM 월")
@@ -137,6 +197,7 @@ class CalendarFragment : Fragment() {
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
+        settingSelectedDate(selectedDate)
         //월의 최값의 이전 날들, 최대값의 이후 날들 표시
         calendarView.showOtherDates=MaterialCalendarView.SHOW_OTHER_MONTHS
 
@@ -144,7 +205,7 @@ class CalendarFragment : Fragment() {
         calendarView.setOnTitleClickListener(View.OnClickListener {
             selectedDate=CalendarDay.today()
             //타이틀 변경
-            tvSelectedDate.text="${selectedDate.year}.${selectedDate.month}.${selectedDate.day}"
+            settingSelectedDate(selectedDate)
             //날짜 이동
             calendarView.selectedDate = selectedDate
             //달력 이동
@@ -231,6 +292,16 @@ class CalendarFragment : Fragment() {
         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
+    }
+
+    fun getHolidayList(year :Int ,month :Int){
+        holidayOfDay.clear()
+        val c2 :Cursor? =TaskDatabaseHelper.searchHoliday(dbHelper.readableDatabase,year,month,"holiday${year}Tbl")
+        if (c2 !=null){
+            while (c2.moveToNext()){
+                holidayOfDay[c2.getInt(2).toString()]=c2.getString(3)
+            }
+        }
     }
 
     //삭제 Dialog
@@ -580,6 +651,22 @@ class CalendarFragment : Fragment() {
 //        database.delete(tblName,null,null)
     }
 
+    private fun checkHolidayForCreateDB(year : Int, context: Context){
+        CoroutineScope(Dispatchers.Main).launch {
+            holidayRetrofit.getHoliday(context,year.toString())
+        }
+    }
+
+    private fun settingSelectedDate(selectDay :CalendarDay){
+        if (holidayOfDay[selectDay.day.toString()] !=null){
+            tvSelectedDate.text="${selectDay.year}.${selectDay.month}.${selectDay.day} [${holidayOfDay[selectDay.day.toString()]}]"
+            tvSelectedDate.setTextColor(Color.parseColor("#FF0000"))
+        }else{
+            tvSelectedDate.text="${selectDay.year}.${selectDay.month}.${selectDay.day}"
+            tvSelectedDate.setTextColor(Color.parseColor("#000000"))
+        }
+    }
+
 
     //일정 만들기 method
     fun notifydataChange(){
@@ -613,22 +700,28 @@ class CalendarFragment : Fragment() {
     //데코레이션 method
     private fun setDecorateForCalender(year:Int,month :Int, date : CalendarDay){
         calendarView.removeDecorators()
+        CoroutineScope(Dispatchers.Main).launch {
 //        searchTaskInDB(month,year)
-        searchTaskOfRepeatYearInDB()
-        searchTaskOfRepeatMonthInDB()
-        searchTaskOfRepeatWeekInDB()
-        searchTaskOfRepeatNoInDB()
-        calendarView.addDecorators(
-            RangeDayDecorator(date),
-            SundayDecorator(),
-            SaturdayDecorator(),
-            OutOfRangeDecorator(date),
-            SelectDecorator(context as Activity),
-            TaskDotDecorator(context as Activity,dayOfRepeatYear,month,"Year"),
-            TaskDotDecorator(context as Activity,dayOfRepeatMonth,month,"Month"),
-            TaskDotDecorator(context as Activity,dayOfRepeatWeek,month,"Week"),
-            TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No")
-        )
+            searchTaskOfRepeatYearInDB()
+            searchTaskOfRepeatMonthInDB()
+            searchTaskOfRepeatWeekInDB()
+            searchTaskOfRepeatNoInDB()
+            getHolidayList(year,month)
+            calendarView.addDecorators(
+                RangeDayDecorator(date),
+                SundayDecorator(),
+                SaturdayDecorator(),
+                TodayDecorator(CalendarDay.today()),
+                HolidayDecorator(context as Activity,holidayOfDay),
+                OutOfRangeDecorator(date),
+                SelectDecorator(context as Activity),
+                TaskDotDecorator(context as Activity,dayOfRepeatYear,month,"Year"),
+                TaskDotDecorator(context as Activity,dayOfRepeatMonth,month,"Month"),
+                TaskDotDecorator(context as Activity,dayOfRepeatWeek,month,"Week"),
+                TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No")
+            )
+        }
+
     }
 
     fun checkTBLNAME(){

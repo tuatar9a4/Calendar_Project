@@ -10,10 +10,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
@@ -96,10 +93,14 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
         val ivDeleteTask = itemView.findViewById<ImageView>(R.id.ivDeleteTask)
         val topViewOfTaskKind=itemView.findViewById<View>(R.id.topViewOfTaskKind);
         val tvIsContents = itemView.findViewById<TextView>(R.id.tvIsContents)
+        private val infoLayout=itemView.findViewById<LinearLayout>(R.id.infoLayout)
+        private val rlTaskBox=itemView.findViewById<RelativeLayout>(R.id.rlTaskBox)
 
         @SuppressLint("ResourceAsColor")
         fun bind(taskItem : ArrayList<TaskItem>, context: Context, position: Int){
-            dbHelper= TaskDatabaseHelper(context,"task.db",null,2);
+            infoLayout.visibility=View.GONE
+            rlTaskBox.clipToOutline=true
+            dbHelper= TaskDatabaseHelper(context,"task.db",null,3);
             database=dbHelper.readableDatabase
             if (taskItem[position].repeatY==1)topViewOfTaskKind.setBackgroundColor(context.getColor(R.color.yearTopColor))
             if (taskItem[position].repeatM==1)topViewOfTaskKind.setBackgroundColor(context.getColor(R.color.monthTopColor))
@@ -109,7 +110,7 @@ class DailyTaskAdapter(context :Context) : RecyclerView.Adapter<DailyTaskAdapter
             tvTaskTitle.text = taskItem[position].title
             tvIsContents.text =
                 if (taskItem[position].text.toString().equals("내용 없음"))"내용 없음"
-                else "<눌러서 자세히보기>\n${taskItem[position].text}"
+                else "${taskItem[position].text}"
             tvTaskDate.text = "Create Date : ${taskItem[position].month}.${taskItem[position].day}"
 
             val df : DateFormat =SimpleDateFormat("HH:mm")

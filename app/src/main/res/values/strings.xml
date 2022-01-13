@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">CalenderByDW</string>
+    <string name="app_name">CalendarWithWatch</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="appwidget_text">CalenderWidget</string>
+    <string name="appwidget_text">MonthWidget</string>
     <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">달력 위젯</string>
+    <string name="app_widget_description">This is an app widget description</string>
+
+
+    <string name="encoding_key">bcn9aniGJga%2B79cQyTcr1SyjSY6ayVNoVfO6syv3qYO%2F%2BW%2F7wCNtS9Z6yNocOwXLZYuPvPPHc5e3By3UcaquUQ%3D%3D</string>
+    <string name="decoding_key">bcn9aniGJga+79cQyTcr1SyjSY6ayVNoVfO6syv3qYO/+W/7wCNtS9Z6yNocOwXLZYuPvPPHc5e3By3UcaquUQ==</string>
 </resources>

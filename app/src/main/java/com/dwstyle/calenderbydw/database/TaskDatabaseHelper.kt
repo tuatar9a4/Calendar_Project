@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.dwstyle.calenderbydw.item.HolidayItem
 import com.dwstyle.calenderbydw.item.TaskItem
 
 class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDatabase.CursorFactory?,version: Int) : SQLiteOpenHelper(context,dbName,factory,version){
@@ -30,9 +31,23 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                "repeatW integer,"+
                "repeatN integer,"+
                "priority integer,"+
+               "isHoliday integer,"+
                "expectDay text"+
         ");"
         db?.let { it.execSQL(sql) }
+    }
+
+    fun createHolidayTbl(db: SQLiteDatabase,tblName : String){
+        val sql : String="CREATE TABLE if not exists ${tblName} ("+
+                "_id integer primary key autoincrement,"+
+                "year integer,"+
+                "month integer,"+
+                "day integer,"+
+                "title text,"+
+                "isRest integer"+
+                ");"
+        db?.let { it.execSQL(sql) }
+
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -42,6 +57,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
             }
 
         }catch ( e : SQLiteException){
+            Log.d("ehdnjs","sql exception ${e.localizedMessage}")
             db!!.execSQL("DROP TABLE IF EXISTS myTaskTbl");
             onCreate(db);
         }
@@ -50,7 +66,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     }
 
     private fun updateColumn(a_db : SQLiteDatabase){
-        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN title TEXT DEFAULT '' ")
+        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN isHoliday integer DEFAULT 0;")
     }
 
     companion object{
@@ -160,6 +176,36 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
             }catch (e : SQLiteException){
                 //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
 
+            }
+            return null
+        }
+
+        fun isExistsTable(database: SQLiteDatabase,tableName :String) : Boolean{
+            val cursor = database.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name ='${tableName}'" , null);
+            cursor.moveToFirst();
+
+            return cursor.count >0
+        }
+
+        fun createHoliday(holidayItem: HolidayItem,database : SQLiteDatabase,tblName :String){
+
+            val contentValue = ContentValues();
+            contentValue.put("year",holidayItem.year)
+            contentValue.put("month",holidayItem.month)
+            contentValue.put("day",holidayItem.day);
+            contentValue.put("title",holidayItem.title);
+            contentValue.put("isRest",holidayItem.isRest)
+
+            database.insert(tblName,null,contentValue);
+        }
+
+        fun searchHoliday(database : SQLiteDatabase,year : Int,month :Int,tblName :String) : Cursor?{
+            try {
+                var c2: Cursor =
+                    database.rawQuery("SELECT year,month,day,title FROM $tblName WHERE isRest == 1 AND year==${year} AND month==${month}", null);
+                return c2
+            }catch (e : SQLiteException){
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
             }
             return null
         }

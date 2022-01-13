@@ -1,5 +1,6 @@
 package com.dwstyle.calenderbydw.calendardacorator
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
@@ -23,6 +24,7 @@ class TaskDotDecorator : DayViewDecorator {
 
 
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     constructor(context: Activity, taskList : HashSet<String>, month :Int, type :String){
         this.taskList=taskList
         this.context=context

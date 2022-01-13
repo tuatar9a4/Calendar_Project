@@ -3,7 +3,9 @@ package com.dwstyle.calenderbydw.adapters
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
 import android.view.View
@@ -181,6 +183,9 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setTextColor(R.id.tvDate, Color.parseColor("#000000"))
                             }
                         }
+                        if (holidayMap.contains(str[2])){
+                            rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
+                        }
                     }
                 }
                 //선택 배경
@@ -210,21 +215,59 @@ class WidgetAdapter : RemoteViewsService(){
                     val temp = taskStr.split("&")
                     when (temp.size) {
                         1 -> {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
+                            if (temp[0].startsWith("**")){
+                                rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
+                                rv.setTextColor(R.id.tvTask1,Color.WHITE)
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
+                            }else{
+                                rv.setTextViewText(R.id.tvTask1, temp[0])
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+
+                            }
                             rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
                         }
                         2 -> {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
+                            if (temp[0].startsWith("**")){
+                                rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
+                                rv.setTextColor(R.id.tvTask1,Color.WHITE)
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
+                            }else{
+                                rv.setTextViewText(R.id.tvTask1, temp[0])
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+                            }
+                            if (temp[1].startsWith("**")){
+                                rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
+                                rv.setTextColor(R.id.tvTask2,Color.WHITE)
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.RED);
+                            }else{
+                                rv.setTextViewText(R.id.tvTask2, temp[1])
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.WHITE);
+                            }
+
                             rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                            rv.setTextViewText(R.id.tvTask2, temp[1])
                             rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
                         }
                         else -> {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
-                            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                            rv.setTextViewText(R.id.tvTask2, temp[1])
-                            rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                            if (temp[0].startsWith("**")){
+                                rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
+                                rv.setTextColor(R.id.tvTask1,Color.WHITE)
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
+                            }else{
+                                rv.setTextViewText(R.id.tvTask1, temp[0])
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+                            }
+                            if (temp[1].startsWith("**")){
+                                rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
+                                rv.setTextColor(R.id.tvTask2,Color.WHITE)
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.RED);
+                            }else{
+                                rv.setTextViewText(R.id.tvTask2, temp[1])
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.WHITE);
+                            }
+
                             rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
+                            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+                            rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
                             rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
                         }
                     }
@@ -257,15 +300,44 @@ class WidgetAdapter : RemoteViewsService(){
 
         private fun getTaskInfo( monthDayList : List<String>){
             taskMap.clear()
-            dbHelper= TaskDatabaseHelper(context,"task.db",null,2)
+            dbHelper= TaskDatabaseHelper(context,"task.db",null,3)
             database=dbHelper.readableDatabase
             getYearTask(database,monthDayList)
             getMonthTask(database,monthDayList)
             getDayTask(database,monthDayList)
             getWeekTask(database,monthDayList)
+            getCheckHoliday(database,monthDayList)
         }
 
-        private fun getCheckHoliday(database: SQLiteDatabase){
+        private fun getCheckHoliday(database: SQLiteDatabase,monthDayList : List<String>){
+            val holidayCursor : Cursor? =TaskDatabaseHelper.searchHoliday(database,selectMonth.year,selectMonth.monthOfYear,"holiday${selectMonth.year}Tbl")
+            holidayMap.clear()
+            holidayCursor?.let {
+                while (it.moveToNext()){
+                    if (it.getInt(2).toString().length==1){
+                        holidayMap.add("0${it.getInt(2).toString()}")
+                    }else{
+                        holidayMap.add(it.getInt(2).toString())
+                    }
+                    val tempMonth :String= if ((it.getInt(it.getColumnIndex("month")).toString().length)==1 )
+                        "0${(it.getInt(it.getColumnIndex("month")).toString())}" else (it.getInt(it.getColumnIndex("month")).toString())
+                    val tempDay :String= if ((it.getInt(it.getColumnIndex("day")).toString().length)==1 )
+                        "0${(it.getInt(it.getColumnIndex("day")).toString())}" else (it.getInt(it.getColumnIndex("day")).toString())
+                    for (a in monthDayList){
+                        val split =a.split(".")
+                        if (split[1]==tempMonth && split[2]==tempDay){
+                            val tempStr1 ="${split[0]}.${split[1]}.${tempDay}"
+                            val tempStr2 = it.getString(it.getColumnIndex("title"))
+                            if (taskMap[tempStr1] ==null){
+                                taskMap[tempStr1] = "**${tempStr2}"
+                            }else{
+                                taskMap[tempStr1] = "**${tempStr2}&${taskMap[tempStr1]}"
+                            }
+                        }
+                    }
+                }
+            }
+
 
         }
 

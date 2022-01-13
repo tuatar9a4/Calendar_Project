@@ -57,7 +57,7 @@ class MainActivity : Activity() {
     }
 
     fun openTheDB(){
-        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,2)
+        dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,3)
         database=dbHelper.readableDatabase
     }
 

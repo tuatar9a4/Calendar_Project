@@ -64,7 +64,7 @@ class TaskListFragment : Fragment() {
         // Inflate the layout for this fragment
         val view= inflater.inflate(R.layout.fragment_task_list,container,false)
         initView(view)
-        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,2)
+        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,3)
 
         selectedCalendarDay?.let {
             tvDay.text="${it.year}.${it.month}.${it.day}"
