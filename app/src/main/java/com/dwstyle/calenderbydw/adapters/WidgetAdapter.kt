@@ -43,6 +43,8 @@ class WidgetAdapter : RemoteViewsService(){
         private lateinit var selectMonth : DateTime
         //일정 hashMap
         private val taskMap = HashMap<String,String>()
+        //휴일 HashSet
+        private val holidayMap = HashSet<String>()
 
         private var todayDate=""
         private var selectedDate : String? =null
@@ -261,6 +263,10 @@ class WidgetAdapter : RemoteViewsService(){
             getMonthTask(database,monthDayList)
             getDayTask(database,monthDayList)
             getWeekTask(database,monthDayList)
+        }
+
+        private fun getCheckHoliday(database: SQLiteDatabase){
+
         }
 
         private fun getYearTask(database : SQLiteDatabase,monthDayList:List<String>){
