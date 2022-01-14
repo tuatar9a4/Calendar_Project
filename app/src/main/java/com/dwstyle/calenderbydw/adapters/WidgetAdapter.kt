@@ -221,7 +221,7 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
                             }else{
                                 rv.setTextViewText(R.id.tvTask1, temp[0])
-                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",Color.parseColor("#00FFFFFF"));
 
                             }
                             rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
@@ -233,7 +233,7 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
                             }else{
                                 rv.setTextViewText(R.id.tvTask1, temp[0])
-                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",Color.parseColor("#00FFFFFF"));
                             }
                             if (temp[1].startsWith("**")){
                                 rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
@@ -241,7 +241,7 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.RED);
                             }else{
                                 rv.setTextViewText(R.id.tvTask2, temp[1])
-                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.WHITE);
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",Color.parseColor("#00FFFFFF"));
                             }
 
                             rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
@@ -254,7 +254,7 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.RED);
                             }else{
                                 rv.setTextViewText(R.id.tvTask1, temp[0])
-                                rv.setInt(R.id.tvTask1, "setBackgroundColor",android.graphics.Color.WHITE);
+                                rv.setInt(R.id.tvTask1, "setBackgroundColor",Color.parseColor("#00FFFFFF"));
                             }
                             if (temp[1].startsWith("**")){
                                 rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
@@ -262,7 +262,7 @@ class WidgetAdapter : RemoteViewsService(){
                                 rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.RED);
                             }else{
                                 rv.setTextViewText(R.id.tvTask2, temp[1])
-                                rv.setInt(R.id.tvTask2, "setBackgroundColor",android.graphics.Color.WHITE);
+                                rv.setInt(R.id.tvTask2, "setBackgroundColor",Color.parseColor("#00FFFFFF"));
                             }
 
                             rv.setTextViewText(R.id.tvTaskCnt,"+${(temp.size-2)}")
