@@ -6,23 +6,12 @@
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\dowon\.android\avd\Wear_OS_Round_API_30_1.avd" />
+            <type value="SERIAL_NUMBER" />
+            <value value="R3CM70FE6XH" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <targetSelectedWithDropDown>
-      <Target>
-        <type value="QUICK_BOOT_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\dowon\.android\avd\Wear_OS_Round_API_30_1.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-    </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2022-01-14T08:24:42.542486500Z" />
+    <timeTargetWasSelectedWithDropDown value="2022-01-14T08:32:28.602981Z" />
   </component>
 </project>
