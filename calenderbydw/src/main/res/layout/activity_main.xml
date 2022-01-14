@@ -14,11 +14,32 @@
         android:layout_height="match_parent"
         app:boxedEdges="right|left"
       >
-        <androidx.recyclerview.widget.RecyclerView
+        <TextView
+            android:id="@+id/tvTopTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이번달"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            />
+        <androidx.wear.widget.WearableRecyclerView
             android:id="@+id/rcTask"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:layout_marginTop="30dp"
             android:scrollbars="none"
             />
     </FrameLayout>
+    <Button
+        android:id="@+id/btnPre"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_vertical|left"
+        />
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_vertical|right"
+        />
 </androidx.wear.widget.BoxInsetLayout>

@@ -25,7 +25,7 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val view :View = inflater.inflate(R.layout.task_list_item_layout,parent,false)
 
-        return TaskListVH(view,mListener)
+        return TaskListVH(view,mListener,mListener2)
     }
 
     override fun onBindViewHolder(holder: TaskListVH, position: Int) {
@@ -47,23 +47,33 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
         fun OnDeleteClick(v :View,item: TaskItem,pos: Int)
     }
 
-    fun setOnDeleteItemClickListener(listener : OnDeleteClickListener){
+    var mListener2: OnChangeClickListener? =null
+
+    interface OnChangeClickListener{
+        fun OnChangeClick(v: View, item : TaskItem , pos : Int)
+    }
+
+    fun setOnDeleteItemClickListener(listener : OnDeleteClickListener,listener2 : OnChangeClickListener){
         this.mListener=listener
+        this.mListener2=listener2
 
     }
 
     class TaskListVH: RecyclerView.ViewHolder{
-        val viewTaskType:View =itemView.findViewById(R.id.viewTaskType);
-        val tvTitle:TextView  =itemView.findViewById(R.id.tvTitle)
-        val tvContents:TextView =itemView.findViewById(R.id.tvContents)
-        val tvCreateDate:TextView=itemView.findViewById(R.id.tvCreateDate);
-        val tvTaskTime:TextView =itemView.findViewById(R.id.tvTaskTime)
-        val ivDeleteTask:ImageView = itemView.findViewById(R.id.ivDeleteTask)
-        val rlTaskLayout:RelativeLayout =itemView.findViewById(R.id.rlTaskLayout)
+        private val viewTaskType:View =itemView.findViewById(R.id.viewTaskType);
+        private val tvTitle:TextView  =itemView.findViewById(R.id.tvTitle)
+        private val tvContents:TextView =itemView.findViewById(R.id.tvContents)
+        private val tvCreateDate:TextView=itemView.findViewById(R.id.tvCreateDate);
+        private val tvTaskTime:TextView =itemView.findViewById(R.id.tvTaskTime)
+        private val ivDeleteTask:ImageView = itemView.findViewById(R.id.ivDeleteTask)
+        private val rlTaskLayout:RelativeLayout =itemView.findViewById(R.id.rlTaskLayout)
+        private val ivChangeTask =itemView.findViewById<ImageView>(R.id.ivChangeTask)
 
         private var mListener :OnDeleteClickListener? =null
-        constructor(itemView: View,mListener : OnDeleteClickListener?)  : super(itemView) {
+        private var mListener2 :OnChangeClickListener? =null
+        constructor(itemView: View,mListener : OnDeleteClickListener?,mListener2 : OnChangeClickListener?)  : super(itemView) {
             this.mListener=mListener ?: null
+            this.mListener2=mListener2 ?: null
         }
 
         fun bind(taskItem: TaskItem,pos :Int,context: Context){
@@ -82,6 +92,14 @@ class TaskListOfSelectDateAdapter(private val context:Context) : RecyclerView.Ad
                 if (pos !=-1){
                     mListener?.OnDeleteClick(itemView,taskItem,pos)
                 }
+            }
+
+            ivChangeTask.setOnClickListener {
+                val pos=bindingAdapterPosition
+                if (pos != -1){
+                    mListener2?.OnChangeClick(itemView,taskItem,pos)
+                }
+
             }
 
             val linearLayout = rlTaskLayout.apply {

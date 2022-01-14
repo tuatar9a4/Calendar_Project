@@ -1,22 +1,36 @@
 package com.dwstyle.calenderbydw
 
 import android.app.Activity
+import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.wear.widget.WearableLinearLayoutManager
+import androidx.wear.widget.WearableRecyclerView
 import com.dwstyle.calenderbydw.adapters.MyTaskAdapter
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.utils.TaskRecyclerViewDecoration
 import org.joda.time.DateTime
+import java.util.*
+import kotlin.Comparator
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 class MainActivity : Activity() {
 
 
 //    private lateinit var tileUiClient :TileUiClient
-    private lateinit var rcTask : RecyclerView
+    private lateinit var rcTask : WearableRecyclerView
+    private lateinit var btnPre : Button
+    private lateinit var btnNext : Button
+    private lateinit var tvTopTitle :TextView
 
     private lateinit var dbHelper: TaskDatabaseHelper
     private lateinit var database: SQLiteDatabase
@@ -26,18 +40,53 @@ class MainActivity : Activity() {
 
     private lateinit var taskAdapter :MyTaskAdapter
 
+    private final val settingMillis : String ="SETTINGMILLS"
+    private var fromWidget =false;
+    private lateinit var currentDate :DateTime
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("도원","WearApp Open ")
+        if (intent.getStringExtra("widgetMonth")!=null){
+            if (intent.getStringExtra("widgetMonth")=="fromWidget"){
+                fromWidget=true
+            }
+        }else{
+            fromWidget=false
+        }
+        var initMillis=0L
+        if (fromWidget){
+            val prss=applicationContext.getSharedPreferences("sharedData", MODE_PRIVATE)
+            if (prss.getLong(settingMillis,0)==0L){
+                initMillis=System.currentTimeMillis()
+            }else{
+                initMillis=prss.getLong(settingMillis,0)
+            }
+        }else{
+            initMillis=System.currentTimeMillis()
+        }
         initView()
         openTheDB()
-        getTodayToSeven()
 
+        btnPre.setOnClickListener {
+            currentDate=currentDate.minusWeeks(1)
+            getTodayToSeven(currentDate.millis)
+        }
+
+        btnNext.setOnClickListener {
+            currentDate=currentDate.plusWeeks(1)
+            getTodayToSeven(currentDate.millis)
+        }
         taskAdapter=MyTaskAdapter(this,currentPlusSevenDate,taskLists)
         rcTask.adapter=taskAdapter
 
+        getTodayToSeven(initMillis)
         rcTask.addItemDecoration(TaskRecyclerViewDecoration(this))
+        rcTask.apply {
+            isCircularScrollingGestureEnabled = true
+            bezelFraction = 0.5f
+            scrollDegreesPerScreen = 90f
+        }
 //        타일 새로 고침
 //        TileService.getUpdater(applicationContext).requestUpdate(CalendarTile::class.java)
 //        val rootLayout = findViewById<FrameLayout>(R.id.tile_container)
@@ -52,7 +101,35 @@ class MainActivity : Activity() {
     //view 들 초기화
     fun initView(){
         rcTask=findViewById(R.id.rcTask)
-        rcTask.layoutManager=LinearLayoutManager(this)
+        rcTask.layoutManager=WearableLinearLayoutManager(this,object  :WearableLinearLayoutManager.LayoutCallback(){
+            private var progressToCenter: Float = 0f
+
+            override fun onLayoutFinished(child: View?, parent: RecyclerView?) {
+                if (parent==null){
+                    return
+                }
+                child?.apply {
+                    // Figure out % progress from top to bottom
+                    val centerOffset = height.toFloat() / 2.0f / parent.height.toFloat()
+                    val yRelativeToCenterOffset = y / parent.height + centerOffset
+
+                    // Normalize for center
+                    progressToCenter = Math.abs(0.5f - yRelativeToCenterOffset)
+                    // Adjust to the maximum scale
+                    progressToCenter = Math.min(progressToCenter, 0.65f)
+
+                    scaleX = 1 - progressToCenter
+                    scaleY = 1 - progressToCenter
+
+                }
+            }
+
+
+        })
+
+        tvTopTitle=findViewById(R.id.tvTopTitle)
+        btnPre=findViewById(R.id.btnPre)
+        btnNext=findViewById(R.id.btnNext)
 
     }
 
@@ -62,22 +139,26 @@ class MainActivity : Activity() {
     }
 
     //오늘 포함 7일 날짜 알기
-    fun getTodayToSeven(){
+    fun getTodayToSeven(initMillis : Long){
         currentPlusSevenDate.clear()
         taskLists.clear()
+        currentDate =DateTime(initMillis)
+        Log.d("도원","WEEK_OF_MONTH : ${currentDate.monthOfYear()}월 ${currentDate.toCalendar(Locale.getDefault()).get(Calendar.WEEK_OF_MONTH)}주")
         //현재 시간에 해당하는 날짜 +7
-        currentPlusSevenDate.add(DateTime(System.currentTimeMillis()).toString("yyyy.MM.dd"))
-        getTaskFromDateVerWeek(DateTime(System.currentTimeMillis()).toString("yyyy.MM.dd.E"))
+        currentPlusSevenDate.add(currentDate.toString("yyyy.MM.dd.E"))
+        getTaskFromDateVerWeek(currentDate.toString("yyyy.MM.dd.E"))
         for (a in 1..6){
-            currentPlusSevenDate.add(DateTime(System.currentTimeMillis()).plusDays(a).toString("yyyy.MM.dd"))
-            getTaskFromDateVerWeek(DateTime(System.currentTimeMillis()).plusDays(a).toString("yyyy.MM.dd.E"))
+            currentPlusSevenDate.add(currentDate.plusDays(a).toString("yyyy.MM.dd.E"))
+            getTaskFromDateVerWeek(currentDate.plusDays(a).toString("yyyy.MM.dd.E"))
         }
 
-        getTaskFromDate(DateTime(System.currentTimeMillis()).toString("yyyy.MM.dd.E"))
+        getTaskFromDate(DateTime(initMillis).toString("yyyy.MM.dd.E"))
 
         taskLists.toSortedMap(Comparator { t, t2 -> if(t>t2) 1 else 2 })
         Log.d("도원","currentPlusSevenDate : ${currentPlusSevenDate}")
         Log.d("도원","taskLists : ${taskLists}")
+        taskAdapter.setItems(currentPlusSevenDate,taskLists)
+        tvTopTitle.text="${currentDate.monthOfYear}월 ${currentDate.toCalendar(Locale.getDefault()).get(Calendar.WEEK_OF_MONTH)}주 중"
 
     }
 
@@ -166,15 +247,22 @@ class MainActivity : Activity() {
     }
 
     fun weekStrTransInt(weekStr : String) :Int{
-        when(weekStr){
-            "Sun"-> return 7//SUN
-            "Mon"-> return 1 //MON
-            "Tue"-> return 2 //Tue
-            "Wen"-> return 3 //WEN
-            "Thu"-> return 4 //THU
-            "Fri"-> return 5 //FRI
-            "Sat"-> return 6 //SAT
-            else -> return 0
+        return when(weekStr){
+            "Sun"-> 7//SUN
+            "일"  -> 7//SUN
+            "Mon"-> 1 //MON
+            "월" -> 1
+            "Tue"-> 2 //Tue
+            "화"-> 2 //Tue
+            "Wen"-> 3 //WEN
+            "수"-> 3 //WEN
+            "Thu"-> 4 //THU
+            "목"-> 4 //THU
+            "Fri"-> 5 //FRI
+            "금"-> 5 //FRI
+            "Sat"-> 6 //SAT
+            "토"-> 6 //SAT
+            else -> 0
         }
 
     }

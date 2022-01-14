@@ -1,6 +1,7 @@
 package com.dwstyle.calenderbydw.database
 
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
@@ -49,6 +50,30 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
 
     fun createMonthTBL(tblName:String){
         this.tblName=tblName;
+    }
+
+    companion object {
+
+
+        fun isExistsTable(database: SQLiteDatabase,tableName :String) : Boolean{
+            val cursor = database.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name ='${tableName}'" , null);
+            cursor.moveToFirst();
+
+            return cursor.count >0
+        }
+
+
+        fun searchHoliday(database : SQLiteDatabase,year : Int,month :Int,tblName :String) : Cursor?{
+            try {
+                var c2: Cursor =
+                    database.rawQuery("SELECT year,month,day,title FROM $tblName WHERE isRest == 1 AND year==${year} AND month==${month}", null);
+                return c2
+            }catch (e : SQLiteException){
+                //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
+            }
+            return null
+        }
+
     }
 
 

@@ -16,8 +16,8 @@ import com.dwstyle.calenderbydw.R
 
 class MyTaskAdapter(
     private  val context : Context,
-    private  val taskDate :  ArrayList<String>,
-    private  val taskLists :HashMap<String,ArrayList<String>>) : RecyclerView.Adapter<MyTaskAdapter.MyTaskAdapterVH>() {
+    private  var taskDate :  ArrayList<String>,
+    private  var taskLists :HashMap<String,ArrayList<String>>) : RecyclerView.Adapter<MyTaskAdapter.MyTaskAdapterVH>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyTaskAdapterVH {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.task_item_layout,parent,false)
@@ -34,6 +34,12 @@ class MyTaskAdapter(
         return taskDate.size
     }
 
+    fun setItems(taskDate :  ArrayList<String>,taskLists :HashMap<String,ArrayList<String>>){
+        this.taskDate=taskDate
+        this.taskLists=taskLists
+        notifyDataSetChanged()
+    }
+
 
     class MyTaskAdapterVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -41,6 +47,14 @@ class MyTaskAdapter(
         val llTaskTitleBox=itemView.findViewById<LinearLayout>(R.id.llTaskTitleBox)
 
         fun bind(item : String,pos :Int,taskLists :HashMap<String,ArrayList<String>>,context :Context){
+            val tempStr =item.split(".")
+            if (tempStr[3]=="일" || tempStr[3]=="Sun"){
+                tvTaskDate.setTextColor(context.getColor(R.color.sunColor))
+            }else if (tempStr[3]=="토" || tempStr[3]=="Sat"){
+                tvTaskDate.setTextColor(context.getColor(R.color.satColor))
+            }else{
+                tvTaskDate.setTextColor(Color.parseColor("#FFFFFF"))
+            }
             tvTaskDate.text = (item)
             llTaskTitleBox.removeAllViews()
             if (taskLists.containsKey(item)){
@@ -56,7 +70,7 @@ class MyTaskAdapter(
             }else{
                 val textView = TextView(context)
                 textView.setTextColor(Color.parseColor("#FFFFFF"))
-                textView.text="일정이 없네요~"
+                textView.text="No Scheduler"
                 textView.gravity=Gravity.CENTER
                 llTaskTitleBox.addView(textView)
             }

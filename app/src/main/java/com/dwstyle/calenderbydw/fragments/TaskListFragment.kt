@@ -2,6 +2,7 @@ package com.dwstyle.calenderbydw.fragments
 
 import android.app.DatePickerDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
@@ -15,8 +16,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.dwstyle.calenderbydw.CreateTaskActivity
 import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.adapters.DateOfListAdapter
 import com.dwstyle.calenderbydw.adapters.TaskListOfSelectDateAdapter
@@ -47,6 +53,9 @@ class TaskListFragment : Fragment() {
 
     private var selectedCalendarDay : CalendarDay?=null
 
+    private lateinit var resultLauncher : ActivityResultLauncher<Intent>
+
+    private var changePos =-1
 
     private lateinit var dbHelper : TaskDatabaseHelper
     private lateinit var database : SQLiteDatabase
@@ -111,7 +120,38 @@ class TaskListFragment : Fragment() {
                     dialog.dismiss()
                 })
             }
+        }, object : TaskListOfSelectDateAdapter.OnChangeClickListener{
+
+            override fun OnChangeClick(v: View, item: TaskItem, pos: Int) {
+                val intent = Intent(context, CreateTaskActivity::class.java)
+                intent.putExtra("type","change")
+                intent.putExtra("taskForChange",item)
+                resultLauncher.launch(intent)
+                changePos=pos
+
+            }
+
         })
+
+        resultLauncher=registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultCallback {
+                //Task 등록 데이터 받는 곳
+                if (it.resultCode == AppCompatActivity.RESULT_OK){
+                    val intent = it.data
+//                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                    if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
+                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                        searchTaskOfSelectedDay(selectedCalendarDay!!)
+//                        if (changePos!=-1){
+//                            dateOfListAdapter.notifyItemChanged(changePos)
+//                        }
+                        context?.let {
+                            WidgetUtils.updateWidgetData(it)
+                        }
+                    }
+                }
+            })
 
         searchDate.setOnClickListener{
             val datePickerDialog = DatePickerDialog(view.context, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->

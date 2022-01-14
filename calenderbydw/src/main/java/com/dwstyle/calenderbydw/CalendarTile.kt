@@ -1,10 +1,12 @@
 package com.dwstyle.calenderbydw
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.os.IBinder
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.*
@@ -34,10 +36,11 @@ class CalendarTile : TileService(){
     private val dotDaySetM =HashSet<String>()
     private val dotDaySetN =HashSet<String>()
     private val dotDaySetW =ArrayList<String>()
+    private val holidaySet =HashSet<String>()
     private var weekInt =0
     lateinit var sharedPreferences:SharedPreferences
     private final val settingMillis : String ="SETTINGMILLS"
-
+    private var clickType= "none"
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
 
         sharedPreferences =applicationContext.getSharedPreferences("sharedData", Context.MODE_PRIVATE)
@@ -49,17 +52,27 @@ class CalendarTile : TileService(){
         Log.d("도원","requestPareams : "+requestParams.state?.lastClickableId)
         if (requestParams.state?.lastClickableId!=null){
             if (requestParams.state!!.lastClickableId.equals("Minus")){
-                getCalendar("Minus")
+//                getCalendar("Minus")
+                clickType="Minus"
             }else if (requestParams.state!!.lastClickableId.equals("Plus")){
-                getCalendar("Plus")
+//                getCalendar("Plus")
+                clickType="Plus"
             }else if (requestParams.state!!.lastClickableId.equals("Today")){
-                getCalendar("Today")
+//                getCalendar("Today")
+                clickType="Today"
+            }else if( requestParams.state!!.lastClickableId=="goToMain"){
+                val intent =Intent(applicationContext,MainActivity::class.java)
+                intent.putExtra("widgetMonth","fromWidget")
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                clickType="none"
             }else{
-                getCalendar("none")
+                Log.d("도원","requestParams.state?.lastClickableId !=null |"+requestParams.state?.lastClickableId)
+                clickType="none"
+//                getCalendar("none")
             }
-        }else{
-            getCalendar("none")
         }
+        Log.d("도원","ㅇㅇㅇ");
         val tile = TileBuilders.Tile.Builder()
             .setResourcesVersion(RESOURCES_VERSION)
             .setFreshnessIntervalMillis(1000*60*60)
@@ -114,9 +127,10 @@ class CalendarTile : TileService(){
 
 
     // 타일의 구성을 위한 method
-    public fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
+    fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
         //달력 구성을 위한 정보를 미리 가져옴
-
+        Log.d("도원","clickType : "+clickType)
+        getCalendar(clickType)
         // Column : 타일의 구성 요소를 열(세로) 로 정렬
         // 첫 addContent : (Spacer) 상단에서 30f 만큼의 공간을 만든다 / 워치가 원형이다 보니 중앙으로 구성을 맞추기 위함
         // 둘 addContent : (Text) 글자를 쓰는 Builder / TextAlignmentProp 를 사용하여 text 를 중앙 정렬한다.
@@ -157,7 +171,7 @@ class CalendarTile : TileService(){
                         .setModifiers(ModifiersBuilders.Modifiers.Builder()
                             .setClickable(
                                 ModifiersBuilders.Clickable.Builder()
-                                    .setId("Plus")
+                                    .setId("Minus")
                                     .setOnClick(ActionBuilders.LoadAction.Builder().build())
                                     .build()).build()).build()
                     )
@@ -270,10 +284,15 @@ class CalendarTile : TileService(){
             dotContainer=LayoutElementBuilders.Row.Builder().setWidth(wrap())
 //            isItem = count==3
             //날짜의 색상  먼저 전달인지 확인하고 그 후 오늘인지 다음으로 일요일 토요일 평일 순으로 확인
+            Log.d("도원","-----------------------------")
+            Log.d("도원","holidaySet  : ${holidaySet}")
+            Log.d("도원","strMonthDay  : ${strMonthDay}")
+
             var dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
                                 else if (strMonthDay.equals(currentDate)) R.color.toDayColor
                                 else if (strs[2].equals("Sun"))R.color.sunColor
                                 else if (strs[2].equals("Sat"))R.color.satColor
+                                else if (holidaySet.contains(strMonthDay)) R.color.sunColor
                                 else R.color.currnetMonthDayColor
             isDot=false
             weekInt=0
@@ -378,18 +397,23 @@ class CalendarTile : TileService(){
             //한칸을 다 채우면 Clomu(열) 세로 에 집어 넣는다.
             count++;
             if (count==7){
-                calendarLayout.addContent(calendarDayRow.build())
+                calendarLayout.addContent(calendarDayRow.setModifiers(ModifiersBuilders.Modifiers.Builder()
+                    .setClickable(
+                        ModifiersBuilders.Clickable.Builder()
+                            .setId("goToMain")
+                            .setOnClick(ActionBuilders.LoadAction.Builder().build())
+                            .build()).build()).build())
                 count=0
             }
         }
         return calendarLayout.build()
     }
 
-    private lateinit var calendarDate : String
-    private lateinit var firstDayOfMonth: String
-    private lateinit var allDayOfMonth : List<String>
-    private lateinit var currentDate :String
-    private lateinit var currentDate1 :String
+    private var calendarDate : String =""
+    private var firstDayOfMonth: String =""
+    private var allDayOfMonth : List<String> =ArrayList<String>()
+    private var currentDate :String =""
+    private var currentDate1 :String =""
 
     private fun getCalendar(type :String) {
 
@@ -414,7 +438,7 @@ class CalendarTile : TileService(){
         currentDate = DateTime(System.currentTimeMillis()).toString("MM.dd")
         currentDate1 = System.currentTimeMillis().toString()
 
-        getDatDayFromDatabase(calendarDate.split(".").get(0))
+        getDatDayFromDatabase(calendarDate.split(".").get(0),firstDayOfMonth.split(".")[1])
 
 //        Log.d("도원","이번달 calendarDate : $calendarDate // test : $firstDayOfMonth //test2 : $allDayOfMonth  // ")
 //        Log.d("도원","이번달 currentDate : $currentDate ")
@@ -422,7 +446,7 @@ class CalendarTile : TileService(){
     }
 
     //날짜를 얻어 봅시다
-    private fun getDatDayFromDatabase(year :String){
+    private fun getDatDayFromDatabase(year :String,month:String){
         dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,3);
         database=dbHelper.readableDatabase
 
@@ -430,6 +454,7 @@ class CalendarTile : TileService(){
         searchTaskOfRepeatMonthInDB()
         searchTaskOfRepeatWeekInDB()
         searchTaskOfRepeatNoInDB(year)
+        searchHolidayInDB(year.toInt(),month.toInt())
     }
 
     private fun searchTaskOfRepeatYearInDB(){
@@ -509,6 +534,23 @@ class CalendarTile : TileService(){
         }catch (e : SQLiteException){
             //TBL 이 없는거면 읽어올 데이터도 없다는 것이니 그냥 패쓰해도 문제 없을듯
         }
+    }
+
+    //공휴일 가져오기
+    private fun searchHolidayInDB(year : Int,month: Int ){
+        holidaySet.clear()
+        try{
+            if (TaskDatabaseHelper.isExistsTable(database,"holiday${year}Tbl")){
+                val  c2 : Cursor? = TaskDatabaseHelper.searchHoliday(database,year,month,"holiday${year}Tbl")
+                c2?.let {
+                    while (it.moveToNext()){
+                        holidaySet.add("${it.getInt(1)}.${it.getInt(2)}")
+                    }
+                }
+            }
+        }catch (e : SQLiteException){
+        }
+
     }
 
 

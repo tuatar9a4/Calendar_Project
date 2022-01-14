@@ -58,8 +58,8 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.wear:wear:1.1.0'
-    implementation "androidx.wear.tiles:tiles:1.0.0-beta01"
-    debugImplementation "androidx.wear.tiles:tiles-renderer:1.0.0-beta01"
+    implementation "androidx.wear.tiles:tiles:1.0.0"
+    debugImplementation "androidx.wear.tiles:tiles-renderer:1.0.0"
 
     implementation 'com.github.prolificinteractive:material-calendarview:2.0.1'
     implementation 'joda-time:joda-time:2.10.6'
