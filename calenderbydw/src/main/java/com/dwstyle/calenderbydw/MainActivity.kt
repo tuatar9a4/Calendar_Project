@@ -1,14 +1,20 @@
 package com.dwstyle.calenderbydw
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.view.InputDeviceCompat
+import androidx.core.view.MotionEventCompat
+import androidx.core.view.ViewConfigurationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.wear.widget.WearableLinearLayoutManager
@@ -22,6 +28,7 @@ import kotlin.Comparator
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import kotlin.math.roundToInt
 
 class MainActivity : Activity() {
 
@@ -31,6 +38,7 @@ class MainActivity : Activity() {
     private lateinit var btnPre : Button
     private lateinit var btnNext : Button
     private lateinit var tvTopTitle :TextView
+    private lateinit var tvToday :TextView
 
     private lateinit var dbHelper: TaskDatabaseHelper
     private lateinit var database: SQLiteDatabase
@@ -43,6 +51,7 @@ class MainActivity : Activity() {
     private final val settingMillis : String ="SETTINGMILLS"
     private var fromWidget =false;
     private lateinit var currentDate :DateTime
+    private lateinit var toDayDateTime : DateTime
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -65,6 +74,7 @@ class MainActivity : Activity() {
         }else{
             initMillis=System.currentTimeMillis()
         }
+        toDayDateTime=DateTime(System.currentTimeMillis())
         initView()
         openTheDB()
 
@@ -83,10 +93,27 @@ class MainActivity : Activity() {
         getTodayToSeven(initMillis)
         rcTask.addItemDecoration(TaskRecyclerViewDecoration(this))
         rcTask.apply {
-            isCircularScrollingGestureEnabled = true
             bezelFraction = 0.5f
             scrollDegreesPerScreen = 90f
         }
+
+        rcTask.setOnGenericMotionListener(View.OnGenericMotionListener { view, ev ->
+            if (ev.action == MotionEvent.ACTION_SCROLL &&
+                ev.isFromSource(InputDeviceCompat.SOURCE_ROTARY_ENCODER)
+            ) {
+                val delta = -ev.getAxisValue(MotionEventCompat.AXIS_SCROLL) *
+                        ViewConfigurationCompat.getScaledVerticalScrollFactor(
+                            ViewConfiguration.get(applicationContext), applicationContext
+                        )
+//                // Swap these axes to scroll horizontally instead
+//                view.scrollBy(0, delta.roundToInt()/2)
+                rcTask.smoothScrollBy(0,delta.roundToInt())
+                true
+            } else {
+                false
+            }
+         })
+
 //        타일 새로 고침
 //        TileService.getUpdater(applicationContext).requestUpdate(CalendarTile::class.java)
 //        val rootLayout = findViewById<FrameLayout>(R.id.tile_container)
@@ -101,6 +128,7 @@ class MainActivity : Activity() {
     //view 들 초기화
     fun initView(){
         rcTask=findViewById(R.id.rcTask)
+        rcTask.requestFocus()
         rcTask.layoutManager=WearableLinearLayoutManager(this,object  :WearableLinearLayoutManager.LayoutCallback(){
             private var progressToCenter: Float = 0f
 
@@ -128,6 +156,7 @@ class MainActivity : Activity() {
         })
 
         tvTopTitle=findViewById(R.id.tvTopTitle)
+        tvToday=findViewById(R.id.tvToday)
         btnPre=findViewById(R.id.btnPre)
         btnNext=findViewById(R.id.btnNext)
 
@@ -160,6 +189,7 @@ class MainActivity : Activity() {
         taskAdapter.setItems(currentPlusSevenDate,taskLists)
         tvTopTitle.text="${currentDate.monthOfYear}월 ${currentDate.toCalendar(Locale.getDefault()).get(Calendar.WEEK_OF_MONTH)}주 중"
 
+        tvToday.text="today(${toDayDateTime.year}.${toDayDateTime.monthOfYear}.${toDayDateTime.dayOfMonth})"
     }
 
     //특정 날짜에 해당하는 Task 알기
@@ -175,35 +205,36 @@ class MainActivity : Activity() {
         getTaskRepeatW(dateStr)
 
     }
-
+    fun settingMonthDay(str:Int)=if (str.toString().length==1) "0${str}" else "${str}"
     //년도 반복에서 얻기
     fun getTaskRepeatY(year:String,month:String){
-        val corsor =database.rawQuery("SELECT month,day,text FROM myTaskTbl WHERE RepeatY==1 AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT month,day,title FROM myTaskTbl WHERE RepeatY==1 AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
-            if (taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]==null){
-                taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]=
+
+            if (taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]==null){
+                taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]=
                     arrayListOf<String>(corsor.getString(2))
             }else{
-                tempTaskList=taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]!!
+                tempTaskList=taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]!!
                 tempTaskList.add(corsor.getString(2))
-                taskLists["${year}.${corsor.getInt(0)}.${corsor.getInt(1)}"]=tempTaskList
+                taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]=tempTaskList
             }
         }
     }
 
     //딜 반복에서 얻기
     fun getTaskRepeatM(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,text FROM myTaskTbl WHERE RepeatM==1",null)
+        val corsor =database.rawQuery("SELECT day,title FROM myTaskTbl WHERE RepeatM==1",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
-            if (taskLists["${year}.${month}.${corsor.getInt(0)}"]==null){
-                taskLists["${year}.${month}.${corsor.getInt(0)}"]=
+            if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
+                taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=
                     arrayListOf<String>(corsor.getString(1))
             }else{
-                tempTaskList=taskLists["${year}.${month}.${corsor.getInt(0)}"]!!
+                tempTaskList=taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]!!
                 tempTaskList.add(corsor.getString(1))
-                taskLists["${year}.${month}.${corsor.getInt(0)}"]=tempTaskList
+                taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=tempTaskList
             }
         }
     }
@@ -211,7 +242,7 @@ class MainActivity : Activity() {
     private var weekRepeat = HashSet<String>()
     //주 반복에서 얻기
     fun getTaskRepeatW(weekStr :String){
-        val corsor =database.rawQuery("SELECT week,text FROM myTaskTbl WHERE RepeatW==1",null)
+        val corsor =database.rawQuery("SELECT week,title FROM myTaskTbl WHERE RepeatW==1",null)
         var tempTaskList = ArrayList<String>()
         weekRepeat.clear()
         val dateSplit = weekStr.split(".")
@@ -219,13 +250,13 @@ class MainActivity : Activity() {
         while (corsor.moveToNext()){
             checkWeekRepeat(corsor.getString(0).split("&"))
             if (weekRepeat.contains(weekStrTransInt(dateSplit[3]).toString())){
-                if (taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]==null){
-                    taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]=
+                if (taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]==null){
+                    taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]=
                         arrayListOf<String>(corsor.getString(1))
                 }else{
-                    tempTaskList=taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]!!
+                    tempTaskList=taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]!!
                     tempTaskList.add(corsor.getString(1))
-                    taskLists["${dateSplit[0]}.${dateSplit[1]}.${dateSplit[2]}"]=tempTaskList
+                    taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]=tempTaskList
                 }
             }
         }
@@ -272,13 +303,13 @@ class MainActivity : Activity() {
         val corsor =database.rawQuery("SELECT day,text,title FROM myTaskTbl WHERE RepeatN==1 AND year == ${year} AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
-            if (taskLists["${year}.${month}.${corsor.getInt(0)}"]==null){
-                taskLists["${year}.${month}.${corsor.getInt(0)}"]=
+            if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
+                taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=
                     arrayListOf<String>(corsor.getString(2))
             }else{
-                tempTaskList=taskLists["${year}.${month}.${corsor.getInt(0)}"]!!
+                tempTaskList=taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]!!
                 tempTaskList.add(corsor.getString(2))
-                taskLists["${year}.${month}.${corsor.getInt(0)}"]=tempTaskList
+                taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=tempTaskList
             }
         }
     }

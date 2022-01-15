@@ -287,11 +287,12 @@ class CalendarTile : TileService(){
             Log.d("도원","-----------------------------")
             Log.d("도원","holidaySet  : ${holidaySet}")
             Log.d("도원","strMonthDay  : ${strMonthDay}")
+            Log.d("도원","strs[2]  : ${strs[2]}")
 
             var dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
                                 else if (strMonthDay.equals(currentDate)) R.color.toDayColor
-                                else if (strs[2].equals("Sun"))R.color.sunColor
-                                else if (strs[2].equals("Sat"))R.color.satColor
+                                else if (strs[2].equals("Sun") || strs[2].equals("일") )R.color.sunColor
+                                else if (strs[2].equals("Sat") || strs[2].equals("토"))R.color.satColor
                                 else if (holidaySet.contains(strMonthDay)) R.color.sunColor
                                 else R.color.currnetMonthDayColor
             isDot=false
@@ -544,7 +545,9 @@ class CalendarTile : TileService(){
                 val  c2 : Cursor? = TaskDatabaseHelper.searchHoliday(database,year,month,"holiday${year}Tbl")
                 c2?.let {
                     while (it.moveToNext()){
-                        holidaySet.add("${it.getInt(1)}.${it.getInt(2)}")
+                        val month =if(it.getInt(1).toString().length==1)"0${it.getInt(1)}" else it.getInt(1)
+                        val day =if(it.getInt(2).toString().length==1)"0${it.getInt(2)}" else it.getInt(2)
+                        holidaySet.add("${month}.${day}")
                     }
                 }
             }

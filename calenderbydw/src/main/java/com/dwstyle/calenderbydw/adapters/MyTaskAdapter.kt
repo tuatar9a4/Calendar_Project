@@ -57,8 +57,8 @@ class MyTaskAdapter(
             }
             tvTaskDate.text = (item)
             llTaskTitleBox.removeAllViews()
-            if (taskLists.containsKey(item)){
-                for (str in taskLists[item]!!){
+            if (taskLists.containsKey("${tempStr[0]}.${tempStr[1]}.${tempStr[2]}")){
+                for (str in taskLists["${tempStr[0]}.${tempStr[1]}.${tempStr[2]}"]!!){
                     val textView = TextView(context)
                     val params =LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT)
                     params.bottomMargin=13

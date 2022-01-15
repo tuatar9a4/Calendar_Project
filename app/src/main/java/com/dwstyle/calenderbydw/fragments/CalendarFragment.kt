@@ -721,14 +721,14 @@ class CalendarFragment : Fragment() {
             RangeDayDecorator(date),
             SundayDecorator(),
             SaturdayDecorator(),
-            TodayDecorator(CalendarDay.today()),
             HolidayDecorator(context as Activity,holidayOfDay),
             OutOfRangeDecorator(date),
             SelectDecorator(context as Activity),
             TaskDotDecorator(context as Activity,dayOfRepeatYear,month,"Year"),
             TaskDotDecorator(context as Activity,dayOfRepeatMonth,month,"Month"),
             TaskDotDecorator(context as Activity,dayOfRepeatWeek,month,"Week"),
-            TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No")
+            TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No"),
+            TodayDecorator(context,CalendarDay.today())
         )
     }
 
