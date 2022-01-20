@@ -137,7 +137,7 @@ class CalendarTile : TileService(){
         // 셋 addContent : (Spacer) 공간 만드는 Builder
         val calendarLayout =LayoutElementBuilders.Column.Builder().setWidth(wrap())
         calendarLayout.setHeight(expand())
-            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(25f)).build())
+            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(20f)).build())
             .addContent(
                 LayoutElementBuilders.Row.Builder().setWidth(wrap()).setVerticalAlignment(LayoutElementBuilders.VerticalAlignmentProp.Builder()
                     .setValue(VERTICAL_ALIGN_CENTER).build())

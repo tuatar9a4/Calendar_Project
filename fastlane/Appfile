@@ -1,0 +1,2 @@
+json_key_file("./pc-api-8848086218749290909-857-9c4712514552.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.dwstyle.calenderbydw") # e.g. com.krausefx.app

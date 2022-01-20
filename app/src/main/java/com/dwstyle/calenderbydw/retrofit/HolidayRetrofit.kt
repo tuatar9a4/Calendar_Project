@@ -42,7 +42,6 @@ class HolidayRetrofit {
                 val temp =HolidayItem(holidayDate.substring(0,4).toInt(),holidayDate.substring(4,6).toInt(),holidayDate.substring(6).toInt(),
                     (if (select("isHoliday").eachText()[0]=="Y") 1 else 0),select("dateName").eachText()[0])
                 holidayListItems.add(temp)
-
             }
         }
         holidayLiveData.postValue(holidayListItems)
