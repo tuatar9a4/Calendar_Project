@@ -54,4 +54,11 @@
         android:layout_height="30dp"
         android:layout_gravity="center_vertical|right"
         />
+    <Button
+        android:id="@+id/btnCreate"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_horizontal|bottom"
+        />
+
 </androidx.wear.widget.BoxInsetLayout>
