@@ -6,4 +6,33 @@
     -->
     <string name="hello_world">Hello Square World!</string>
     <string name="title_activity_tile">TileActivity</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_minus">Minus</string>
+    <string name="widget_plus">Plus</string>
+    <string name="widget_go_to_main">goToMain</string>
+    <string name="widget_none">none</string>
+    <string name="dot_year">dot_year</string>
+    <string name="dot_month">dot_month</string>
+    <string name="dot_day">dot_day</string>
+    <string name="dot_week">dot_week</string>
+    <string name="next_icon">next_icon</string>
+    <string name="pre_icon">pre_icon</string>
+
+    <string name="weeksunEn">Sun</string>
+    <string name="weeksunKr">일</string>
+    <string name="weeksatEn">Sat</string>
+    <string name="weeksatKr">토</string>
+    <string name="weekmonEn">Mon</string>
+    <string name="weekmonKr">일</string>
+    <string name="weektueEn">Tue</string>
+    <string name="weektueKr">일</string>
+    <string name="weekwenEn">Wen</string>
+    <string name="weekwenKr">일</string>
+    <string name="weekthuEn">Thu</string>
+    <string name="weekthuKr">일</string>
+    <string name="weekfriEn">Fri</string>
+    <string name="weekfriKr">일</string>
+
+
+
 </resources>

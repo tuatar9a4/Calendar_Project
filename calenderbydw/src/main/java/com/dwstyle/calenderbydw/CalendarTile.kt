@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
-import android.os.IBinder
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.*
@@ -51,25 +50,20 @@ class CalendarTile : TileService(){
         // setTimeline : 화면을 구성을 set 함 보통 LayoutElementBuilders.LayoutElement 를 반환하는 method를 만든 후 거기에서 타일을 구성함
         Log.d("도원","requestPareams : "+requestParams.state?.lastClickableId)
         if (requestParams.state?.lastClickableId!=null){
-            if (requestParams.state!!.lastClickableId.equals("Minus")){
-//                getCalendar("Minus")
-                clickType="Minus"
-            }else if (requestParams.state!!.lastClickableId.equals("Plus")){
-//                getCalendar("Plus")
-                clickType="Plus"
-            }else if (requestParams.state!!.lastClickableId.equals("Today")){
-//                getCalendar("Today")
-                clickType="Today"
-            }else if( requestParams.state!!.lastClickableId=="goToMain"){
+            if (requestParams.state!!.lastClickableId.equals(applicationContext.getString(R.string.widget_minus))){
+                clickType=applicationContext.getString(R.string.widget_minus);
+            }else if (requestParams.state!!.lastClickableId.equals(applicationContext.getString(R.string.widget_plus))){
+                clickType=applicationContext.getString(R.string.widget_plus)
+            }else if (requestParams.state!!.lastClickableId.equals(applicationContext.getString(R.string.widget_today))){
+                clickType=applicationContext.getString(R.string.widget_today)
+            }else if( requestParams.state!!.lastClickableId==applicationContext.getString(R.string.widget_go_to_main)){
                 val intent =Intent(applicationContext,MainActivity::class.java)
                 intent.putExtra("widgetMonth","fromWidget")
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
-                clickType="none"
+                clickType=applicationContext.getString(R.string.widget_none)
             }else{
-                Log.d("도원","requestParams.state?.lastClickableId !=null |"+requestParams.state?.lastClickableId)
-                clickType="none"
-//                getCalendar("none")
+                clickType=applicationContext.getString(R.string.widget_none)
             }
         }
         Log.d("도원","ㅇㅇㅇ");
@@ -98,27 +92,27 @@ class CalendarTile : TileService(){
 
         return Futures.immediateFuture(ResourceBuilders.Resources.Builder().setVersion(
             RESOURCES_VERSION)
-            .addIdToImageMapping("dot_year",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.dot_year),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.dot_year)
                     .build()).build())
-            .addIdToImageMapping("dot_month",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.dot_month),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.dot_month)
                     .build()).build())
-            .addIdToImageMapping("dot_day",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.dot_day),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.dot_day)
                     .build()).build())
-            .addIdToImageMapping("dot_week",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.dot_week),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.dot_week)
                     .build()).build())
-            .addIdToImageMapping("next_icon",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.next_icon),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.next_month_icon)
                     .build()).build())
-            .addIdToImageMapping("pre_icon",ResourceBuilders.ImageResource.Builder()
+            .addIdToImageMapping(getString(R.string.pre_icon),ResourceBuilders.ImageResource.Builder()
                 .setAndroidResourceByResId(ResourceBuilders.AndroidImageResourceByResId.Builder()
                     .setResourceId(R.drawable.pre_month_icon)
                     .build()).build())
@@ -285,20 +279,25 @@ class CalendarTile : TileService(){
 //            isItem = count==3
             //날짜의 색상  먼저 전달인지 확인하고 그 후 오늘인지 다음으로 일요일 토요일 평일 순으로 확인
             Log.d("도원","-----------------------------")
-            Log.d("도원","holidaySet  : ${holidaySet}")
-            Log.d("도원","strMonthDay  : ${strMonthDay}")
-            Log.d("도원","strs[2]  : ${strs[2]}")
-
-            var dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
+//            Log.d("도원","holidaySet  : ${holidaySet}")
+//            Log.d("도원","dotDaySetY  : ${dotDaySetY}")
+//            Log.d("도원","dotDaySetM  : ${dotDaySetM}")
+//            Log.d("도원","dotDaySetN  : ${dotDaySetN}")
+//            Log.d("도원","weekRepeat  : ${weekRepeat}")
+//            Log.d("도원","strMonthDay  : ${strMonthDay}")
+//            Log.d("도원","strs[2]  : ${strs[2]}")
+//
+            val dayTextColor =if(!strMonthDay.split(".")[0].equals(firstDayOfMonth.split(".")[0]))R.color.preMonthDayColor
                                 else if (strMonthDay.equals(currentDate)) R.color.toDayColor
-                                else if (strs[2].equals("Sun") || strs[2].equals("일") )R.color.sunColor
-                                else if (strs[2].equals("Sat") || strs[2].equals("토"))R.color.satColor
                                 else if (holidaySet.contains(strMonthDay)) R.color.sunColor
+                                else if (strs[2] == getString(R.string.weeksunEn)|| strs[2]==getString(R.string.weeksunKr) )R.color.sunColor
+                                else if (strs[2].equals("Sat") || strs[2].equals("토"))R.color.satColor
                                 else R.color.currnetMonthDayColor
             isDot=false
             weekInt=0
             //점찍는곳
             if (dotDaySetY.contains(strMonthDay)){
+//            if (true){
                 isDot=true
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_year")
                 dotContainer.addContent(scheduleItem.build())
@@ -323,6 +322,7 @@ class CalendarTile : TileService(){
 //                }
 //            }
             if (dotDaySetN.contains(strMonthDay)){
+                Log.d("도원","dotDaySetN Dot : ${strMonthDay}")
                 isDot=true
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_day")
                 dotContainer.addContent(scheduleItem.build())
@@ -335,15 +335,16 @@ class CalendarTile : TileService(){
 //                    scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_image")
 //                }
 //            }
-            if (strs[2]=="Sun")weekInt=7
-            if (strs[2]=="Mon")weekInt=1
-            if (strs[2]=="Tue")weekInt=2
-            if (strs[2]=="Wed")weekInt=3
-            if (strs[2]=="Thu")weekInt=4
-            if (strs[2]=="Fri")weekInt=5
-            if (strs[2]=="Sat")weekInt=6
+            if (strs[2]=="Sun"  || strs[2]=="일")weekInt=7
+            if (strs[2]=="Mon"  || strs[2]=="월")weekInt=1
+            if (strs[2]=="Tue"  || strs[2]=="화")weekInt=2
+            if (strs[2]=="Wed"  || strs[2]=="수")weekInt=3
+            if (strs[2]=="Thu"  || strs[2]=="목")weekInt=4
+            if (strs[2]=="Fri"  || strs[2]=="금")weekInt=5
+            if (strs[2]=="Sat"  || strs[2]=="토")weekInt=6
             if (weekRepeat.contains(weekInt.toString())){
                 isDot=true
+                Log.d("도원","weekRepeat Dot : ${weekInt.toString()}")
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_week")
                 dotContainer.addContent(scheduleItem.build())
                     .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
@@ -439,7 +440,7 @@ class CalendarTile : TileService(){
         currentDate = DateTime(System.currentTimeMillis()).toString("MM.dd")
         currentDate1 = System.currentTimeMillis().toString()
 
-        getDatDayFromDatabase(calendarDate.split(".").get(0),firstDayOfMonth.split(".")[1])
+        getDatDayFromDatabase(calendarDate.split(".").get(0),calendarDate.split(".")[1])
 
 //        Log.d("도원","이번달 calendarDate : $calendarDate // test : $firstDayOfMonth //test2 : $allDayOfMonth  // ")
 //        Log.d("도원","이번달 currentDate : $currentDate ")
@@ -545,9 +546,9 @@ class CalendarTile : TileService(){
                 val  c2 : Cursor? = TaskDatabaseHelper.searchHoliday(database,year,month,"holiday${year}Tbl")
                 c2?.let {
                     while (it.moveToNext()){
-                        val month =if(it.getInt(1).toString().length==1)"0${it.getInt(1)}" else it.getInt(1)
-                        val day =if(it.getInt(2).toString().length==1)"0${it.getInt(2)}" else it.getInt(2)
-                        holidaySet.add("${month}.${day}")
+                        val holidayMonth =if(it.getInt(1).toString().length==1)"0${it.getInt(1)}" else it.getInt(1)
+                        val holidayDay =if(it.getInt(2).toString().length==1)"0${it.getInt(2)}" else it.getInt(2)
+                        holidaySet.add("${holidayMonth}.${holidayDay}")
                     }
                 }
             }

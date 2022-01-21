@@ -2,6 +2,7 @@ package com.dwstyle.calenderbydw
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.Intent
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
@@ -37,6 +38,7 @@ class MainActivity : Activity() {
     private lateinit var rcTask : WearableRecyclerView
     private lateinit var btnPre : Button
     private lateinit var btnNext : Button
+    private lateinit var btnCreate : Button
     private lateinit var tvTopTitle :TextView
     private lateinit var tvToday :TextView
 
@@ -159,6 +161,11 @@ class MainActivity : Activity() {
         tvToday=findViewById(R.id.tvToday)
         btnPre=findViewById(R.id.btnPre)
         btnNext=findViewById(R.id.btnNext)
+        btnCreate=findViewById(R.id.btnCreate)
+        btnCreate.setOnClickListener {
+            val intent =Intent(applicationContext,CreateSimpleTaskActivity::class.java)
+            startActivityForResult(intent,1003)
+        }
 
     }
 
