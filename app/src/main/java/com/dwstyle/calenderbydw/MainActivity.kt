@@ -148,6 +148,7 @@ class MainActivity : AppCompatActivity() {
                         calendarFragment.notifydataChange()
                         taskListFragment.notifydataChange()
                         WidgetUtils.updateWidgetData(applicationContext)
+                        WidgetUtils.changeDBToBytes(applicationContext)
                     }
                 }
             })

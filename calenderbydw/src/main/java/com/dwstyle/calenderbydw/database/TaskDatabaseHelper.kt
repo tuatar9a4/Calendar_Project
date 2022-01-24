@@ -27,6 +27,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                "repeatW integer,"+
                "repeatN integer,"+
                "priority integer,"+
+               "isHoliday integer,"+
                "expectDay text"+
         ");"
         db?.let { it.execSQL(sql) }
@@ -45,7 +46,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     }
 
     private fun updateColumn(a_db : SQLiteDatabase){
-        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN title TEXT DEFAULT '' ")
+        a_db.execSQL("ALTER TABLE myTaskTbl ADD COLUMN isHoliday integer DEFAULT 0;")
     }
 
     fun createMonthTBL(tblName:String){

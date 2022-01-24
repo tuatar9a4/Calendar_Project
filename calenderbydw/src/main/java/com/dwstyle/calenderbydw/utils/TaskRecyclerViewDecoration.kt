@@ -18,6 +18,7 @@ class TaskRecyclerViewDecoration(private val activity: Activity) : RecyclerView.
         if (parent.getChildAdapterPosition(view)==0){
             outRect.top=LengthUtils.getDeviceHeight(activity)/4
         }else if(parent.getChildAdapterPosition(view)==parent.adapter!!.itemCount-1){
+            outRect.top=20
             outRect.bottom=LengthUtils.getDeviceHeight(activity)/2
         }else {
             outRect.top=20

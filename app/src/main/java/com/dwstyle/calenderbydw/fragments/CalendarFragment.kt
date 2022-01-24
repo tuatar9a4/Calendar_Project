@@ -236,6 +236,7 @@ class CalendarFragment : Fragment() {
                     setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
                     context?.let {
                         WidgetUtils.updateWidgetData(it)
+                        WidgetUtils.changeDBToBytes(it)
                     }
                     dialog.dismiss()
                 })
@@ -251,6 +252,7 @@ class CalendarFragment : Fragment() {
                         setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
                         context?.let {
                             WidgetUtils.updateWidgetData(it)
+                            WidgetUtils.changeDBToBytes(it)
                         }
                         dialog.dismiss()
                         taskDialog.dismissDialog()
@@ -281,6 +283,7 @@ class CalendarFragment : Fragment() {
                         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
                         context?.let {
                             WidgetUtils.updateWidgetData(it)
+                            WidgetUtils.changeDBToBytes(it)
                         }
                     }
                 }

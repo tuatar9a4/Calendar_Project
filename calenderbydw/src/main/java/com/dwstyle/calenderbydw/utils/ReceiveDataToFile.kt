@@ -25,9 +25,7 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
     private lateinit var database : SQLiteDatabase
 
     fun createDBFromSendData(){
-        val dbAsset : ByteArray =receiveAsset.let {
-                asset ->bytesArrayFromAsset(asset)
-        }
+        val dbAsset : ByteArray = bytesArrayFromAsset(receiveAsset)
         val newFile = File(context.getDatabasePath("wearTask.db").path)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -38,6 +36,7 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
 
     //asset 를 byte array로
     fun bytesArrayFromAsset(asset :Asset)  : ByteArray{
+        Log.d("도원","assetInputStream.readBytes()");
         val assetInputStream : InputStream = Tasks.await(Wearable.getDataClient(context).getFdForAsset(asset)).inputStream
         return assetInputStream.readBytes()
 

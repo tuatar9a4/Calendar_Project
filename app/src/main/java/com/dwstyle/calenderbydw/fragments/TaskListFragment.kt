@@ -116,6 +116,7 @@ class TaskListFragment : Fragment() {
                     searchTaskOfSelectedDay(selectedCalendarDay!!)
                     context?.let {
                         WidgetUtils.updateWidgetData(it)
+                        WidgetUtils.changeDBToBytes(it)
                     }
                     dialog.dismiss()
                 })
@@ -148,6 +149,7 @@ class TaskListFragment : Fragment() {
 //                        }
                         context?.let {
                             WidgetUtils.updateWidgetData(it)
+                            WidgetUtils.changeDBToBytes(it)
                         }
                     }
                 }
