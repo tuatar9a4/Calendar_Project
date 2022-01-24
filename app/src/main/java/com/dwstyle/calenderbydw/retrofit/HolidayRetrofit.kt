@@ -20,12 +20,12 @@ import java.net.URL
 
 class HolidayRetrofit {
 
-    private val holidayRetro: Retrofit =Retrofit.Builder()
-        .baseUrl("http://apis.data.go.kr")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+//    private val holidayRetro: Retrofit =Retrofit.Builder()
+//        .baseUrl("http://apis.data.go.kr")
+//        .addConverterFactory(GsonConverterFactory.create())
+//        .build()
 
-    private val holidayRetroService: HolidayRetroService =holidayRetro.create(HolidayRetroService::class.java)
+//    private val holidayRetroService: HolidayRetroService =holidayRetro.create(HolidayRetroService::class.java)
 
     private val holidayLiveData :MutableLiveData<ArrayList<HolidayItem>> =MutableLiveData()
     private val holidayListItems =ArrayList<HolidayItem>()
@@ -34,18 +34,19 @@ class HolidayRetrofit {
         val doc = jsoup.get()
 
         val elements: Elements = doc.select("body").select("items").select("item")
-        Log.d("도원","${year}_성공 , ${elements.size}")
-        holidayListItems.clear()
-        for (ele in elements){
-            ele.run {
-                val holidayDate =select("locdate").eachText()[0]
-                val temp =HolidayItem(holidayDate.substring(0,4).toInt(),holidayDate.substring(4,6).toInt(),holidayDate.substring(6).toInt(),
-                    (if (select("isHoliday").eachText()[0]=="Y") 1 else 0),select("dateName").eachText()[0])
-                holidayListItems.add(temp)
+//        Log.d("도원","${year}_성공 , ${elements.size}")
+        synchronized(holidayListItems){
+            holidayListItems.clear()
+            for (ele in elements){
+                ele.run {
+                    val holidayDate =select("locdate").eachText()[0]
+                    val temp =HolidayItem(holidayDate.substring(0,4).toInt(),holidayDate.substring(4,6).toInt(),holidayDate.substring(6).toInt(),
+                        (if (select("isHoliday").eachText()[0]=="Y") 1 else 0),select("dateName").eachText()[0])
+                    holidayListItems.add(temp)
+                }
             }
+            holidayLiveData.postValue(holidayListItems)
         }
-        holidayLiveData.postValue(holidayListItems)
-
     }
 
 
@@ -55,8 +56,8 @@ class HolidayRetrofit {
 
 
 
-    interface HolidayRetroService{
-        @GET("/B090041/openapi/service/SpcdeInfoService/getRestDeInfo")
-        fun getHoliday(@Query("serviceKey")serviceKey:String , @Query("solYear")solYear:String) : Call<ResponseBody>
-    }
+//    interface HolidayRetroService{
+//        @GET("/B090041/openapi/service/SpcdeInfoService/getRestDeInfo")
+//        fun getHoliday(@Query("serviceKey")serviceKey:String , @Query("solYear")solYear:String) : Call<ResponseBody>
+//    }
 }

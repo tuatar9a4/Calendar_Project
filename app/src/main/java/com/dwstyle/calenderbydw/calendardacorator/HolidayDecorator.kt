@@ -15,7 +15,7 @@ import com.prolificinteractive.materialcalendarview.spans.DotSpan
 import java.util.*
 import kotlin.collections.HashMap
 
-class HolidayDecorator(private val context: Context,private val holidayLists : HashMap<String,String>) : DayViewDecorator {
+class HolidayDecorator(private val holidayLists : HashMap<String,String>) : DayViewDecorator {
 
 
     override fun shouldDecorate(day: CalendarDay): Boolean {

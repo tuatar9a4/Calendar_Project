@@ -11,14 +11,9 @@ import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
 
-class SelectDecorator : DayViewDecorator {
+class SelectDecorator(context: Activity) : DayViewDecorator {
 
-    private lateinit var selectDrawable : Drawable
-
-    constructor(context :Activity){
-        selectDrawable=context.resources.getDrawable(R.drawable.select_background)
-
-    }
+    private var selectDrawable : Drawable = context.resources.getDrawable(R.drawable.select_background)
 
     override fun shouldDecorate(day: CalendarDay): Boolean {
         return true

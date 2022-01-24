@@ -136,11 +136,13 @@ class CalendarFragment : Fragment() {
     private fun bindData(v: View){
         holidayRetrofit.getHolidayItems().observe(viewLifecycleOwner,
             { t :ArrayList<HolidayItem> ->
-                if (t.size>0){
-                    if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${t[0].year}Tbl")){
-                        dbHelper.createHolidayTbl(dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
-                        for ((i,item) in t.withIndex()){
-                            TaskDatabaseHelper.createHoliday(item,dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
+                synchronized(t){
+                    if (t.size>0){
+                        if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${t[0].year}Tbl")){
+                            dbHelper.createHolidayTbl(dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
+                            for (item in t){
+                                TaskDatabaseHelper.createHoliday(item,dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
+                            }
                         }
                     }
                 }
@@ -149,7 +151,6 @@ class CalendarFragment : Fragment() {
                     justDb=true
                 }
             })
-
     }
 
     private fun initCalendarSetting(view : View){
@@ -717,19 +718,21 @@ class CalendarFragment : Fragment() {
     }
     suspend fun addDeco(month :Int, date : CalendarDay) = withContext(Dispatchers.Main){
         calendarView.removeDecorators()
-        calendarView.addDecorators(
-            RangeDayDecorator(date),
-            SundayDecorator(),
-            SaturdayDecorator(),
-            HolidayDecorator(context as Activity,holidayOfDay),
-            OutOfRangeDecorator(date),
-            SelectDecorator(context as Activity),
-            TaskDotDecorator(context as Activity,dayOfRepeatYear,month,"Year"),
-            TaskDotDecorator(context as Activity,dayOfRepeatMonth,month,"Month"),
-            TaskDotDecorator(context as Activity,dayOfRepeatWeek,month,"Week"),
-            TaskDotDecorator(context as Activity,dayOfRepeatNo,month,"No"),
-            TodayDecorator(context,CalendarDay.today())
-        )
+        context?.let {
+            calendarView.addDecorators(
+                RangeDayDecorator(date),
+                SundayDecorator(),
+                SaturdayDecorator(),
+                HolidayDecorator(holidayOfDay),
+                OutOfRangeDecorator(date),
+                SelectDecorator(it as Activity),
+                TaskDotDecorator(it as Activity,dayOfRepeatYear,month,"Year"),
+                TaskDotDecorator(it as Activity,dayOfRepeatMonth,month,"Month"),
+                TaskDotDecorator(it as Activity,dayOfRepeatWeek,month,"Week"),
+                TaskDotDecorator(it as Activity,dayOfRepeatNo,month,"No"),
+                TodayDecorator(it,CalendarDay.today())
+            )
+        }
     }
 
     fun checkTBLNAME(){

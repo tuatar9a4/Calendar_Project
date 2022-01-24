@@ -22,7 +22,7 @@ class DataLayerListenerService : WearableListenerService() {
 
 
     override fun onDataChanged(p0: DataEventBuffer) {
-//        super.onDataChanged(p0)
+        super.onDataChanged(p0)
         dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,3);
         database=dbHelper.readableDatabase
         Log.d("도원","onDataChaned service????")
@@ -30,7 +30,7 @@ class DataLayerListenerService : WearableListenerService() {
             if (event.type == DataEvent.TYPE_CHANGED){
                 val path = event.dataItem.uri.path
                 Log.d("도원","path ${path}")
-                if ("/taskdata".equals(path)){
+                if ("/taskdata" == path){
                     val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
                     val dbString :String? =dataMapItem.dataMap.getString("taskDBPath")
                     if (dataMapItem.dataMap.getAsset("taskDB")!=null){

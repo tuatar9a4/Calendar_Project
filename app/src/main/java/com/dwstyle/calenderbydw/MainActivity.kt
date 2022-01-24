@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
 import com.dwstyle.calenderbydw.fragments.CalendarFragment
 import com.dwstyle.calenderbydw.fragments.TaskListFragment
@@ -30,13 +31,16 @@ import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Exception
 import java.nio.file.Files
+import java.time.Instant
 import java.util.*
+import java.util.concurrent.CancellationException
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
@@ -56,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainTopToolbar : Toolbar
 
     private val testRetrofit : HolidayRetrofit =HolidayRetrofit()
+    private val dataClient by lazy { Wearable.getDataClient(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -187,13 +192,41 @@ class MainActivity : AppCompatActivity() {
 
     //Asset 으로 만든 데이터 보내기
     private fun sendDBData(sendData :Asset,dBPtah : String){
-        val dataMap : PutDataMapRequest = PutDataMapRequest.create("/taskdata")
-        dataMap.dataMap.putAsset("taskDB",sendData)
-        dataMap.dataMap.putString("taskDBPath",dBPtah)
-        Log.d("도원","dBPtah :  ${dBPtah}")
-        val request : PutDataRequest= dataMap.asPutDataRequest()
-        request.setUrgent()
-        val putTask : Task<DataItem> =Wearable.getDataClient(this).putDataItem(request)
+//        val dataMap : PutDataMapRequest = PutDataMapRequest.create("/taskdata")
+//        dataMap.dataMap.putAsset("taskDB",sendData)
+//        dataMap.dataMap.putString("taskDBPath",dBPtah)
+//        Log.d("도원","dBPtah :  ${dBPtah}")
+//        val request : PutDataRequest= dataMap.asPutDataRequest()
+//        request.setUrgent()
+//        val putTask : Task<DataItem> =Wearable.getDataClient(this).putDataItem(request)
+
+        lifecycleScope.launch {
+            try {
+                val putDataReq = PutDataMapRequest.create("/taskdata").apply {
+                    this.dataMap.putAsset("taskDB",sendData)
+                    this.dataMap.putString("taskDBPath",dBPtah)
+                    this.dataMap.putLong("KEY", Instant.now().epochSecond)
+
+                }
+                    .asPutDataRequest()
+                    .setUrgent()
+
+                val result =dataClient.putDataItem(putDataReq).await()
+
+                Log.d("도원", "DataItem saved: $result")
+            } catch (cancellationException: CancellationException) {
+                Log.d("도원", "Saving DataItem failed: ${cancellationException.localizedMessage}")
+                throw cancellationException
+            } catch (exception: Exception) {
+                Log.d("도원", "Saving DataItem failed: $exception")
+            }
+        }
+
+
+
+//        val putTask =dataClient.putDataItem(putDataReq).await()
+
+
 
 //        try {
 //
@@ -207,25 +240,21 @@ class MainActivity : AppCompatActivity() {
 //            Log.d("도원","e :  ${e.localizedMessage}")
 //        }
 
-        putTask.addOnSuccessListener {
-            Log.d("도원","isSuccessful :  ${putTask.isCanceled}")
-            Toast.makeText(applicationContext,"send Successful!!",Toast.LENGTH_SHORT).show()
-        }
-
-        putTask.addOnCompleteListener {
-            Log.d("도원","result :  ${putTask.result}")
-            Log.d("도원","result :   ${it.isSuccessful} | ${it.exception}")
-        }
-
-        putTask.addOnFailureListener {
-            Log.d("도원","exception :  ${putTask.exception}")
-            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
-        }
-
-        putTask.addOnCanceledListener {
-            Log.d("도원","exception :  ${putTask.isCanceled}")
-            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
-        }
+//        putTask.addOnSuccessListener {
+//            Toast.makeText(applicationContext,"send Successful!!",Toast.LENGTH_SHORT).show()
+//        }
+//
+//        putTask.addOnCompleteListener {
+//            Log.d("도원","result :   ${it.isSuccessful} | ${it.exception}")
+//        }
+//
+//        putTask.addOnFailureListener {
+//            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
+//        }
+//
+//        putTask.addOnCanceledListener {
+//            Toast.makeText(applicationContext,"send Error!!",Toast.LENGTH_SHORT).show()
+//        }
 
     }
 
