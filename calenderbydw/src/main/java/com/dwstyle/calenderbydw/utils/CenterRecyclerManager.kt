@@ -2,19 +2,19 @@ package com.dwstyle.calenderbydw.utils
 
 import android.content.Context
 import android.graphics.PointF
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
+import androidx.wear.widget.WearableLinearLayoutManager
 
-class CenterRecyclerManager : LinearLayoutManager {
-
-    constructor(context: Context) : super(context) {
-
+class CenterRecyclerManager: WearableLinearLayoutManager{
+    private var progressToCenter: Float = 0f
+    private var viewHeight = 0
+    constructor(context: Context,height : Int) : super(context) {
+        viewHeight=height
     }
 
-    constructor(context: Context,orientation :Int,reverseLayout :Boolean) : super(context,orientation,reverseLayout) {
-
-    }
 
     override fun smoothScrollToPosition(
         recyclerView: RecyclerView?,
@@ -22,13 +22,13 @@ class CenterRecyclerManager : LinearLayoutManager {
         position: Int
     ) {
         recyclerView?.let {
-            val smoothScroller =CenterSmoothScroller(it.context)
+            val smoothScroller =CenterSmoothScroller(it.context,viewHeight)
+            smoothScroller.targetPosition=position
             startSmoothScroll(smoothScroller)
         }
     }
 
-    private class CenterSmoothScroller(context: Context) : LinearSmoothScroller(context) {
-
+    private class CenterSmoothScroller(context: Context,viewHeight:Int) : LinearSmoothScroller(context) {
         override fun calculateDtToFit(
             viewStart: Int,
             viewEnd: Int,
@@ -36,11 +36,13 @@ class CenterRecyclerManager : LinearLayoutManager {
             boxEnd: Int,
             snapPreference: Int
         ): Int {
-            return  (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2);
+
+            return  (boxStart + (boxEnd - boxStart) / 2) - (viewStart+10+ (viewEnd - viewStart) / 2);
         }
 
         override fun computeScrollVectorForPosition(targetPosition: Int): PointF? {
             return null
         }
     }
+
 }

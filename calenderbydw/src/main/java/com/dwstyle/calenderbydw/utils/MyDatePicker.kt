@@ -1,24 +1,40 @@
 package com.dwstyle.calenderbydw.utils
 
 import android.app.Activity
-import android.graphics.Point
+import android.graphics.Color
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
-import android.view.WindowInsets
+import android.view.ViewTreeObserver
+import android.widget.Button
+import android.widget.TextView
+import androidx.core.view.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.wear.widget.WearableLinearLayoutManager
 import androidx.wear.widget.WearableRecyclerView
 import com.dwstyle.calenderbydw.R
-import com.dwstyle.calenderbydw.adapters.YearPickerAdapter
+import com.dwstyle.calenderbydw.adapters.PickerAdapter
+import org.joda.time.DateTime
 
 class MyDatePicker : Activity() {
     private lateinit var RCYear :RecyclerView
-    private lateinit var RCMonth :RecyclerView
+    private lateinit var RCMonth :WearableRecyclerView
     private lateinit var RCDay :RecyclerView
-    private lateinit var  adapter :YearPickerAdapter
+    private lateinit var  yearAdapter :PickerAdapter
+    private lateinit var monthAdapter : PickerAdapter
+    private lateinit var dayAdapter : PickerAdapter
+
+    private lateinit var btnplus :Button
+    private var count =0;
+
+    private val date =DateTime(System.currentTimeMillis());
+
+    private var selectYear ="2022";
+
+    private var itemHeight :Int=0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.my_spinner_activity)
@@ -26,110 +42,171 @@ class MyDatePicker : Activity() {
         RCYear=findViewById(R.id.RCYear);
 //        RCYear.layoutManager= LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL,false)
         RCYear.setHasFixedSize(true)
-        RCYear.layoutManager= CenterRecyclerManager(this)
-
+        RCYear.layoutManager= CenterRecyclerManager(this,itemHeight)
         RCMonth=findViewById(R.id.RCMonth)
-        RCMonth.layoutManager= LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL,false)
+        RCMonth.setHasFixedSize(true);
         RCDay=findViewById(R.id.RCDay)
         RCDay.layoutManager= LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL,false)
 
-        val strs = ArrayList<String>()
-        for (a in 1900..2100){
-            strs.add(a.toString())
+
+        itemHeight=TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,15f,applicationContext.getResources().getDisplayMetrics()).toInt()
+        btnplus=findViewById(R.id.btnplus)
+        btnplus.setOnClickListener {
+            if (count>600)count=0
+            Log.d("도원","ScrollCount ${count}")
+//            RCMonth.scrollTo(count,count)
+            RCMonth.scrollBy(0,count)
+            count+=20;
         }
-        adapter = YearPickerAdapter(strs)
-        RCYear.adapter=adapter
-        val strs2 = ArrayList<String>()
+        settingYearSelector()
+        settingMonthSelector()
+        settingDaySelector()
+    }
+
+    private fun settingYearSelector(){
+
+        val yearText = ArrayList<String>()
+        for (a in (date.year-50)..(date.year+51)){
+            yearText.add(a.toString())
+        }
+        yearAdapter = PickerAdapter(yearText)
+
+        RCYear.adapter=yearAdapter
+
+        RCYear.addItemDecoration(DateTimePickerDecoration(this,itemHeight))
+        RCYear.layoutManager=
+            WearableLinearLayoutManager(this,object  : WearableLinearLayoutManager.LayoutCallback(){
+                private var progressToCenter: Float = 0f
+                override fun onLayoutFinished(child: View?, parent: RecyclerView?) {
+                    if (parent==null){
+                        return
+                    }
+                    child?.apply {
+                        // Figure out % progress from top to bottom
+                        val centerOffset = height.toFloat() / 2.0f / parent.height.toFloat()
+                        val yRelativeToCenterOffset = y / parent.height + centerOffset
+
+                        // Normalize for center
+                        progressToCenter = Math.abs(0.5f - yRelativeToCenterOffset)
+                        // Adjust to the maximum scale
+                        progressToCenter = Math.min(progressToCenter, 0.7f)
+//                    adapter.setTextColor(parent.getChildAdapterPosition(this)-4)
+                        scaleX = 1 - progressToCenter
+                        scaleY = 1 - progressToCenter
+                        if (scaleX>0.92f && scaleY>0.92f){
+                            val selectView=this.findViewById<TextView>(R.id.tvYear)
+                            selectView.setTextColor(Color.parseColor("#0000FF"))
+                            selectYear=selectView.text.toString()
+                        }else{
+                            val selectView=this.findViewById<TextView>(R.id.tvYear)
+                            selectView.setTextColor(Color.parseColor("#FFFFFF"))
+                        }
+                    }
+                }
+            })
+        RCYear.scrollToPosition(48)
+
+    }
+
+    private fun settingMonthSelector(){
+        val llmanger =CenterRecyclerManager(this,itemHeight)
+        llmanger.layoutCallback= object : WearableLinearLayoutManager.LayoutCallback() {
+            private var progressToCenter: Float = 0f
+            override fun onLayoutFinished(child: View?, parent: RecyclerView?) {
+                if (parent==null){
+                    return
+                }
+                child?.apply {
+                    // Figure out % progress from top to bottom
+                    val centerOffset = height.toFloat() / 2.0f / parent.height.toFloat()
+                    val yRelativeToCenterOffset = y / parent.height + centerOffset
+
+                    // Normalize for center
+                    progressToCenter = Math.abs(0.5f - yRelativeToCenterOffset)
+                    // Adjust to the maximum scale
+                    progressToCenter = Math.min(progressToCenter, 0.7f)
+//                    adapter.setTextColor(parent.getChildAdapterPosition(this)-4)
+                    scaleX = 1 - progressToCenter
+                    scaleY = 1 - progressToCenter
+                    if (scaleX>0.92f && scaleY>0.92f){
+                        val selectView=this.findViewById<TextView>(R.id.tvYear)
+                        selectView.setTextColor(Color.parseColor("#0000FF"))
+                        selectYear=selectView.text.toString()
+                    }else{
+                        val selectView=this.findViewById<TextView>(R.id.tvYear)
+                        selectView.setTextColor(Color.parseColor("#FFFFFF"))
+                    }
+                }
+            }
+        }
+        RCMonth.layoutManager= llmanger
+
+        val monthText = ArrayList<String>()
         for (a in 1..12){
-            strs2.add(a.toString())
+            monthText.add(a.toString())
         }
-//        RCYear.addItemDecoration(TaskRecyclerViewDecoration(this))
-
-//        RCYear.apply {
-//            bezelFraction = 0.5f
-//            scrollDegreesPerScreen = 90f
-//
-//        }
-//        RCYear.layoutManager=
+        monthAdapter = PickerAdapter(monthText)
+        RCMonth.adapter=monthAdapter
+        monthAdapter.setClickListener(object : PickerAdapter.OnDateItemClickListener{
+            override fun OnDateItemClick(v: View, pos: Int) {
+                Log.d("도원","Click : ${pos}")
+                highText(pos)
+            }
+        })
+        RCMonth.addItemDecoration(DateTimePickerDecoration(this,itemHeight))
+        RCMonth.scrollToPosition(5)
+        monthAdapter.setSelectedPosition(5)
+        RCMonth.findViewHolderForAdapterPosition(4)?.itemView?.performClick()
+//        RCMonth.layoutManager=
 //            WearableLinearLayoutManager(this,object  : WearableLinearLayoutManager.LayoutCallback(){
-//            private var progressToCenter: Float = 0f
-//            override fun onLayoutFinished(child: View?, parent: RecyclerView?) {
-//                if (parent==null){
-//                    return
-//                }
-//                child?.apply {
-//                    // Figure out % progress from top to bottom
-//                    val centerOffset = height.toFloat() / 2.0f / parent.height.toFloat()
-//                    val yRelativeToCenterOffset = y / parent.height + centerOffset
+//                private var progressToCenter: Float = 0f
+//                override fun onLayoutFinished(child: View?, parent: RecyclerView?) {
+//                    if (parent==null){
+//                        return
+//                    }
+//                    child?.apply {
+//                        // Figure out % progress from top to bottom
+//                        val centerOffset = height.toFloat() / 2.0f / parent.height.toFloat()
+//                        val yRelativeToCenterOffset = y / parent.height + centerOffset
 //
-//                    // Normalize for center
-//                    progressToCenter = Math.abs(0.5f - yRelativeToCenterOffset)
-//                    // Adjust to the maximum scale
-//                    progressToCenter = Math.min(progressToCenter, 0.9f)
+//                        // Normalize for center
+//                        progressToCenter = Math.abs(0.5f - yRelativeToCenterOffset)
+//                        // Adjust to the maximum scale
+//                        progressToCenter = Math.min(progressToCenter, 0.7f)
 ////                    adapter.setTextColor(parent.getChildAdapterPosition(this)-4)
-//                    scaleX = 1 - progressToCenter
-//                    scaleY = 1 - progressToCenter
-//
-//
+//                        scaleX = 1 - progressToCenter
+//                        scaleY = 1 - progressToCenter
+//                        if (scaleX>0.92f && scaleY>0.92f){
+//                            val selectView=this.findViewById<TextView>(R.id.tvYear)
+//                            selectView.setTextColor(Color.parseColor("#0000FF"))
+//                            selectYear=selectView.text.toString()
+//                        }else{
+//                            val selectView=this.findViewById<TextView>(R.id.tvYear)
+//                            selectView.setTextColor(Color.parseColor("#FFFFFF"))
+//                        }
+//                    }
 //                }
-//            }
-//
-//
-//        })
+//            })
+//        RCMonth.getChildAt(4).performClick()
 
-        val adapter2 = YearPickerAdapter(strs2)
-        RCMonth.adapter=adapter2
-        val strs3 = ArrayList<String>()
+
+    }
+
+    private fun settingDaySelector(){
+        val dayText = ArrayList<String>()
         for (a in 1..30){
-            strs3.add(a.toString())
+            dayText.add(a.toString())
         }
-        val adapter3 = YearPickerAdapter(strs3)
-        RCDay.adapter=adapter3
+        dayAdapter = PickerAdapter(dayText)
+        RCDay.adapter=dayAdapter
+        RCDay.scrollToPosition(date.dayOfMonth-2)
     }
 
-
-
-    suspend fun highText(pos : Int){
-        RCYear.scrollToPosition(pos);
-        RCYear.smoothScrollToPosition(pos);
-        adapter.setSele(pos);
-        adapter.notifyDataSetChanged();
+    public fun highText( pos: Int) {
+        RCMonth.scrollToPosition(pos);
+        RCMonth.smoothScrollToPosition(pos);
+        monthAdapter.setSelectedPosition(pos);
+        monthAdapter.notifyDataSetChanged();
     }
 
-    private fun scrollSelectedItemToCenter(selectedPosition: Int) {
-        val layoutManager = RCYear.layoutManager as? LinearLayoutManager
-
-        // 가운데로 스크롤할 아이템이 왼쪽으로 부터 떨어진 거리.
-        // == 스크린너비/2 - 아이템의너비/2
-        val offset = (getDeviceHeight(this) / 2 - RCYear.getChildAt(selectedPosition).height / 2)
-
-        // [selectedPosition]번째 아이템을 왼쪽 가장자리에서 offset 만큼 떨어진 위치로 스크롤한다.
-        layoutManager?.scrollToPositionWithOffset(selectedPosition, offset)
-    }
-
-    fun getDeviceHeight(activity: Activity) :Int{
-        val outMetrics = DisplayMetrics()
-        val height :Int
-        val width :Int
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            val windowMetrics = activity.windowManager.currentWindowMetrics
-            val windowInsets : WindowInsets = windowMetrics.windowInsets
-
-            val insets =windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.navigationBars())
-            val insetsWidth =insets.right+insets.left
-            val insetsHeight= insets.bottom+insets.top
-            val bounds = windowMetrics.bounds
-            width=bounds.width()-insetsWidth
-            height=bounds.height()-insetsHeight
-        } else {
-            val size = Point()
-            val display = activity.windowManager.defaultDisplay
-            display?.getSize(size)
-            height=size.y
-            width=size.x
-        }
-
-        return height
-    }
 }
