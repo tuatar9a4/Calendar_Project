@@ -8,16 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
+
         <View
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/strok_line"
-            android:layout_gravity="center_vertical"
-            />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.01dp"
-            android:background="#ffffff"
             android:layout_gravity="center_vertical"
             />
         <HorizontalScrollView
@@ -54,6 +49,14 @@
                     />
             </LinearLayout>
         </HorizontalScrollView>
+        <TextView
+            android:id="@+id/tvSelectDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="2022.03.22"
+            android:gravity="center"
+            />
         <Button
             android:layout_width="50dp"
             android:layout_height="30dp"

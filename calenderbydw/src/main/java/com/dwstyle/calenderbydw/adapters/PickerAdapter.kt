@@ -70,6 +70,7 @@ class PickerAdapter(private var str:ArrayList<String>) : RecyclerView.Adapter<Pi
 
     fun setItems(items :ArrayList<String>){
         this.str=items;
+        notifyDataSetChanged()
     }
     fun setSelectedPosition(pos :Int){
         selectionPos=pos

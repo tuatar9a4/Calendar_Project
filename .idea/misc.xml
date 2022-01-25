@@ -32,8 +32,15 @@
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/task_list_item_layout.xml" value="0.25" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/widget_calender_grid_item.xml" value="0.67" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/write_task_layout.xml" value="0.22" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_create_simple_task.xml" value="0.5725806451612904" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_main.xml" value="0.6862745098039216" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_my_date_time_picker.xml" value="0.67" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_tile.xml" value="0.6862745098039216" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/custom_date_picker.xml" value="0.42136498516320475" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/datepicker_item.xml" value="0.6759776536312849" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/my_simmer_activity.xml" value="0.67" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/my_spinner_activity.xml" value="0.4534711964549483" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/task_item_layout.xml" value="0.4367816091954023" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/mipmap-anydpi-v26/calendar_widget.xml" value="1.0857142857142856" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/mipmap-anydpi-v26/calendar_widget_round.xml" value="1.0857142857142856" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/mipmap-anydpi-v26/ic_calendar.xml" value="0.9892857142857143" />
@@ -59,12 +66,9 @@
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/dot_week.xml" value="0.25052083333333336" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/dot_year.xml" value="0.25052083333333336" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/dotyear.xml" value="0.24791666666666667" />
-        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/strok_line.xml" value="0.1859375" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/drawable/testdot.xml" value="0.25052083333333336" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/layout/activity_create_simple_task.xml" value="0.16" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/layout/activity_main.xml" value="0.18" />
-        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/layout/datepicker_item.xml" value="0.228125" />
-        <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/layout/my_spinner_activity.xml" value="0.173828125" />
         <entry key="..\:/Users/dowon/AndroidStudioProjects/DWProject/CalenderByDW/calenderbydw/src/main/res/layout/task_item_layout.xml" value="0.3547008547008547" />
       </map>
     </option>
@@ -74,5 +78,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.16" />
+      </ProjectState>
+    </option>
   </component>
 </project>

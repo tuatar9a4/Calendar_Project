@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
@@ -57,7 +58,6 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("도원","WearApp Open ")
         if (intent.getStringExtra("widgetMonth")!=null){
             if (intent.getStringExtra("widgetMonth")=="fromWidget"){
                 fromWidget=true
@@ -171,7 +171,16 @@ class MainActivity : Activity() {
 
     fun openTheDB(){
         dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,3)
-        database=dbHelper.readableDatabase
+        database=dbHelper.writableDatabase
+//        dropTable("myTaskTbl")
+        dbHelper.onCreate(database)
+    }
+    fun dropTable(tblName :String){
+//        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
+        database=dbHelper.writableDatabase;
+        var c2: Cursor =database.rawQuery("DROP TABLE IF EXISTS ${tblName.toString()}",null)
+        while (c2.moveToNext())
+        Log.d("도원","c2  ${c2} || ${database.version}")
     }
 
     //오늘 포함 7일 날짜 알기
@@ -215,7 +224,7 @@ class MainActivity : Activity() {
     fun settingMonthDay(str:Int)=if (str.toString().length==1) "0${str}" else "${str}"
     //년도 반복에서 얻기
     fun getTaskRepeatY(year:String,month:String){
-        val corsor =database.rawQuery("SELECT month,day,title FROM myTaskTbl WHERE RepeatY==1 AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT month,day,title FROM myTaskTbl WHERE repeatY==1 AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
 
@@ -232,7 +241,7 @@ class MainActivity : Activity() {
 
     //딜 반복에서 얻기
     fun getTaskRepeatM(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,title FROM myTaskTbl WHERE RepeatM==1",null)
+        val corsor =database.rawQuery("SELECT day,title FROM myTaskTbl WHERE repeatM==1",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
             if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
@@ -249,7 +258,7 @@ class MainActivity : Activity() {
     private var weekRepeat = HashSet<String>()
     //주 반복에서 얻기
     fun getTaskRepeatW(weekStr :String){
-        val corsor =database.rawQuery("SELECT week,title FROM myTaskTbl WHERE RepeatW==1",null)
+        val corsor =database.rawQuery("SELECT week,title FROM myTaskTbl WHERE repeatW==1",null)
         var tempTaskList = ArrayList<String>()
         weekRepeat.clear()
         val dateSplit = weekStr.split(".")
@@ -307,7 +316,7 @@ class MainActivity : Activity() {
 
     //반복 없음에서 얻기
     fun getTaskRepeatN(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,text,title FROM myTaskTbl WHERE RepeatN==1 AND year == ${year} AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT day,text,title FROM myTaskTbl WHERE repeatN==1 AND year == ${year} AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
             if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
