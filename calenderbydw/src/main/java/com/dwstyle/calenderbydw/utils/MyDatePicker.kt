@@ -1,15 +1,14 @@
 package com.dwstyle.calenderbydw.utils
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.TextView
-import androidx.core.view.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.wear.widget.WearableLinearLayoutManager
@@ -29,14 +28,14 @@ class MyDatePicker : Activity() {
     private lateinit var dayAdapter : PickerAdapter
 
     private lateinit var tvSelectDateTime :TextView
-    private lateinit var btnplus :Button
+    private lateinit var btnCompelete :Button
     private var count =0;
 
     private val date =DateTime(System.currentTimeMillis()).toLocalDate();
 
     private var selectYear ="2022";
-    private var selectMonth ="2022";
-    private var selectDay ="2022";
+    private var selectMonth ="12";
+    private var selectDay ="02";
 
     private var itemHeight :Int=0
 
@@ -56,6 +55,14 @@ class MyDatePicker : Activity() {
         datSettingJob = CoroutineScope(Dispatchers.Main).launch {
             delay(100)
             setDayText(selectMonth.toInt())
+        }
+
+        btnCompelete=findViewById(R.id.btnCompelete)
+        btnCompelete.setOnClickListener {
+            val intent =Intent()
+            intent.putExtra(Consts.TASKCREATEDAET,"${selectYear}.${selectMonth}.${selectDay}")
+            setResult(RESULT_OK,intent)
+            finish()
         }
         settingYearSelector()
         settingMonthSelector()
@@ -143,12 +150,9 @@ class MyDatePicker : Activity() {
                         if (tvSelectDateTime.text.toString().substring(5,7) != selectMonth){
                             try{
                                 datSettingJob.cancel()
-                                Log.d("도원","=============settingMonthSelector====================")
                                 datSettingJob = CoroutineScope(Dispatchers.Main).launch {
                                     delay(100)
-                                    Log.d("도원","코루틴 0.1초 후 ....");
                                     setDayText(selectMonth.toInt())
-                                    Log.d("도원","코루틴 setDayText 끝");
                                 }
                             }catch (e : Exception){
                                 Log.d("도원","Expction : ${e.localizedMessage}");
@@ -222,8 +226,8 @@ class MyDatePicker : Activity() {
                     if (scaleX>0.92f && scaleY>0.92f){
                         val selectView=this.findViewById<TextView>(R.id.tvYear)
                         selectView.setTextColor(Color.parseColor("#0000FF"))
-                        selectMonth=if(selectView.text.toString().length==1) "0${selectView.text.toString()}" else selectView.text.toString()
-                        tvSelectDateTime.text=tvSelectDateTime.text.toString().replaceRange(8,10,selectMonth)
+                        selectDay=if(selectView.text.toString().length==1) "0${selectView.text.toString()}" else selectView.text.toString()
+                        tvSelectDateTime.text=tvSelectDateTime.text.toString().replaceRange(8,10,selectDay)
                     }else{
                         val selectView=this.findViewById<TextView>(R.id.tvYear)
                         selectView.setTextColor(Color.parseColor("#FFFFFF"))
@@ -246,17 +250,11 @@ class MyDatePicker : Activity() {
         try{
             datSettingJob.cancel()
             datSettingJob = CoroutineScope(Dispatchers.Main).launch {
-                Log.d("도원","=============settingDaySelector====================")
-                Log.d("도원","코루틴 실행 ....");
                 delay(100)
-                Log.d("도원","코루틴 0.1초 후 .... ${date.dayOfMonth}");
                 setDayText(date.monthOfYear.toInt())
-                RCDay.scrollToPosition(date.dayOfMonth-1);
-                RCDay.smoothScrollToPosition(date.dayOfMonth-1);
 //                dayAdapter.setSelectedPosition(date.monthOfYear-1);
 //                RCDay.scrollToPosition(date.dayOfMonth-2)
 //                dayAdapter.setSelectedPosition(date.dayOfMonth-2)
-                Log.d("도원","코루틴 setDayText 끝");
             }
         }catch (e : Exception){
             Log.d("도원","Expction : ${e.localizedMessage}");
@@ -278,6 +276,11 @@ class MyDatePicker : Activity() {
             dayText.add(temp)
         }
         dayAdapter.setItems(dayText)
+        if (selectMonth==if (date.monthOfYear.toString().length==1) "0${date.monthOfYear.toString()}" else date.monthOfYear.toString()){
+            RCDay.scrollToPosition(date.dayOfMonth-1);
+            RCDay.smoothScrollToPosition(date.dayOfMonth-1);
+        }
+
     }
 
     public fun highText( rcView : WearableRecyclerView,pickAdapter :PickerAdapter,pos: Int) {

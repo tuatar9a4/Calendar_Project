@@ -64,7 +64,7 @@
             android:layout_marginRight="30dp"
             />
         <Button
-            android:id="@+id/btnplus"
+            android:id="@+id/btnCompelete"
             android:layout_width="50dp"
             android:layout_height="30dp"
             android:layout_gravity="bottom|center_horizontal"
