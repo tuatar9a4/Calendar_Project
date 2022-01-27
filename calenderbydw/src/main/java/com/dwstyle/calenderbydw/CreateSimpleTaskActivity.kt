@@ -6,21 +6,27 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import com.dwstyle.calenderbydw.databinding.ActivityCreateSimpleTaskBinding
 import com.dwstyle.calenderbydw.utils.Consts
 import com.dwstyle.calenderbydw.utils.MyDatePicker
+import com.dwstyle.calenderbydw.utils.MyTimePicker
 import org.joda.time.DateTime
 
 class CreateSimpleTaskActivity : Activity() {
 
+    val binding by lazy { ActivityCreateSimpleTaskBinding.inflate(layoutInflater) }
+
     private lateinit var tvDate :TextView
     private lateinit var btnDatePicker:Button
+
+
     private var taskYear ="2022"
     private var taskMonth ="03"
     private var taskDay ="22"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_simple_task)
+        setContentView(binding.root)
 
         initView()
         clickViewFunc()
@@ -41,6 +47,10 @@ class CreateSimpleTaskActivity : Activity() {
 //
 //            },2022,3,22).show()
         }
+        binding.btnTimePicker.setOnClickListener {
+            val intent = Intent(this,MyTimePicker::class.java);
+            startActivityForResult(intent, Consts.TASKTIMECODE)
+        }
 
     }
 
@@ -54,6 +64,8 @@ class CreateSimpleTaskActivity : Activity() {
         if (resultCode== RESULT_OK){
             if (requestCode==Consts.TASKCREATECODE){
                 Log.d("도원","${data?.getStringExtra(Consts.TASKCREATEDAET)}")
+            }else if(requestCode==Consts.TASKTIMECODE){
+                Log.d("도원","${data?.getStringExtra(Consts.TASKCREATETIME)}")
             }
         }
 

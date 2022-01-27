@@ -19,6 +19,8 @@
         <activity android:name=".utils.MyDatePicker"
             />
 
+        <activity android:name=".utils.MyTimePicker"
+            />
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
