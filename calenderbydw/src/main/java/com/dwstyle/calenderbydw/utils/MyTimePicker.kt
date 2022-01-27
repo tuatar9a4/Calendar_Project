@@ -17,7 +17,10 @@ import com.dwstyle.calenderbydw.R
 import com.dwstyle.calenderbydw.adapters.PickerAdapter
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
+import org.joda.time.DateTimeFieldType
+import org.joda.time.LocalTime
 import java.lang.Exception
+import java.time.temporal.ChronoField
 
 class MyTimePicker : Activity() {
     private lateinit var RCAmPm :WearableRecyclerView
@@ -32,6 +35,7 @@ class MyTimePicker : Activity() {
     private var count =0;
 
     private val date =DateTime(System.currentTimeMillis()).toLocalDate();
+    private val time =LocalTime.now()
 
     private var selectAMPM ="AM";
     private var selectHour ="03";
@@ -45,13 +49,13 @@ class MyTimePicker : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.my_spinner_activity)
         tvSelectTime=findViewById(R.id.tvSelectDateTime)
-        tvSelectTime.text = "AM:03:22"
+        tvSelectTime.text = LocalTime.now().toString("aa hh:mm")
         RCAmPm=findViewById(R.id.RCYear);
         RCAmPm.setHasFixedSize(true)
         RCHour=findViewById(R.id.RCMonth)
         RCHour.setHasFixedSize(true);
         RCMinute=findViewById(R.id.RCDay)
-        Log.d("도원","time : ${date.toString("hh:mm")}")
+        Log.d("도원","time : ${DateTime.now().toLocalDateTime().toString("aa.hh.mm")}")
         RCMinute.layoutManager= LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL,false)
         itemHeight=TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,15f,applicationContext.getResources().getDisplayMetrics()).toInt()
 //        datSettingJob = CoroutineScope(Dispatchers.Main).launch {
@@ -120,8 +124,15 @@ class MyTimePicker : Activity() {
             }
         })
         RCAmPm.addItemDecoration(DateTimePickerDecoration(this,itemHeight))
-        RCAmPm.scrollToPosition(50);
-        RCAmPm.smoothScrollToPosition(50);
+        Log.d("도원","ㅇㅇㅇ ${time.plusHours(2).get(DateTimeFieldType.clockhourOfDay())}")
+        if (time.get(DateTimeFieldType.clockhourOfDay())<12){
+            RCAmPm.scrollToPosition(0)
+            RCAmPm.smoothScrollToPosition(0)
+        }else{
+            RCAmPm.scrollToPosition(1)
+            RCAmPm.smoothScrollToPosition(1)
+        }
+
 
     }
 
@@ -183,29 +194,15 @@ class MyTimePicker : Activity() {
             }
         })
         RCHour.addItemDecoration(DateTimePickerDecoration(this,itemHeight))
-        Log.d("도원","date.monthOfYear : ${date.monthOfYear}")
-        RCHour.scrollToPosition(date.monthOfYear);
-        RCHour.smoothScrollToPosition(date.monthOfYear-1);
-        hourAdapter.setSelectedPosition(date.monthOfYear-1);
+        RCHour.scrollToPosition(time.hourOfDay-1);
+        RCHour.smoothScrollToPosition(time.hourOfDay-1);
+        hourAdapter.setSelectedPosition(time.hourOfDay-1);
 //        monthAdapter.notifyDataSetChanged();
 //        monthAdapter.setSelectedPosition(0)
 
     }
 
     private fun settingDaySelector(){
-//        val firstDate =date.withDayOfMonth(1)
-//        val selectMonth =if (firstDate.monthOfYear.toString().length==1) "0${firstDate.monthOfYear.toString()}" else firstDate.monthOfYear.toString()
-//        val dayText = ArrayList<String>()
-//        for (a in 0 until 31){
-//            var temp =firstDate.plusDays(a).toString("MM.dd")
-//            val tmpe2 = temp.split(".")
-//            temp = if (tmpe2[1].length==1) "0${tmpe2[1]}" else tmpe2[1]
-//            Log.d("도원","temp : ${temp}  | firstDate.monthOfYear.toString() : ${firstDate.monthOfYear.toString()} || tmpe2[0] : ${tmpe2[0]}")
-//            if (selectMonth != tmpe2[0]){
-//                break
-//            }
-//            dayText.add(temp)
-//        }
         val llmanger =CenterRecyclerManager(this,itemHeight)
         llmanger.layoutCallback= object : WearableLinearLayoutManager.LayoutCallback() {
             private var progressToCenter: Float = 0f
@@ -251,7 +248,8 @@ class MyTimePicker : Activity() {
             }
         })
         RCMinute.addItemDecoration(DateTimePickerDecoration(this,itemHeight))
-
+        RCMinute.scrollToPosition(time.minuteOfHour);
+        RCMinute.smoothScrollToPosition(time.minuteOfHour);
 //        try{
 //            datSettingJob.cancel()
 //            datSettingJob = CoroutineScope(Dispatchers.Main).launch {
@@ -264,27 +262,6 @@ class MyTimePicker : Activity() {
 //        }catch (e : Exception){
 //            Log.d("도원","Expction : ${e.localizedMessage}");
 //        }
-
-    }
-
-    private fun setDayText(month : Int){
-        val firstDate = DateTime().withMonthOfYear(month).withDayOfMonth(1)
-        val selectMonth =if (firstDate.monthOfYear.toString().length==1) "0${firstDate.monthOfYear.toString()}" else firstDate.monthOfYear.toString()
-        val dayText = ArrayList<String>()
-        for (a in 0 until 31){
-            var temp =firstDate.plusDays(a).toString("MM.dd")
-            val tmpe2 = temp.split(".")
-            temp = if (tmpe2[1].length==1) "0${tmpe2[1]}" else tmpe2[1]
-            if (selectMonth != tmpe2[0]){
-                break
-            }
-            dayText.add(temp)
-        }
-        minuteAdapter.setItems(dayText)
-        if (selectMonth==if (date.monthOfYear.toString().length==1) "0${date.monthOfYear.toString()}" else date.monthOfYear.toString()){
-            RCMinute.scrollToPosition(date.dayOfMonth-1);
-            RCMinute.smoothScrollToPosition(date.dayOfMonth-1);
-        }
 
     }
 
