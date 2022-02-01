@@ -62,8 +62,8 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
         }
 
 
-        dbHelper= TaskDatabaseHelper(context,"wearTask.db",null,3);
-        database=dbHelper.readableDatabase
+//        dbHelper= TaskDatabaseHelper(context,"wearTask.db",null,3);
+//        database=dbHelper.readableDatabase
 //        try{
 //            var c2: Cursor =
 //                database.rawQuery("SELECT month,day,time,text,notice FROM myTaskTbl WHERE repeatY = 1", null);

@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.dwstyle.calenderbydw.item.HolidayItem
 import com.dwstyle.calenderbydw.item.TaskItem
+import com.dwstyle.calenderbydw.utils.SyncSendData
+import com.google.android.gms.wearable.DataClient
 
 class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDatabase.CursorFactory?,version: Int) : SQLiteOpenHelper(context,dbName,factory,version){
 // change_icon -> <a href="https://www.streamlinehq.com">Free Pencil 1 PNG icon by Streamline</a>
@@ -71,16 +73,17 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
 
     companion object{
 
-        fun deleteTask(_id : String,database : SQLiteDatabase){
+        fun deleteTask(_id : String,database : SQLiteDatabase,context: Context,dataClient : DataClient){
             if (database!=null){
                 var c2: Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
                 Log.d("도원","c2 ${c2.count}")
+                SyncSendData.changeDBToBytes(context,dataClient)
 //            var c2:Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${_id} ",null)
             }
         }
 
 
-        fun changeTask(taskItem: TaskItem,database: SQLiteDatabase){
+        fun changeTask(taskItem: TaskItem,database: SQLiteDatabase,context: Context,dataClient : DataClient){
             if (database!=null){
                 var c2: Cursor =database.rawQuery(
                     "UPDATE myTaskTbl SET " +
@@ -101,11 +104,12 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
                             " WHERE _id == ${taskItem._id} ",null)
                 while (c2.moveToNext()){
                 }
+                SyncSendData.changeDBToBytes(context,dataClient)
             }
 
         }
 
-        fun createTask(taskItem: TaskItem,database : SQLiteDatabase){
+        fun createTask(taskItem: TaskItem,database : SQLiteDatabase,context: Context,dataClient : DataClient){
 
             val contentValue = ContentValues();
             contentValue.put("year",taskItem.year)
@@ -124,6 +128,7 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
             contentValue.put("expectDay",taskItem.expectDay)
 
             database.insert("myTaskTbl",null,contentValue);
+            SyncSendData.changeDBToBytes(context,dataClient)
         }
 
         //년마다 반복 task 의 날짜만 (month.day) 찾기

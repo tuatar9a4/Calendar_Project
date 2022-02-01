@@ -8,5 +8,8 @@ class Consts {
         val TASKTIMECODE=2003
         val TASKCREATETIME="taskCreateTime"
 
+        val REVICETASKINFOCODE=4000
+        val REVICETASKINFO="taskInfoForCreate"
+
     }
 }

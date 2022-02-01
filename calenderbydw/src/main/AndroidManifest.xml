@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <uses-feature android:name="android.hardware.type.watch" />
+    <uses-feature android:name="android.hardware.type.watch" android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -30,7 +30,7 @@
         -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
-            android:value="false" />
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"

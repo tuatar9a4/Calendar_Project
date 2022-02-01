@@ -1,5 +1,6 @@
 package com.dwstyle.calenderbydw.fragments
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
@@ -31,6 +32,7 @@ import com.dwstyle.calenderbydw.item.DateOfListItem
 import com.dwstyle.calenderbydw.item.TaskItem
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.dwstyle.calenderbydw.utils.WidgetUtils
+import com.google.android.gms.wearable.Wearable
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import org.joda.time.DateTime
 import org.threeten.bp.ZoneOffset
@@ -112,7 +114,7 @@ class TaskListFragment : Fragment() {
             override fun OnDeleteClick(v: View, item: TaskItem, pos: Int) {
                 database=dbHelper.writableDatabase
                 CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
-                    TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+                    TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase,context!!,Wearable.getDataClient(context!!))
                     searchTaskOfSelectedDay(selectedCalendarDay!!)
                     context?.let {
                         WidgetUtils.updateWidgetData(it)
@@ -142,7 +144,8 @@ class TaskListFragment : Fragment() {
                     val intent = it.data
 //                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
                     if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
-                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase,requireContext(),
+                            Wearable.getDataClient(context))
                         searchTaskOfSelectedDay(selectedCalendarDay!!)
 //                        if (changePos!=-1){
 //                            dateOfListAdapter.notifyItemChanged(changePos)
@@ -235,7 +238,8 @@ class TaskListFragment : Fragment() {
     }
 
     //매주 반복
-    private fun searchTaskInRepeatWeek(week : Int,taskList : ArrayList<TaskItem>){
+    @SuppressLint("Range")
+    private fun searchTaskInRepeatWeek(week : Int, taskList : ArrayList<TaskItem>){
         database=dbHelper.readableDatabase
 
         try {
@@ -263,6 +267,7 @@ class TaskListFragment : Fragment() {
                                 c2.getInt(c2.getColumnIndex("repeatW")),
                                 c2.getInt(c2.getColumnIndex("repeatN")),
                                 c2.getInt(c2.getColumnIndex("priority")),
+                                0,
                                 ""
                             )
                             taskList.add(tempTask)
@@ -278,6 +283,7 @@ class TaskListFragment : Fragment() {
     }
 
     //선택된 날짜에 맞는 task 찾기
+    @SuppressLint("Range")
     private fun searchTaskInDay(year:Int, month:Int, day:Int, taskList : ArrayList<TaskItem>){
         database=dbHelper.readableDatabase
         try {
@@ -301,6 +307,7 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     taskList.add(tempTask)
@@ -321,6 +328,7 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     taskList.add(tempTask)
@@ -341,6 +349,7 @@ class TaskListFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     taskList.add(tempTask)

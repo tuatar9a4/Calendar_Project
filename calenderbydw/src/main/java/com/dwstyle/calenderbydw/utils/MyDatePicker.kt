@@ -29,6 +29,7 @@ class MyDatePicker : Activity() {
 
     private lateinit var tvSelectDateTime :TextView
     private lateinit var btnCompelete :Button
+    private lateinit var btnCancel : Button
     private var count =0;
 
     private val date =DateTime(System.currentTimeMillis()).toLocalDate();
@@ -56,7 +57,10 @@ class MyDatePicker : Activity() {
             delay(100)
             setDayText(selectMonth.toInt())
         }
-
+        btnCancel=findViewById(R.id.btnCancel)
+        btnCancel.setOnClickListener {
+            finish()
+        }
         btnCompelete=findViewById(R.id.btnCompelete)
         btnCompelete.setOnClickListener {
             val intent =Intent()

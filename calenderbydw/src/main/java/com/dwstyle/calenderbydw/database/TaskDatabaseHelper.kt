@@ -1,11 +1,13 @@
 package com.dwstyle.calenderbydw.database
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.dwstyle.calenderbydw.item.CreateTaskData
 
 class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDatabase.CursorFactory?,version: Int) : SQLiteOpenHelper(context,dbName,factory,version){
 
@@ -54,6 +56,59 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
     }
 
     companion object {
+        fun createTask(taskItem: CreateTaskData,database : SQLiteDatabase){
+            val contentValue = ContentValues();
+            contentValue.put("year",taskItem.year)
+            contentValue.put("month",taskItem.month)
+            contentValue.put("day",taskItem.day);
+            contentValue.put("week",taskItem.week);
+            contentValue.put("time",taskItem.time);
+            contentValue.put("title",taskItem.title);
+            contentValue.put("text",taskItem.text);
+            contentValue.put("repeatY",taskItem.repeatY);
+            contentValue.put("repeatM",taskItem.repeatM);
+            contentValue.put("repeatW",taskItem.repeatW);
+            contentValue.put("repeatN",taskItem.repeatN);
+            contentValue.put("notice",taskItem.notice);
+            contentValue.put("priority",taskItem.priority)
+            contentValue.put("expectDay",taskItem.expectDay)
+
+            database.insert("myTaskTbl",null,contentValue);
+        }
+
+        fun deleteTask(_id : String,database : SQLiteDatabase){
+            if (database!=null){
+                var c2: Cursor =database.rawQuery("DELETE FROM myTaskTbl  WHERE _id == ${_id.toInt()} ",null)
+                Log.d("도원","c2 ${c2.count}")
+//            var c2:Cursor =database.rawQuery("SELECT * FROM myTaskTbl  WHERE _id = ${_id} ",null)
+
+            }
+        }
+
+        fun changeTask(taskItem: CreateTaskData,database: SQLiteDatabase){
+            if (database!=null){
+                var c2: Cursor =database.rawQuery(
+                    "UPDATE myTaskTbl SET " +
+                            "year=${taskItem.year}," +
+                            "month=${taskItem.month}," +
+                            "day=${taskItem.day}," +
+                            "time=${taskItem.time}," +
+                            "title='${taskItem.title}'," +
+                            "text='${taskItem.text}'," +
+                            "week='${taskItem.week}'," +
+                            "repeatY=${taskItem.repeatY}," +
+                            "repeatM=${taskItem.repeatM}," +
+                            "repeatW=${taskItem.repeatW}," +
+                            "repeatN=${taskItem.repeatN}," +
+                            "notice=${taskItem.notice}," +
+                            "priority=${taskItem.priority}," +
+                            "expectDay='${taskItem.expectDay}'" +
+                            " WHERE _id == ${taskItem._id} ",null)
+                while (c2.moveToNext()){
+                }
+            }
+
+        }
 
 
         fun isExistsTable(database: SQLiteDatabase,tableName :String) : Boolean{

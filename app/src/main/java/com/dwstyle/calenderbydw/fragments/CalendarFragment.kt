@@ -1,5 +1,6 @@
 package com.dwstyle.calenderbydw.fragments
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -36,6 +37,7 @@ import com.dwstyle.calenderbydw.retrofit.HolidayRetrofit
 import com.dwstyle.calenderbydw.utils.CustomAlertDialog
 import com.dwstyle.calenderbydw.utils.ShowTaskDialog
 import com.dwstyle.calenderbydw.utils.WidgetUtils
+import com.google.android.gms.wearable.Wearable
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -231,7 +233,7 @@ class CalendarFragment : Fragment() {
             //삭제 선택시
             override fun onItemClick(v: View, item: TaskItem, pos: Int) {
                 CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
-                    TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+                    TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase,context!!,Wearable.getDataClient(context!!))
                     dailyTaskAdapter.deleteItemOfList(pos)
                     setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
                     context?.let {
@@ -247,7 +249,7 @@ class CalendarFragment : Fragment() {
                 taskDialog.showTask(item, {
                     //삭제
                     CustomAlertDialog(context!!).taskDeleteDialog( DialogInterface.OnClickListener { dialog, which ->
-                        TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase)
+                        TaskDatabaseHelper.deleteTask(item._id.toString(),dbHelper.writableDatabase,context!!,Wearable.getDataClient(context!!))
                         dailyTaskAdapter.deleteItemOfList(pos)
                         setDecorateForCalender(selectedDate.year,selectedDate.month,selectedDate)
                         context?.let {
@@ -277,7 +279,7 @@ class CalendarFragment : Fragment() {
 //                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
                     Log.d("도원","d뭐여 ${intent?.getParcelableExtra<TaskItem>("changeItem")}")
                     if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
-                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
+                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase,requireContext(), Wearable.getDataClient(context))
                         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
                         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
                         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)
@@ -331,6 +333,7 @@ class CalendarFragment : Fragment() {
 //    }
 
     //년마다 반복 task 의 날짜만 (month.day) 찾기
+    @SuppressLint("Range")
     fun searchTaskOfRepeatYearInDB(){
         dayOfRepeatYear.clear()
         database=dbHelper.readableDatabase
@@ -371,6 +374,7 @@ class CalendarFragment : Fragment() {
     }
 
     //월 마다 반복 TASK 찾기
+    @SuppressLint("Range")
     fun searchTaskOfRepeatMonthInDB(){
         dayOfRepeatMonth.clear()
         database=dbHelper.readableDatabase
@@ -407,6 +411,7 @@ class CalendarFragment : Fragment() {
     }
 
     //주마다 반복
+    @SuppressLint("Range")
     fun searchTaskOfRepeatWeekInDB(){
         dayOfRepeatWeek.clear()
         database=dbHelper.readableDatabase
@@ -444,6 +449,7 @@ class CalendarFragment : Fragment() {
     }
 
     //반복 안하는 Task 찾기
+    @SuppressLint("Range")
     fun searchTaskOfRepeatNoInDB(){
         dayOfRepeatNo.clear()
         database=dbHelper.readableDatabase
@@ -486,7 +492,8 @@ class CalendarFragment : Fragment() {
     }
 
     //해당 월에 맞는 task 찾기
-    fun searchTaskInDB(month : Int,year :Int){
+    @SuppressLint("Range")
+    fun searchTaskInDB(month : Int, year :Int){
         monthlyTaskList.clear()
         database=dbHelper.readableDatabase
         try {
@@ -510,6 +517,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                 )
@@ -520,7 +528,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
-
+    @SuppressLint("Range")
     private fun searchTaskInRepeatWeek(month :Int,day:Int,calendarDay: CalendarDay){
         dailyTaskList.clear()
         try {
@@ -548,6 +556,7 @@ class CalendarFragment : Fragment() {
                                 c2.getInt(c2.getColumnIndex("repeatW")),
                                 c2.getInt(c2.getColumnIndex("repeatN")),
                                 c2.getInt(c2.getColumnIndex("priority")),
+                                0,
                                 ""
                             )
                             dailyTaskList.add(tempTask)
@@ -570,6 +579,7 @@ class CalendarFragment : Fragment() {
     }
 
     //선택된 날짜에 맞는 task 찾기
+    @SuppressLint("Range")
     private fun searchTaskInDay(month :Int,day:Int,calendarDay: CalendarDay){
         database=dbHelper.readableDatabase
         try {
@@ -593,6 +603,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     dailyTaskList.add(tempTask)
@@ -613,6 +624,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     dailyTaskList.add(tempTask)
@@ -633,6 +645,7 @@ class CalendarFragment : Fragment() {
                         c2.getInt(c2.getColumnIndex("repeatW")),
                         c2.getInt(c2.getColumnIndex("repeatN")),
                         c2.getInt(c2.getColumnIndex("priority")),
+                        0,
                         ""
                     )
                     dailyTaskList.add(tempTask)
@@ -738,6 +751,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
+    @SuppressLint("Range")
     fun checkTBLNAME(){
         //테이블 명 파악하는 메소드
         database=dbHelper.writableDatabase

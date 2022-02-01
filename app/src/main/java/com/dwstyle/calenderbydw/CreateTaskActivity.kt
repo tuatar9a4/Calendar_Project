@@ -313,13 +313,13 @@ class CreateTaskActivity : AppCompatActivity() {
                     intent.putExtra("createItem",
                         TaskItem(
                             0,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendTitle,sendText,
-                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""))
+                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,0,""))
 
                 }else if (type.equals("change")){
                     intent.putExtra("changeItem",
                         TaskItem(
                             _id,sendYear,sendMonth,sendDay,sendWeek,sendTimemllis,sendTitle,sendText,
-                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,""))
+                            sendNotice,sendRepeatY,sendRepeatM,sendRepeatW,sendRepeatN,sendPriority,0,""))
                 }
                 setResult(RESULT_OK,intent)
                 finish()

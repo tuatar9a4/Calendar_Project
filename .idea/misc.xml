@@ -5,6 +5,7 @@
       <map>
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/calendar_background.xml" value="0.2564102564102564" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/calendar_select_gradiant.xml" value="0.2564102564102564" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/custom_checkbox.xml" value="0.8527777777777777" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/custom_repeat_checkbox.xml" value="0.2657407407407407" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/edit_background_round_10.xml" value="0.2564102564102564" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/drawable/main_create_btn_img.xml" value="0.2657407407407407" />
@@ -32,8 +33,10 @@
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/task_list_item_layout.xml" value="0.25" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/widget_calender_grid_item.xml" value="0.67" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/app/src/main/res/layout/write_task_layout.xml" value="0.22" />
-        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_create_simple_task.xml" value="0.5725806451612904" />
-        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_main.xml" value="0.6862745098039216" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/drawable/repeat_on_off.xml" value="0.8166666666666667" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/drawable/strok_line.xml" value="0.6777777777777778" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_create_simple_task.xml" value="0.7121212121212122" />
+        <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_main.xml" value="0.6380597014925373" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_my_date_time_picker.xml" value="0.67" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/activity_tile.xml" value="0.6862745098039216" />
         <entry key="..\:/DWProject/MyCalendar/Calendar_Project/calenderbydw/src/main/res/layout/custom_date_picker.xml" value="0.42136498516320475" />

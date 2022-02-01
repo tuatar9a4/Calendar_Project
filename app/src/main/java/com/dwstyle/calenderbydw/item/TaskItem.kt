@@ -19,5 +19,6 @@ data class TaskItem (
     var repeatW :Int,
     var repeatN :Int,
     var priority :Int,
+    var isHoliday :Int,
     var expectDay :String
         ) :Parcelable

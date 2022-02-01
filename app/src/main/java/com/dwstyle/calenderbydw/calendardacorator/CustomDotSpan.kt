@@ -62,8 +62,6 @@ class CustomDotSpan : DotSpan {
             //반복 없음
             paint.color= Color.parseColor("#6792f9")
 
-            Log.d("도원","x :${x} , bottom : ${bottom} , R : ${radius} ")
-            Log.d("도원","x :${x} , y : ${bottom+(radius)} , R : ${radius} , paint : ${paint.color}")
             canvas.drawCircle(x,bottom+(radius),radius,paint)
         }
 

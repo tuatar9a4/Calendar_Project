@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                     if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
                         database=dbHelper.writableDatabase
                         dbHelper.onCreate(database)
-                        TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database)
+                        TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database,applicationContext,Wearable.getDataClient(applicationContext))
                         calendarFragment.notifydataChange()
                         taskListFragment.notifydataChange()
                         WidgetUtils.updateWidgetData(applicationContext)
@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
                     .setUrgent()
 
                 val result =dataClient.putDataItem(putDataReq).await()
-
+                Log.d("도원", "moblie saved: ${putDataReq.uri}")
                 Log.d("도원", "DataItem saved: $result")
             } catch (cancellationException: CancellationException) {
                 Log.d("도원", "Saving DataItem failed: ${cancellationException.localizedMessage}")

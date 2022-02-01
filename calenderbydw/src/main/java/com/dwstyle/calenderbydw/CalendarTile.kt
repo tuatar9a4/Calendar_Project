@@ -123,7 +123,6 @@ class CalendarTile : TileService(){
     // 타일의 구성을 위한 method
     fun myLayout(deviceParameters: DeviceParametersBuilders.DeviceParameters) : LayoutElementBuilders.LayoutElement{
         //달력 구성을 위한 정보를 미리 가져옴
-        Log.d("도원","clickType : "+clickType)
         getCalendar(clickType)
         // Column : 타일의 구성 요소를 열(세로) 로 정렬
         // 첫 addContent : (Spacer) 상단에서 30f 만큼의 공간을 만든다 / 워치가 원형이다 보니 중앙으로 구성을 맞추기 위함
@@ -136,14 +135,14 @@ class CalendarTile : TileService(){
                 LayoutElementBuilders.Row.Builder().setWidth(wrap()).setVerticalAlignment(LayoutElementBuilders.VerticalAlignmentProp.Builder()
                     .setValue(VERTICAL_ALIGN_CENTER).build())
                     .addContent(
-                        LayoutElementBuilders.Image.Builder().setHeight(dp(7f)).setWidth(dp(20f))
+                        LayoutElementBuilders.Spacer.Builder().setHeight(dp(7f)).setWidth(dp(20f))
                             .setModifiers(ModifiersBuilders.Modifiers.Builder()
                             .setClickable(
                                 ModifiersBuilders.Clickable.Builder()
                                     .setId("Minus")
                                     .setOnClick(ActionBuilders.LoadAction.Builder().build())
                                     .build()).build())
-                            .setResourceId("next_icon").build()
+                            .build()
                     )
                     .addContent(
                         LayoutElementBuilders.Text.Builder().setMultilineAlignment(LayoutElementBuilders.TextAlignmentProp.Builder().setValue(
@@ -208,14 +207,14 @@ class CalendarTile : TileService(){
                                 .build()).build()
                     )
                     .addContent(
-                        LayoutElementBuilders.Image.Builder().setHeight(dp(7f)).setWidth(dp(20f))
+                        LayoutElementBuilders.Spacer.Builder().setHeight(dp(7f)).setWidth(dp(20f))
                             .setModifiers(ModifiersBuilders.Modifiers.Builder()
                                 .setClickable(
                                     ModifiersBuilders.Clickable.Builder()
                                         .setId("Plus")
                                         .setOnClick(ActionBuilders.LoadAction.Builder().build())
                                         .build()).build())
-                            .setResourceId("pre_icon").build()
+                            .build()
                     )
                     .build())
                     .addContent(
@@ -278,7 +277,6 @@ class CalendarTile : TileService(){
             dotContainer=LayoutElementBuilders.Row.Builder().setWidth(wrap())
 //            isItem = count==3
             //날짜의 색상  먼저 전달인지 확인하고 그 후 오늘인지 다음으로 일요일 토요일 평일 순으로 확인
-            Log.d("도원","-----------------------------")
 //            Log.d("도원","holidaySet  : ${holidaySet}")
 //            Log.d("도원","dotDaySetY  : ${dotDaySetY}")
 //            Log.d("도원","dotDaySetM  : ${dotDaySetM}")
@@ -322,7 +320,6 @@ class CalendarTile : TileService(){
 //                }
 //            }
             if (dotDaySetN.contains(strMonthDay)){
-                Log.d("도원","dotDaySetN Dot : ${strMonthDay}")
                 isDot=true
                 scheduleItem=LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f)).setResourceId("dot_day")
                 dotContainer.addContent(scheduleItem.build())

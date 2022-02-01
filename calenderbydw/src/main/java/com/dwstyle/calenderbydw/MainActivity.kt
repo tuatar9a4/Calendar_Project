@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -17,15 +18,29 @@ import android.widget.TextView
 import androidx.core.view.InputDeviceCompat
 import androidx.core.view.MotionEventCompat
 import androidx.core.view.ViewConfigurationCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.wear.widget.WearableLinearLayoutManager
 import androidx.wear.widget.WearableRecyclerView
 import com.dwstyle.calenderbydw.adapters.MyTaskAdapter
 import com.dwstyle.calenderbydw.database.TaskDatabaseHelper
+import com.dwstyle.calenderbydw.item.CreateTaskData
+import com.dwstyle.calenderbydw.utils.Consts
+import com.dwstyle.calenderbydw.utils.SendSyncData
 import com.dwstyle.calenderbydw.utils.TaskRecyclerViewDecoration
+import com.google.android.gms.wearable.Asset
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.launch
 import org.joda.time.DateTime
+import java.io.File
+import java.lang.Exception
+import java.nio.file.Files
+import java.time.Instant
 import java.util.*
+import java.util.concurrent.CancellationException
 import kotlin.Comparator
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -55,6 +70,9 @@ class MainActivity : Activity() {
     private var fromWidget =false;
     private lateinit var currentDate :DateTime
     private lateinit var toDayDateTime : DateTime
+
+    private val dataClient by lazy { Wearable.getDataClient(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -164,7 +182,7 @@ class MainActivity : Activity() {
         btnCreate=findViewById(R.id.btnCreate)
         btnCreate.setOnClickListener {
             val intent =Intent(applicationContext,CreateSimpleTaskActivity::class.java)
-            startActivityForResult(intent,1003)
+            startActivityForResult(intent,Consts.REVICETASKINFOCODE)
         }
 
     }
@@ -188,7 +206,6 @@ class MainActivity : Activity() {
         currentPlusSevenDate.clear()
         taskLists.clear()
         currentDate =DateTime(initMillis)
-        Log.d("도원","WEEK_OF_MONTH : ${currentDate.monthOfYear()}월 ${currentDate.toCalendar(Locale.getDefault()).get(Calendar.WEEK_OF_MONTH)}주")
         //현재 시간에 해당하는 날짜 +7
         currentPlusSevenDate.add(currentDate.toString("yyyy.MM.dd.E"))
         getTaskFromDateVerWeek(currentDate.toString("yyyy.MM.dd.E"))
@@ -200,8 +217,6 @@ class MainActivity : Activity() {
         getTaskFromDate(DateTime(initMillis).toString("yyyy.MM.dd.E"))
 
         taskLists.toSortedMap(Comparator { t, t2 -> if(t>t2) 1 else 2 })
-        Log.d("도원","currentPlusSevenDate : ${currentPlusSevenDate}")
-        Log.d("도원","taskLists : ${taskLists}")
         taskAdapter.setItems(currentPlusSevenDate,taskLists)
         tvTopTitle.text="${currentDate.monthOfYear}월 ${currentDate.toCalendar(Locale.getDefault()).get(Calendar.WEEK_OF_MONTH)}주 중"
 
@@ -224,16 +239,16 @@ class MainActivity : Activity() {
     fun settingMonthDay(str:Int)=if (str.toString().length==1) "0${str}" else "${str}"
     //년도 반복에서 얻기
     fun getTaskRepeatY(year:String,month:String){
-        val corsor =database.rawQuery("SELECT month,day,title FROM myTaskTbl WHERE repeatY==1 AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT month,day,title,_id FROM myTaskTbl WHERE repeatY==1 AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
 
             if (taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]==null){
                 taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]=
-                    arrayListOf<String>(corsor.getString(2))
+                    arrayListOf<String>(corsor.getString(2)+"&"+corsor.getInt(3))
             }else{
                 tempTaskList=taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]!!
-                tempTaskList.add(corsor.getString(2))
+                tempTaskList.add(corsor.getString(2)+"&"+corsor.getInt(3))
                 taskLists["${year}.${settingMonthDay(corsor.getInt(0))}.${settingMonthDay(corsor.getInt(1))}"]=tempTaskList
             }
         }
@@ -241,15 +256,15 @@ class MainActivity : Activity() {
 
     //딜 반복에서 얻기
     fun getTaskRepeatM(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,title FROM myTaskTbl WHERE repeatM==1",null)
+        val corsor =database.rawQuery("SELECT day,title,_id FROM myTaskTbl WHERE repeatM==1",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
             if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
                 taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=
-                    arrayListOf<String>(corsor.getString(1))
+                    arrayListOf<String>(corsor.getString(1)+"&"+corsor.getInt(2))
             }else{
                 tempTaskList=taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]!!
-                tempTaskList.add(corsor.getString(1))
+                tempTaskList.add(corsor.getString(1)+"&"+corsor.getInt(2))
                 taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=tempTaskList
             }
         }
@@ -258,7 +273,7 @@ class MainActivity : Activity() {
     private var weekRepeat = HashSet<String>()
     //주 반복에서 얻기
     fun getTaskRepeatW(weekStr :String){
-        val corsor =database.rawQuery("SELECT week,title FROM myTaskTbl WHERE repeatW==1",null)
+        val corsor =database.rawQuery("SELECT week,title,_id FROM myTaskTbl WHERE repeatW==1",null)
         var tempTaskList = ArrayList<String>()
         weekRepeat.clear()
         val dateSplit = weekStr.split(".")
@@ -268,10 +283,10 @@ class MainActivity : Activity() {
             if (weekRepeat.contains(weekStrTransInt(dateSplit[3]).toString())){
                 if (taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]==null){
                     taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]=
-                        arrayListOf<String>(corsor.getString(1))
+                        arrayListOf<String>(corsor.getString(1)+"&"+corsor.getInt(2))
                 }else{
                     tempTaskList=taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]!!
-                    tempTaskList.add(corsor.getString(1))
+                    tempTaskList.add(corsor.getString(1)+"&"+corsor.getInt(2))
                     taskLists["${dateSplit[0]}.${settingMonthDay(dateSplit[1].toInt())}.${settingMonthDay(dateSplit[2].toInt())}"]=tempTaskList
                 }
             }
@@ -316,15 +331,15 @@ class MainActivity : Activity() {
 
     //반복 없음에서 얻기
     fun getTaskRepeatN(year:String,month:String){
-        val corsor =database.rawQuery("SELECT day,text,title FROM myTaskTbl WHERE repeatN==1 AND year == ${year} AND month == ${month}",null)
+        val corsor =database.rawQuery("SELECT day,text,title,_id FROM myTaskTbl WHERE repeatN==1 AND year == ${year} AND month == ${month}",null)
         var tempTaskList = ArrayList<String>()
         while (corsor.moveToNext()){
             if (taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]==null){
                 taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=
-                    arrayListOf<String>(corsor.getString(2))
+                    arrayListOf<String>(corsor.getString(2)+"&"+corsor.getInt(3))
             }else{
                 tempTaskList=taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]!!
-                tempTaskList.add(corsor.getString(2))
+                tempTaskList.add(corsor.getString(2)+"&"+corsor.getInt(3))
                 taskLists["${year}.${settingMonthDay(month.toInt())}.${settingMonthDay(corsor.getInt(0))}"]=tempTaskList
             }
         }
@@ -335,6 +350,67 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         Log.d("도원","WearApp onResume ")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK){
+            if (requestCode == Consts.REVICETASKINFOCODE){
+
+                Log.d("도원","데이터 ${data?.getParcelableExtra<CreateTaskData>(Consts.REVICETASKINFO)}")
+                data?.let {
+                    TaskDatabaseHelper.createTask((it.getParcelableExtra<CreateTaskData>(Consts.REVICETASKINFO) as CreateTaskData),dbHelper.readableDatabase)
+                    SendSyncData.changeDBToBytes(applicationContext,dataClient)
+//                    changeDBToBytes()
+                    getTodayToSeven((it.getParcelableExtra<CreateTaskData>(Consts.REVICETASKINFO) as CreateTaskData).time)
+                }
+            }
+
+        }
+    }
+
+    //데이터 전송하기 전에 DB를 byteArray형태로 변경
+    private fun changeDBToBytes(){
+        //DB 경로를 구한 한다.
+        val dbPath = TaskDatabaseHelper(applicationContext,"wearTask.db",null,3).readableDatabase.path
+        val dbFile = File(dbPath)
+        val dbUri = Uri.fromFile(dbFile)
+//        val realAsset = Asset.createFromUri(dbUri)
+        val bytesFromDB = Files.readAllBytes(dbFile.toPath())
+        val realAsset = Asset.createFromBytes(bytesFromDB)
+        sendDBData(realAsset,dbPath)
+    }
+
+
+    //Asset 으로 만든 데이터 보내기
+    private fun sendDBData(sendData : Asset, dBPtah : String) {
+//        val dataMap : PutDataMapRequest = PutDataMapRequest.create("/taskdata")
+//        dataMap.dataMap.putAsset("taskDB",sendData)
+//        dataMap.dataMap.putString("taskDBPath",dBPtah)
+//        Log.d("도원","dBPtah :  ${dBPtah}")
+//        val request : PutDataRequest= dataMap.asPutDataRequest()
+//        request.setUrgent()
+//        val putTask : Task<DataItem> =Wearable.getDataClient(this).putDataItem(request)
+        try {
+            val putDataReq = PutDataMapRequest.create("/taskdata").apply {
+                this.dataMap.putAsset("taskDB", sendData)
+                this.dataMap.putString("taskDBPath", dBPtah)
+                this.dataMap.putLong("KEY", Instant.now().epochSecond)
+
+            }
+                .asPutDataRequest()
+                .setUrgent()
+
+            val result = dataClient.putDataItem(putDataReq)
+
+            Log.d("도원", "putDataReq.uri: $putDataReq.uri")
+            Log.d("도원", "DataItem saved: $result")
+        } catch (cancellationException: CancellationException) {
+            Log.d("도원", "Saving DataItem failed: ${cancellationException.localizedMessage}")
+            throw cancellationException
+        } catch (exception: Exception) {
+            Log.d("도원", "Saving DataItem failed: $exception")
+        }
     }
 
 }

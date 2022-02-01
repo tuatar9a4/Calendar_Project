@@ -56,6 +56,27 @@
         <service
             android:name=".adapters.WidgetAdapter"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <service
+            android:name=".serviece.DataRecevieService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:path="/taskdata"
+                    android:scheme="wear" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+
+                <data
+                    android:host="*"
+                    android:path="*"
+                    android:scheme="wear" />
+            </intent-filter>
+
+        </service>
     </application>
 
 </manifest>

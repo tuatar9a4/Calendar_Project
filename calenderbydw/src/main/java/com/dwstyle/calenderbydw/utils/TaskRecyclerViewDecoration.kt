@@ -21,7 +21,7 @@ class TaskRecyclerViewDecoration(private val activity: Activity) : RecyclerView.
             outRect.top=20
             outRect.bottom=LengthUtils.getDeviceHeight(activity)/2
         }else {
-            outRect.top=20
+            outRect.top=25
         }
     }
 }

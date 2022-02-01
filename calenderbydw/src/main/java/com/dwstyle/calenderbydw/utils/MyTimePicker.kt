@@ -32,6 +32,7 @@ class MyTimePicker : Activity() {
 
     private lateinit var tvSelectTime :TextView
     private lateinit var btnCompelete :Button
+    private lateinit var btnCancel : Button
     private var count =0;
 
     private val date =DateTime(System.currentTimeMillis()).toLocalDate();
@@ -62,7 +63,10 @@ class MyTimePicker : Activity() {
 //            delay(100)
 //            setDayText(selectHour.toInt())
 //        }
-
+        btnCancel=findViewById(R.id.btnCancel)
+        btnCancel.setOnClickListener {
+            finish()
+        }
         btnCompelete=findViewById(R.id.btnCompelete)
         btnCompelete.setOnClickListener {
             val intent =Intent()
