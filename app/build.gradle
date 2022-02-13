@@ -27,11 +27,11 @@ android {
 
 
     defaultConfig {
-        applicationId "com.dwstyle.calenderbydw"
+        applicationId "com.devd.calenderbydw"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 1060
-        versionName "1.0.6"
+        versionCode 1070
+        versionName "1.0.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

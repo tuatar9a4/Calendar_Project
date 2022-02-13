@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dwstyle.calenderbydw">
+    package="com.devd.calenderbydw">
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -13,13 +13,13 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
         <activity
-            android:name=".CreateSimpleTaskActivity"
+            android:name="com.devd.calenderbydw.CreateSimpleTaskActivity"
             android:exported="true" />
 
-        <activity android:name=".utils.MyDatePicker"
+        <activity android:name="com.devd.calenderbydw.utils.MyDatePicker"
             />
 
-        <activity android:name=".utils.MyTimePicker"
+        <activity android:name="com.devd.calenderbydw.utils.MyTimePicker"
             />
         <uses-library
             android:name="com.google.android.wearable"
@@ -33,7 +33,7 @@
             android:value="true" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.devd.calenderbydw.MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -49,7 +49,7 @@
         </activity>
 
         <service
-            android:name=".service.DataLayerListenerService"
+            android:name="com.devd.calenderbydw.service.DataLayerListenerService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
@@ -69,7 +69,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".CalendarTile"
+            android:name="com.devd.calenderbydw.CalendarTile"
             android:description="@string/app_name"
             android:exported="true"
             android:label="@string/calendar"

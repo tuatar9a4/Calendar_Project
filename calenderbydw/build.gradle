@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.dwstyle.calenderbydw"
+        applicationId "com.devd.calenderbydw"
         minSdkVersion 28
         targetSdkVersion 31
         versionCode 106

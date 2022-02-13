@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dwstyle.calenderbydw">
+    package="com.devd.calenderbydw">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,7 +13,7 @@
         android:theme="@style/Theme.CalenderByDW"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".SplashActivity"
+            android:name="com.devd.calenderbydw.SplashActivity"
             android:exported="true"
             android:theme="@style/mainStyle">
             <intent-filter>
@@ -24,12 +24,12 @@
         </activity>
 
         <receiver
-            android:name=".CalendarWidget"
+            android:name="com.devd.calenderbydw.CalendarWidget"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.dwstyle.calenderbydw.COLLECTION_VIEW_ACTION"/>
-                <action android:name="com.dwstyle.calenderbydw.BT_REFRESH_ACTION"/>
+                <action android:name="com.devd.calenderbydw.COLLECTION_VIEW_ACTION"/>
+                <action android:name="com.devd.calenderbydw.BT_REFRESH_ACTION"/>
             </intent-filter>
 
             <meta-data
@@ -38,7 +38,7 @@
         </receiver>
 
         <activity
-            android:name=".CreateTaskActivity"
+            android:name="com.devd.calenderbydw.CreateTaskActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
@@ -47,18 +47,18 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.devd.calenderbydw.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/mainStyle">
 
         </activity>
 
         <service
-            android:name=".adapters.WidgetAdapter"
+            android:name="com.devd.calenderbydw.adapters.WidgetAdapter"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <service
-            android:name=".serviece.DataRecevieService"
+            android:name="com.devd.calenderbydw.serviece.DataRecevieService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
