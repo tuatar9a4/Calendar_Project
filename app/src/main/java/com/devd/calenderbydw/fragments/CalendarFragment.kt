@@ -132,23 +132,34 @@ class CalendarFragment : Fragment() {
     }
 
     private fun bindData(v: View){
-        holidayRetrofit.getHolidayItems().observe(viewLifecycleOwner,
-            { t :ArrayList<HolidayItem> ->
-                synchronized(t){
-                    if (t.size>0){
-                        if (!TaskDatabaseHelper.isExistsTable(dbHelper.readableDatabase,"holiday${t[0].year}Tbl")){
-                            dbHelper.createHolidayTbl(dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
-                            for (item in t){
-                                TaskDatabaseHelper.createHoliday(item,dbHelper.writableDatabase,"holiday${t[0].year}Tbl")
-                            }
+        holidayRetrofit.getHolidayItems().observe(viewLifecycleOwner
+        ) { t: ArrayList<HolidayItem> ->
+            synchronized(t) {
+                if (t.size > 0) {
+                    if (!TaskDatabaseHelper.isExistsTable(
+                            dbHelper.readableDatabase,
+                            "holiday${t[0].year}Tbl"
+                        )
+                    ) {
+                        dbHelper.createHolidayTbl(
+                            dbHelper.writableDatabase,
+                            "holiday${t[0].year}Tbl"
+                        )
+                        for (item in t) {
+                            TaskDatabaseHelper.createHoliday(
+                                item,
+                                dbHelper.writableDatabase,
+                                "holiday${t[0].year}Tbl"
+                            )
                         }
                     }
                 }
-                if (!justDb){
-                    initCalendarSetting(v)
-                    justDb=true
-                }
-            })
+            }
+            if (!justDb) {
+                initCalendarSetting(v)
+                justDb = true
+            }
+        }
     }
 
     private fun initCalendarSetting(view : View){

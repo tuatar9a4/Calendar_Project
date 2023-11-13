@@ -6,8 +6,8 @@ apply plugin: 'com.google.gms.google-services'
 
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 33
+    buildToolsVersion "33.0.1"
 
     signingConfigs {
         release {
@@ -29,9 +29,9 @@ android {
     defaultConfig {
         applicationId "com.devd.calenderbydw"
         minSdkVersion 26
-        targetSdkVersion 30
-        versionCode 1070
-        versionName "1.0.7"
+        targetSdkVersion 33
+        versionCode 1100
+        versionName "1.0.10"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

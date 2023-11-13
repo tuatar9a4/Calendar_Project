@@ -3,6 +3,7 @@ package com.devd.calenderbydw.utils
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.util.Log
 
 class SharedDataUtils {
     companion object{
@@ -18,6 +19,7 @@ class SharedDataUtils {
         }
 
         fun getDateMillis(context: Context) : Long {
+            Log.d("MillsCheck","Check -> ${getSharedPreferences(context).getLong(PREFERENCE_WIDGET_DATE, 0)}")
             return getSharedPreferences(context).getLong(PREFERENCE_WIDGET_DATE, 0)
         }
 

@@ -25,7 +25,6 @@ class HolidayRetrofit {
         val doc = jsoup.get()
 
         val elements: Elements = doc.select("body").select("items").select("item")
-//        Log.d("도원","${year}_성공 , ${elements.size}")
         synchronized(holidayListItems){
             holidayListItems.clear()
             for (ele in elements){

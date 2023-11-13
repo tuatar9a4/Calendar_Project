@@ -80,8 +80,7 @@ class CalendarWidget : AppWidgetProvider() {
                 this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
                 Log.d("도원","next onUpdate ${getCalendarSharedData(it)}")
             }
-        }
-        else if (RECEIVE_ADAPTER == intent?.action){
+        }else if (RECEIVE_ADAPTER == intent?.action){
             context?.let {
                 val receiveDate = intent.getStringExtra(COLLECTION_VIEW_EXTRA)
                 Log.d("도원"," Code : $receiveDate  =>> currentReceiveDate : $currentReceiveDate")
@@ -97,7 +96,6 @@ class CalendarWidget : AppWidgetProvider() {
                         val manager =AppWidgetManager.getInstance(it)
                         manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)),R.id.gvCalendar)
                         this.onUpdate(it,manager,manager.getAppWidgetIds(ComponentName(it, CalendarWidget::class.java)))
-
                     }
                 }
 
@@ -111,7 +109,7 @@ class CalendarWidget : AppWidgetProvider() {
         }
     }
 
-     fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+     private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
         // Construct the RemoteViews object
         val views = RemoteViews(context.packageName, R.layout.calendar_widget)
         views.setOnClickPendingIntent(R.id.btnPreMonth, getPendingSelfIntent(context,"PreMonth","??"))
@@ -133,7 +131,7 @@ class CalendarWidget : AppWidgetProvider() {
         gridIntent.action = RECEIVE_ADAPTER
         gridIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetId)
         gridIntent.data = Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME))
-        val pendingIntent = PendingIntent.getBroadcast(context,0,gridIntent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(context,0,gridIntent,PendingIntent.FLAG_MUTABLE)
         views.setPendingIntentTemplate(R.id.gvCalendar,pendingIntent)
         val showDateTime = DateTime(getCalendarSharedData(context))
         views.setTextViewText(R.id.tvTopDate,"${showDateTime.year}.${showDateTime.monthOfYear}.${showDateTime.dayOfMonth}")
@@ -142,11 +140,11 @@ class CalendarWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    fun getPendingSelfIntent (context: Context,code1 :String, code:String): PendingIntent {
+    private fun getPendingSelfIntent (context: Context, code1 :String, code:String): PendingIntent {
         val intent = Intent(context,CalendarWidget::class.java)
         intent.action = code1
         intent.putExtra("date",code)
-        return PendingIntent.getBroadcast(context,0,intent,0)
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     fun getCalendarSharedData(context : Context ) : Long{

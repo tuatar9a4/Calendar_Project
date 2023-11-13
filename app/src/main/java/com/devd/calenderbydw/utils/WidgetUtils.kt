@@ -31,6 +31,7 @@ class WidgetUtils {
 //        val realAsset = Asset.createFromUri(dbUri)
             val bytesFromDB = Files.readAllBytes(dbFile.toPath())
             val realAsset = Asset.createFromBytes(bytesFromDB)
+            Log.d("도원","흠..$dbPath : ${File(dbPath).exists()}")
             sendDBData(realAsset,dbPath,context)
         }
 

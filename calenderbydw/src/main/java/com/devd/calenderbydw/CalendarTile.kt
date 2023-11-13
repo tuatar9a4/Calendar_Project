@@ -22,7 +22,7 @@ private const val RESOURCES_VERSION = "1"
 
 class CalendarTile : TileService(){
 
-    private var calendarTopTextSize=8f
+    private var calendarTopTextSize=9f
     private var calendarSpace =0f
     private var calendarWeekTextSize=12f
     private var daySpace=9f
@@ -356,7 +356,7 @@ class CalendarTile : TileService(){
             //오늘날짜
             if (strMonthDay.equals(currentDate)){
                 calendarDayRow.addContent(
-                    LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
+                    LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(calendarWeekTextSize+8f))
                         .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP).addContent(
                             LayoutElementBuilders.Column.Builder()
                                 .addContent(
@@ -376,7 +376,7 @@ class CalendarTile : TileService(){
             }else{
 //                오늘을 제외한 날짜
                 calendarDayRow.addContent(
-                    LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(20f))
+                    LayoutElementBuilders.Box.Builder().setWidth(dp(20f)).setHeight(dp(calendarWeekTextSize+8f))
                         .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_TOP).addContent(
                             LayoutElementBuilders.Column.Builder()
                                 .addContent(
