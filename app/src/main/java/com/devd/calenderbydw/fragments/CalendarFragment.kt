@@ -286,7 +286,7 @@ class CalendarFragment : Fragment() {
 //                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
                     Log.d("도원","d뭐여 ${intent?.getParcelableExtra<TaskItem>("changeItem")}")
                     if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
-                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase,requireContext(), Wearable.getDataClient(context))
+                        TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase,requireContext(), Wearable.getDataClient(requireContext()))
                         searchTaskInRepeatWeek(selectedDate.month,selectedDate.day,selectedDate)
                         searchTaskInDay(selectedDate.month,selectedDate.day,selectedDate)
                         setDecorateForCalender(selectedDate.year,selectedDate.month,calendarView.currentDate)

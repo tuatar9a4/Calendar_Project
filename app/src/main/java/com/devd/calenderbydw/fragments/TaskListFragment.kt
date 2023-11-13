@@ -145,7 +145,7 @@ class TaskListFragment : Fragment() {
 //                    TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase)
                     if (intent?.getParcelableExtra<TaskItem>("changeItem")!=null){
                         TaskDatabaseHelper.changeTask(intent.getParcelableExtra<TaskItem>("changeItem")!!,dbHelper.writableDatabase,requireContext(),
-                            Wearable.getDataClient(context))
+                            Wearable.getDataClient(requireContext()))
                         searchTaskOfSelectedDay(selectedCalendarDay!!)
 //                        if (changePos!=-1){
 //                            dateOfListAdapter.notifyItemChanged(changePos)
