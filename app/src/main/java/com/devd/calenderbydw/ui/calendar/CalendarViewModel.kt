@@ -36,17 +36,18 @@ class CalendarViewModel @Inject constructor(
                 if (this.isNotEmpty()) {
                     when (this[0]) {
                         is HolidayDbData -> {
-                            val item =this
-                            getCalendarDate( item.map { (it as HolidayDbData).toHolidayItem() })
+                            val item = this
+                            getCalendarDate(item.map { (it as HolidayDbData).toHolidayItem() })
 //                            holidayRepository.getHolidayOfYear(encodeKey, calendar.get(Calendar.YEAR),true,item.size)
                         }
+
                         is HolidayItem -> {
-                            getCalendarDate( this.map { it as HolidayItem })
+                            getCalendarDate(this.map { it as HolidayItem })
 
                         }
                     }
-                }else{
-                    getCalendarDate( listOf())
+                } else {
+                    getCalendarDate(listOf())
                 }
 
             }
@@ -59,7 +60,6 @@ class CalendarViewModel @Inject constructor(
      */
     @SuppressLint("SimpleDateFormat")
     private fun getCalendarDate(holidayInfo: List<HolidayItem>) {
-        Timber.d("Calendar holidayCheck holidayInfo: ${holidayInfo}")
         viewModelScope.launch {
             val calendar = Calendar.getInstance()
             val monthDataList = arrayListOf<CalendarData>()
@@ -67,70 +67,101 @@ class CalendarViewModel @Inject constructor(
                 calendar.time = Date()
                 calendar.add(Calendar.MONTH, monthCount)
                 val tempMonth = calendar.get(Calendar.MONTH) + 1
+                val tempYear = calendar.get(Calendar.YEAR)
                 val calendarList = arrayListOf<CalendarDayData>()
-//                val weeks = getMonthWeekCount(calendar)
                 calendar.set(Calendar.DAY_OF_MONTH, 1)   // 달의 첫번째로 이동
                 val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
                 val firstWeek = calendar.get(Calendar.DAY_OF_WEEK)
-                if(firstWeek !=1){
-                    calendar.add(Calendar.DAY_OF_MONTH,(1-firstWeek))
-                    for(i in 0 until  firstWeek-1){
-                        val holidayItem = checkHolidayItem(holidayInfo,calendar)
+                if (firstWeek != 1) {
+                    calendar.add(Calendar.DAY_OF_MONTH, (1 - firstWeek))
+                    for (i in 0 until firstWeek - 1) {
+
+                        val holidayItem = checkHolidayItem(
+                            holidayInfo, getYearToDayFormat(
+                                year = calendar.get(Calendar.YEAR),
+                                month = calendar.get(Calendar.MONTH) + 1,
+                                day = calendar.get(Calendar.DAY_OF_MONTH)
+                            )
+                        )
                         holidayItem?.let {
                             calendarList.add(
                                 CalendarDayData(
                                     day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                    weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                    isCurrentMonth = false,
                                     holidayName = it.holidayName,
                                     isHoliday = it.isHolidayBoolean
                                 )
                             )
-                        }?: kotlin.run {
+                        } ?: kotlin.run {
                             calendarList.add(
                                 CalendarDayData(
-                                    day = calendar.get(Calendar.DAY_OF_MONTH).toString()
+                                    day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                    weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                    isCurrentMonth = false,
                                 )
                             )
                         }
-                        calendar.add(Calendar.DAY_OF_MONTH,1)
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
                     }
                 }
-                for( i in 1 .. lastDay){
-                    val holidayItem = checkHolidayItem(holidayInfo,calendar)
+                for (i in 1..lastDay) {
+                    val holidayItem = checkHolidayItem(
+                        holidayInfo, getYearToDayFormat(
+                            year = calendar.get(Calendar.YEAR),
+                            month = calendar.get(Calendar.MONTH) + 1,
+                            day = calendar.get(Calendar.DAY_OF_MONTH)
+                        )
+                    )
                     holidayItem?.let {
                         calendarList.add(
                             CalendarDayData(
                                 day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                isCurrentMonth = true,
                                 holidayName = it.holidayName,
                                 isHoliday = it.isHolidayBoolean
                             )
                         )
-                    }?: kotlin.run {
+                    } ?: kotlin.run {
                         calendarList.add(
                             CalendarDayData(
-                                day = calendar.get(Calendar.DAY_OF_MONTH).toString()
+                                day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                isCurrentMonth = true,
                             )
                         )
                     }
-                    calendar.add(Calendar.DAY_OF_MONTH,1)
+                    calendar.add(Calendar.DAY_OF_MONTH, 1)
                 }
                 calendar.set(Calendar.DAY_OF_MONTH, lastDay)
                 val lastWeek = calendar.get(Calendar.DAY_OF_WEEK)
-                if(lastWeek!=7){
-                    for(i in 7 downTo  lastWeek+1){
-                        calendar.add(Calendar.DAY_OF_MONTH,1)
-                        val holidayItem = checkHolidayItem(holidayInfo,calendar)
+                if (lastWeek != 7) {
+                    for (i in 7 downTo lastWeek + 1) {
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                        val holidayItem = checkHolidayItem(
+                            holidayInfo, getYearToDayFormat(
+                                year = calendar.get(Calendar.YEAR),
+                                month = calendar.get(Calendar.MONTH) + 1,
+                                day = calendar.get(Calendar.DAY_OF_MONTH)
+                            )
+                        )
                         holidayItem?.let {
                             calendarList.add(
                                 CalendarDayData(
                                     day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                    weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                    isCurrentMonth = false,
                                     holidayName = it.holidayName,
                                     isHoliday = it.isHolidayBoolean
                                 )
                             )
-                        }?: kotlin.run {
+                        } ?: kotlin.run {
                             calendarList.add(
                                 CalendarDayData(
-                                    day = calendar.get(Calendar.DAY_OF_MONTH).toString()
+                                    day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                                    weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                                    isCurrentMonth = false,
                                 )
                             )
                         }
@@ -138,49 +169,74 @@ class CalendarViewModel @Inject constructor(
                 }
                 monthDataList.add(
                     CalendarData(
-                        month = tempMonth,
-                        dayList = calendarList
+                        year = tempYear, month = tempMonth, dayList = calendarList
                     )
                 )
             }
-            Timber.d("Calendar holidayCheck end")
             _calendarLiveData.value = Event(monthDataList)
-//        monthDataList.forEach {
-//            Timber.d("Calendar List ${it}")
-//        }
         }
     }
 
-    private fun getMonthWeekCount(calendar: Calendar): Int {
-        val dayCount = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) // 해당 월의 날짜수
-        calendar.set(Calendar.DAY_OF_MONTH, dayCount)                       // 해당 월의 마지막 날짜로 이동
-        val dayWeek = calendar.get(Calendar.DAY_OF_WEEK)                // 요일 반환
-//        Timber.d("Calendar [${calendar.get(Calendar.MONTH) + 1}] 월 주차 수  : ${(dayCount - dayWeek + 13) / 7}")
-        return (dayCount - dayWeek + 13) / 7
+    private fun getYearToDayFormat(year: Int, month: Int, day: Int): String {
+        val calMonth = if (month.toString().length == 1) {
+            "0${month}"
+        } else {
+            month.toString()
+        }
+        val calDay = if (day.toString().length == 1) {
+            "0${day}"
+        } else {
+            day.toString()
+        }
+        return "${year}${calMonth}${calDay}"
     }
 
-    private fun getYearToDayFormat(calendar : Calendar) :String{
-        val calMonth = if((calendar.get(Calendar.MONTH)+1).toString().length==1){
-            "0${calendar.get(Calendar.MONTH)+1}"
-        }else{
-            (calendar.get(Calendar.MONTH)+1).toString()
-        }
-        val calDay = if(calendar.get(Calendar.DAY_OF_MONTH).toString().length==1){
-            "0${calendar.get(Calendar.DAY_OF_MONTH)}"
-        }else{
-            calendar.get(Calendar.DAY_OF_MONTH).toString()
-        }
-        return "${calendar.get(Calendar.MONTH)}${calMonth}${calDay}"
-    }
-
-    private fun checkHolidayItem(holidayInfo: List<HolidayItem> , calendar: Calendar):HolidayItem?{
+    private fun checkHolidayItem(
+        holidayInfo: List<HolidayItem>, yearToDayStr: String
+    ): HolidayItem? {
         val checkHoliday = holidayInfo.filter {
-            it.holidayYearToday == getYearToDayFormat(calendar)
+            it.holidayYearToday == yearToDayStr
         }
-        return if(checkHoliday.isNotEmpty()){
+        return if (checkHoliday.isNotEmpty()) {
             checkHoliday[0]
-        }else{
+        } else {
             null
+        }
+    }
+
+    fun updateYearDb(encodeKey: String, year: Int) {
+        viewModelScope.launch {
+            holidayRepository.checkHolidayDBOfYear(year)?.map { it.toHolidayItem() }
+                ?.let { holidayList ->
+                    _calendarLiveData.value?.peekContent()?.filter { it.year == year }
+                        ?.forEach { calendarData ->
+                            calendarData.dayList.forEach { dayItem ->
+                                checkHolidayItem(
+                                    holidayList, getYearToDayFormat(
+                                        calendarData.year, calendarData.month, dayItem.day.toInt()
+                                    )
+                                )?.let { holidayItem ->
+                                    dayItem.holidayName = holidayItem.holidayName
+                                    dayItem.isHoliday = holidayItem.isHolidayBoolean
+                                }
+                            }
+                        }
+                } ?: kotlin.run {
+                val holidayList = holidayRepository.getHolidayOfYear(encodeKey, year, true, 0)
+                _calendarLiveData.value?.peekContent()?.filter { it.year == year }
+                    ?.forEach { calendarData ->
+                        calendarData.dayList.forEach { dayItem ->
+                            checkHolidayItem(
+                                holidayList, getYearToDayFormat(
+                                    calendarData.year, calendarData.month, dayItem.day.toInt()
+                                )
+                            )?.let { holidayItem ->
+                                dayItem.holidayName = holidayItem.holidayName
+                                dayItem.isHoliday = holidayItem.isHolidayBoolean
+                            }
+                        }
+                    }
+            }
         }
     }
 }

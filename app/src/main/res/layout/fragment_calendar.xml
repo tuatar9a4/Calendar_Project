@@ -28,7 +28,8 @@
         app:layout_constraintEnd_toStartOf="@id/tvMonDay"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="5dp"
-        app:layout_constraintTop_toBottomOf="@id/tvCurrentMonth" />
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentMonth"
+        />
 
     <TextView
         android:id="@+id/tvMonDay"
@@ -115,7 +116,7 @@
         android:paddingVertical="5dp"
         android:layout_marginEnd="10dp"
         android:text="SAT"
-        android:textColor="@color/weekTopColor"
+        android:textColor="@color/satDayColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/tvFriDay"
         app:layout_constraintTop_toTopOf="@id/tvSunDay"
@@ -166,7 +167,7 @@
             android:layout_marginLeft="40dp"
             android:layout_marginTop="40dp"
             android:gravity="center"
-            android:text="asd" />
+            android:text="asdas" />
 
         <View
             android:id="@+id/taskLine"

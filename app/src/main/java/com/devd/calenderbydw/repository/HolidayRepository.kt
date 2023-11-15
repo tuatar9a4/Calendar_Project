@@ -16,21 +16,18 @@ class HolidayRepository @Inject constructor(
 ) : SafeNetCall() {
 
     suspend fun getHolidayOfYear(serviceKey: String, year: Int,checkUpdate:Boolean,dbHolidaySize :Int) : List<HolidayItem> {
-        Timber.d("holidayCheck getHolidayOfYear ->")
         safeApiCall(Dispatchers.IO) {
             holidayService.getHolidayOfMonth(serviceKey, year)
         }.run {
            return when (this) {
                 is CallResult.Success -> {
                     if(checkUpdate){
-                        Timber.d("holidayCheck checkUpdate -> ${dbHolidaySize} || ${this.data.body.items.item.size}")
                         if(dbHolidaySize != this.data.body.items.item.size){
                             holidayDao.insertHolidayItemList(this.data.body.items.item.map { it.toHolidayDbItem() })
                         }
                     }else{
                         holidayDao.insertHolidayItemList(this.data.body.items.item.map { it.toHolidayDbItem() })
                     }
-                    Timber.d("holidayCheck api Data -> ${this.data.body.items.item}")
                     this.data.body.items.item
                 }
                 else -> {
@@ -42,10 +39,11 @@ class HolidayRepository @Inject constructor(
 
     suspend fun getHolidayOfYearInDB(serviceKey: String, year: Int) : List<Any> {
         val holidayData = holidayDao.selectHolidayItemOfYear(year)
-        Timber.d("holidayCheck DBSize -> ${holidayData.size}")
         return holidayData.ifEmpty {
             getHolidayOfYear(serviceKey, year, false, 0)
         }
     }
+
+    suspend fun checkHolidayDBOfYear(year: Int)=holidayDao.selectHolidayItemOfYear(year).ifEmpty { null }
 
 }
