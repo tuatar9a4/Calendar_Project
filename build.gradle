@@ -12,6 +12,8 @@ buildscript {
         retrofit_version = '2.9.0'
         okhttp3_version = '4.10.0'
         okhttp3_logging_version = '4.9.3'
+        tikxml_version = '0.8.13'
+        glide_version = '4.13.0'
     }
     repositories {
         google()
