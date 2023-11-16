@@ -11,11 +11,9 @@ class DataRecevieService : WearableListenerService() {
 
     override fun onDataChanged(p0: DataEventBuffer) {
         super.onDataChanged(p0)
-        Log.d("도원","mobile onDataChaned service????")
         for (event in p0){
             if (event.type == DataEvent.TYPE_CHANGED){
                 val path = event.dataItem.uri.path
-                Log.d("도원","path ${path}")
                 if ("/taskdata" == path){
                     val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
                     val dbString :String? =dataMapItem.dataMap.getString("taskDBPath")

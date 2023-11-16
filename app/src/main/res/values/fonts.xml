@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    상단 탭 타이틀-->
+    <style name="ToolbarTextStyle">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+<!--    -->
+    <style name="Font32Weight600">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font24Weight600">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font20Weight600">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font18Weight600">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font16Weight600">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font16Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font14Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font12Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Font11Weight100">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">100</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+</resources>

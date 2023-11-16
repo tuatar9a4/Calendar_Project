@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:textSize="12sp"
+        android:layout_marginVertical="1dp"
+        style="@style/Font14Weight300"
         android:text="1"
         />
     <TextView
@@ -25,8 +26,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:textColor="@color/sunDayColor"
         android:lines="1"
+        android:layout_marginStart="2dp"
         android:ellipsize="end"
-        android:textSize="8sp"
+        style="@style/Font11Weight100"
         android:text="기독탄신일"
         />
     <TextView
@@ -35,10 +37,11 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/tvDate"
         app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="2dp"
         android:lines="1"
+        style="@style/Font12Weight300"
         android:text="asdasdaasdasd"
         android:ellipsize="end"
-        android:textSize="11sp"
         />
     <ImageView
         android:id="@+id/ivSticker1"

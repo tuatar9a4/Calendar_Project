@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.devd.calenderbydw.R
@@ -16,7 +18,6 @@ import com.devd.calenderbydw.utils.SnapPagerScrollListener
 import com.devd.calenderbydw.utils.addSingleItemDecoRation
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class CalendarFragment : Fragment() {
@@ -24,8 +25,12 @@ class CalendarFragment : Fragment() {
     private var binding by autoCleared<FragmentCalendarBinding>()
     private val viewModel: CalendarViewModel by viewModels()
 
-    private val calendarAdapter = CalendarMonthAdapter()
     private lateinit var horizontalMarginItemDecoration: HorizontalMarginItemDecoration
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkToday()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         horizontalMarginItemDecoration = HorizontalMarginItemDecoration(10f, 10f, requireContext())
@@ -45,9 +50,9 @@ class CalendarFragment : Fragment() {
     }
 
     private fun setObserver() {
-        viewModel.calendarLiveData.observe(viewLifecycleOwner, EventObserver { calendList ->
-            calendarAdapter.submitList(calendList) {
-                binding.rcCustomCalendar.scrollToPosition(((calendarAdapter.itemCount - 1) / 2))
+        viewModel.updateCalendarData.observe(viewLifecycleOwner, EventObserver { result ->
+            if(result){
+                binding.rcCustomCalendar.scrollToPosition(((viewModel.calendarAdapter.itemCount - 1) / 2))
             }
         })
     }
@@ -56,7 +61,7 @@ class CalendarFragment : Fragment() {
         binding.rcCustomCalendar.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.rcCustomCalendar.addSingleItemDecoRation(horizontalMarginItemDecoration)
-        binding.rcCustomCalendar.adapter = calendarAdapter
+        binding.rcCustomCalendar.adapter = viewModel.calendarAdapter
 
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.rcCustomCalendar)
@@ -67,19 +72,41 @@ class CalendarFragment : Fragment() {
             true,
             object : SnapPagerScrollListener.OnChangeListener {
                 override fun onSnapped(position: Int, isRightScroll: Boolean) {
-                    Timber.d("UpdateHoliday onSnapped position : $position | isRightScroll $isRightScroll ")
-                    val currentItem = calendarAdapter.currentList[position]
+//                    Timber.d("UpdateHoliday onSnapped position : $position | isRightScroll $isRightScroll ")
+                    val currentItem = viewModel.getAdapterCurrentList()[position]
                     binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
-                    if (calendarAdapter.currentList.size > position + 2 && isRightScroll) {
-                        val twoStepItem = calendarAdapter.currentList[position + 2]
+                    if (viewModel.getAdapterCurrentList().size > position + 2 && isRightScroll) {
+                        val twoStepItem = viewModel.getAdapterCurrentList()[position + 2]
                         updateHolidayInCalendar(currentItem.year,twoStepItem.year)
                     }else if(!isRightScroll && position - 2 > 0){
-                        val twoStepItem = calendarAdapter.currentList[position -2]
+                        val twoStepItem = viewModel.getAdapterCurrentList()[position -2]
                         updateHolidayInCalendar(currentItem.year,twoStepItem.year)
                     }
                 }
             }
         ))
+
+        viewModel.calendarAdapter.setOnCalendarClickListener(object :CalendarMonthAdapter.CalendarClickListener{
+            override fun onMonthClick() {
+            }
+
+            override fun onDayClick(year: Int, month: Int, day: Int) {
+                findNavController().navigate(R.id.action_calendarFragment_to_taskListFragment,
+                    bundleOf(
+                        "year" to year,
+                        "month" to month,
+                        "day" to day
+                    )
+                )
+//                if(binding.tvSelectedDate.text == "${year}.${month}.${day}"){
+//                    binding.tvSelectedDate.text=""
+//                    binding.rlTaskContainer.visibility=View.GONE
+//                }else{
+//                    binding.tvSelectedDate.text="${year}.${month}.${day}"
+//                    binding.rlTaskContainer.visibility=View.VISIBLE
+//                }
+            }
+        })
     }
 
 

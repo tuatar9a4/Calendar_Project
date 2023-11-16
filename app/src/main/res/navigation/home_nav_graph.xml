@@ -8,5 +8,41 @@
         android:id="@+id/calendarFragment"
         android:name="com.devd.calenderbydw.ui.calendar.CalendarFragment"
         android:label="fragment_calendar"
-        tools:layout="@layout/fragment_calendar" />
+        tools:layout="@layout/fragment_calendar" >
+        <action
+            android:id="@+id/action_calendarFragment_to_taskListFragment"
+            app:destination="@id/taskListFragment" />
+        <action
+            android:id="@+id/action_calendarFragment_to_createTaskFragment2"
+            app:destination="@id/createTaskFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/taskListFragment"
+        android:name="com.devd.calenderbydw.ui.task.tasklist.TaskListFragment"
+        android:label="fragment_task_list"
+        tools:layout="@layout/fragment_task_list" >
+        <argument
+             android:name="year"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <argument
+             android:name="month"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <argument
+             android:name="day"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <action
+            android:id="@+id/action_taskListFragment_to_createTaskFragment2"
+            app:destination="@id/createTaskFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/createTaskFragment2"
+        android:name="com.devd.calenderbydw.ui.task.maketask.CreateTaskFragment"
+        android:label="fragment_create_task"
+        tools:layout="@layout/fragment_create_task" />
 </navigation>

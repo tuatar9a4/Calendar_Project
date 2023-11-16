@@ -14,18 +14,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.devd.calenderbydw.CreateTaskActivity
-import com.devd.calenderbydw.R
 import com.devd.calenderbydw.database.TaskDatabaseHelper
 import com.devd.calenderbydw.databinding.FragmentMyCalendarBinding
 import com.devd.calenderbydw.item.TaskItem
-import com.devd.calenderbydw.utils.WidgetUtils
 import com.devd.calenderbydw.utils.autoCleared
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
-import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
@@ -77,8 +73,6 @@ class MyCalendarFragment : Fragment() {
     private fun setAddFunc(){
         //일정 생성으로 이동
         binding.btnPlus.setOnClickListener {
-            val intent = Intent(context, CreateTaskActivity::class.java)
-            intent.putExtra("type","create")
 //            var sendCalendar : CalendarDay? =null
 //            if (calendarFragment.isVisible)
 //                sendCalendar=calendarFragment.getSelectDateInfo()
