@@ -5,6 +5,12 @@
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">This is an app widget description</string>
 
+    <string name="task_input_info">
+        "⚠︎ 제목은 최대 50자만 가능 합니다! 필요시 하단 입력창을 사용해주세요!"
+        "\n⚠︎ 각 년,월,일 을 선택하여 날짜를 변경할 수 있어요!"
+        "\n⚠︎ 일정을 반복해서 등록하고 싶다면[반복]버튼을 선택해주세요!"
+        "\n⚠︎ 일정은 리스트 창에서 언제든지 수정 할 수 있어요! "
+    </string>
 
     <!--    <string name="encoding_key">bcn9aniGJga%2B79cQyTcr1SyjSY6ayVNoVfO6syv3qYO%2F%2BW%2F7wCNtS9Z6yNocOwXLZYuPvPPHc5e3By3UcaquUQ%3D%3D</string>-->
     <!--    <string name="decoding_key">bcn9aniGJga+79cQyTcr1SyjSY6ayVNoVfO6syv3qYO/+W/7wCNtS9Z6yNocOwXLZYuPvPPHc5e3By3UcaquUQ==</string>-->

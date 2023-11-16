@@ -3,6 +3,7 @@ package com.devd.calenderbydw.di
 import android.content.Context
 import com.devd.calenderbydw.data.local.AppDatabase
 import com.devd.calenderbydw.data.local.dao.HolidayDao
+import com.devd.calenderbydw.data.local.dao.TaskDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +24,8 @@ class DatabaseModule {
     @Provides
     fun provideHolidayDao(appDatabase: AppDatabase) : HolidayDao =
         appDatabase.holidayDao()
+
+    @Provides
+    fun provideTaskDao(appDatabase: AppDatabase) : TaskDao =
+        appDatabase.taskDao()
 }

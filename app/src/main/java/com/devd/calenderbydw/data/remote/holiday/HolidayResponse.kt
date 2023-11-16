@@ -1,6 +1,6 @@
 package com.devd.calenderbydw.data.remote.holiday
 
-import com.devd.calenderbydw.data.local.db.HolidayDbData
+import com.devd.calenderbydw.data.local.entity.HolidayDbEntity
 import com.tickaroo.tikxml.annotation.Element
 import com.tickaroo.tikxml.annotation.PropertyElement
 import com.tickaroo.tikxml.annotation.Xml
@@ -33,7 +33,7 @@ data class HolidayItem(
     val isHolidayBoolean: Boolean
         get() = holidayStr == "Y"
 
-    fun toHolidayDbItem()= HolidayDbData(
+    fun toHolidayDbItem()= HolidayDbEntity(
         holidayName = holidayName,
         holidayYear = holidayYearToday.substring(0,4),
         holidayYearToday = holidayYearToday.toInt(),

@@ -6,417 +6,170 @@
     android:layout_height="match_parent"
     android:background="#FCF6F5"
     tools:context=".ui.task.maketask.CreateTaskFragment">
-
-    <TextView
-        android:id="@+id/tvActivityTitle"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/taskToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         app:layout_constraintTop_toTopOf="parent"
-        android:textSize="30sp"
-        android:textColor="#7b9acc"
-        android:text="일정 생성"
-        android:gravity="center"
-        />
-
-    <TextView
-        android:id="@+id/tvTaskDateTitle"
+        android:background="@color/white"
+        app:titleTextAppearance="@style/Font24Weight600"
+        app:navigationIcon="@drawable/icon_left_arrow"
+        app:title="일정 생성기"
+        app:titleTextColor="@color/commonDayColor"
+        >
+        <TextView
+            android:id="@+id/tvInsertTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/grayColor"
+            android:textAppearance="@style/Font20Weight600"
+            android:text="작성"
+            />
+    </com.google.android.material.appbar.MaterialToolbar>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRepeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/tvActivityTitle"
-        app:layout_constraintLeft_toLeftOf="@id/tvTaskTimeTitle"
-        app:layout_constraintRight_toRightOf="@id/tvTaskTimeTitle"
-        android:textSize="24sp"
-        android:layout_marginTop="20dp"
-        android:textColor="#7b9acc"
-        android:text="Date : "
-        />
-    <TextView
-        android:id="@+id/tvTaskDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/tvTaskDateTitle"
-        app:layout_constraintLeft_toRightOf="@+id/tvTaskDateTitle"
-        android:textSize="24sp"
-        android:textColor="#7b7aFF"
-        android:layout_marginLeft="10dp"
-        android:text="날짜"
-        />
-
-    <ImageView
-        android:id="@+id/ivChangeDate"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        app:layout_constraintTop_toTopOf="@+id/tvTaskDateTitle"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="10dp"
-        />
-
-    <TextView
-        android:id="@+id/tvTaskTimeTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/tvTaskDateTitle"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:background="@color/transport"
+        android:textAppearance="@style/Font18Weight600"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="20dp"
-        android:textSize="24sp"
-        android:textColor="#7b9acc"
-        android:text="Time : "
+        app:layout_constraintTop_toBottomOf="@id/taskToolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="20dp"
+        android:text="반복 : 없음"
         />
     <TextView
-        android:id="@+id/tvTaskTime"
+        android:id="@+id/tvTaskYear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/tvTaskTimeTitle"
-        app:layout_constraintLeft_toRightOf="@+id/tvTaskDateTitle"
-        android:textSize="24sp"
-        android:layout_marginLeft="10dp"
-        android:textColor="#7b7aFF"
-        android:text="시간"
+        app:layout_constraintTop_toBottomOf="@id/btnRepeat"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/Font32Weight600"
+        android:layout_marginStart="20dp"
+        android:text="2021"
         />
-
-    <ImageView
-        android:id="@+id/ivChangeTime"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        app:layout_constraintTop_toTopOf="@+id/tvTaskTimeTitle"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="10dp"
-        />
-
     <TextView
-        android:id="@+id/tvTaskTitle"
-        android:layout_width="match_parent"
+        android:id="@+id/tvTaskYearHolder"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/tvTaskTimeTitle"
-        android:gravity="center"
-        android:textSize="19sp"
-        android:layout_marginTop="5dp"
-        android:textColor="#7b9acc"
-        android:textStyle="bold"
-        android:text="Title"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskYear"
+        style="@style/Font32Weight600"
+        android:layout_marginStart="2dp"
+        android:text="년"
         />
-
+    <TextView
+        android:id="@+id/tvTaskMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskYearHolder"
+        android:layout_marginStart="4dp"
+        android:textColor="@color/black"
+        style="@style/Font32Weight600"
+        android:text="3"
+        />
+    <TextView
+        android:id="@+id/tvTaskMonthHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskMonth"
+        style="@style/Font32Weight600"
+        android:textColor="@color/black"
+        android:layout_marginStart="2dp"
+        android:text="월"
+        />
+    <TextView
+        android:id="@+id/tvTaskDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskMonthHolder"
+        style="@style/Font32Weight600"
+        android:textColor="@color/black"
+        android:layout_marginStart="4dp"
+        android:text="22"
+        />
+    <TextView
+        android:id="@+id/tvTaskDayHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskDay"
+        style="@style/Font32Weight600"
+        android:textColor="@color/black"
+        android:layout_marginStart="2dp"
+        android:text="일에"
+        />
     <EditText
         android:id="@+id/edtTaskTitle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/tvTaskTitle"
-        android:layout_marginTop="5dp"
-        android:layout_margin="10dp"
-        android:textSize="17sp"
-        android:background="@drawable/edit_background_round_10"
-        android:gravity="center"
-        android:elevation="4dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTaskYear"
         android:textColor="@color/black"
-        android:textColorHint="@color/outOfRangeColor"
-        android:lines="1"
-        android:ellipsize="start"
-        android:inputType="text"
-        android:hint="여기를 터치하여 제목을 입력하세요"
+        android:hint="선택하여 간략한 제목을 적어주세요"
+        android:maxLength="50"
+        android:background="@null"
+        style="@style/Font24Weight600"
+        android:textColorHint="@color/grayDayColor"
         />
-
     <TextView
-        android:id="@+id/tvTaskContents"
-        android:layout_width="match_parent"
+        android:id="@+id/tvTaskTail"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/edtTaskTitle"
-        android:gravity="center"
-        android:textSize="19sp"
-        android:layout_marginTop="5dp"
-        android:textColor="#7b9acc"
-        android:textStyle="bold"
-        android:text="Contents"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtTaskTitle"
+        android:background="@null"
+        android:text="하기!"
+        style="@style/Font32Weight600"
+        android:textColorHint="@color/grayDayColor"
         />
     <EditText
         android:id="@+id/edtTaskContents"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        app:layout_constraintTop_toBottomOf="@id/tvTaskContents"
-        android:layout_marginTop="5dp"
-        android:textSize="17sp"
-        android:elevation="4dp"
-        android:background="@drawable/edit_background_round_10"
-        android:layout_margin="10dp"
-        android:padding="5dp"
-        android:gravity="top"
-        android:textColor="@color/black"
-        android:textColorHint="@color/outOfRangeColor"
-        android:hint="여기를 터치하여 내용을 입력하세요"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTaskTail"
+        android:hint="필요하시다면 자세한 일정을\n 여기 적을 수 있습니다!"
+        android:background="@null"
+        style="@style/Font24Weight600"
+        android:textColorHint="@color/grayDayColor"
         />
     <TextView
-        android:id="@+id/tvEditCount"
+        android:id="@+id/tvTaskInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/edtTaskContents"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="10dp"
-        android:textColor="@color/outOfRangeColor"
-        android:text="0/300"
+        android:layout_marginStart="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtTaskContents"
+        android:background="@null"
+        android:layout_marginTop="20dp"
+        android:text="@string/task_input_info"
+        style="@style/Font14Weight300"
+        android:textColorHint="@color/grayDayColor"
         />
-
-
-    <TextView
-        android:id="@+id/tvRepeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/radioRepeat"
-        app:layout_constraintBottom_toBottomOf="@+id/radioRepeat"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="20dp"
-        android:textSize="20sp"
-        android:textColor="#7b9acc"
-        android:text="반복"
-        />
-    <RadioGroup
-        android:id="@+id/radioRepeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/edtTaskContents"
-        android:layout_marginTop="10dp"
-        app:layout_constraintLeft_toRightOf="@+id/tvRepeat"
-        android:layout_marginLeft="20dp"
-        android:orientation="horizontal"
-        >
-        <RadioButton
-            android:id="@+id/radioNone"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:checked="true"
-            android:background="@drawable/custom_repeat_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="없음"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
-            />
-        <RadioButton
-            android:id="@+id/radioYear"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginLeft="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_repeat_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="매년"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
-            />
-        <RadioButton
-            android:id="@+id/radioMonth"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginLeft="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_repeat_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="매달"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
-            />
-        <RadioButton
-            android:id="@+id/radioWeek"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginLeft="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_repeat_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="매주"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
-            />
-    </RadioGroup>
-    <LinearLayout
-        android:id="@+id/repeatWeekBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginLeft="5dp"
-        android:visibility="gone"
-        android:gravity="center"
-        >
-        <CheckBox
-            android:id="@+id/repeatMon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Mon"/>
-        <CheckBox
-            android:id="@+id/repeatTue"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Tue"/>
-        <CheckBox
-            android:id="@+id/repeatWEN"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Wen"/>
-        <CheckBox
-            android:id="@+id/repeatThu"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Thu"/>
-        <CheckBox
-            android:id="@+id/repeatFri"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Fri"/>
-        <CheckBox
-            android:id="@+id/repeatSat"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Sat"/>
-        <CheckBox
-            android:id="@+id/repeatSun"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/radioRepeat"
-            android:button="@null"
-            android:background="@drawable/custom_checkbox"
-            android:lines="1"
-            android:maxLines="1"
-            android:layout_marginLeft="5dp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:text="Sun"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/btnBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        android:orientation="horizontal"
-        >
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:text="취소"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            android:background="#7b9acc"
-            android:textColor="#FCF6F5"
-            />
-
-        <Button
-            android:id="@+id/btnDelete"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="#7b9acc"
-            android:text="작성"
-            android:textColor="#FCF6F5"
-            />
-
-    </LinearLayout>
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

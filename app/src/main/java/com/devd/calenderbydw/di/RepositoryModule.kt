@@ -1,9 +1,11 @@
 package com.devd.calenderbydw.di
 
 import com.devd.calenderbydw.data.local.dao.HolidayDao
+import com.devd.calenderbydw.data.local.dao.TaskDao
 import com.devd.calenderbydw.data.remote.api.HolidayService
 import com.devd.calenderbydw.repository.CalendarRepository
 import com.devd.calenderbydw.repository.HolidayRepository
+import com.devd.calenderbydw.repository.TaskRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +27,9 @@ class RepositoryModule {
     @Provides
     fun provideCalendarRetrofit(@NetworkModule.HolidayServer holidayService: HolidayService,holidayDao: HolidayDao): CalendarRepository =
         CalendarRepository(holidayService,holidayDao)
+
+    @Singleton
+    @Provides
+    fun provideTaskRepository(taskDao: TaskDao) : TaskRepository =
+        TaskRepository(taskDao)
 }

@@ -1,4 +1,4 @@
-package com.devd.calenderbydw.data.local.db
+package com.devd.calenderbydw.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import com.devd.calenderbydw.data.remote.holiday.HolidayItem
 
 @Entity(tableName = "holiday_table")
-data class HolidayDbData(
+data class HolidayDbEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "holidayYearToday")
     val holidayYearToday : Int,
