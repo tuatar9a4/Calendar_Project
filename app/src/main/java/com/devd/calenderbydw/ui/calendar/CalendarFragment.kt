@@ -31,6 +31,7 @@ class CalendarFragment : Fragment() {
         super.onResume()
         viewModel.checkToday()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         horizontalMarginItemDecoration = HorizontalMarginItemDecoration(10f, 10f, requireContext())
@@ -43,15 +44,18 @@ class CalendarFragment : Fragment() {
         binding = FragmentCalendarBinding.inflate(inflater, container, false)
         setRecyclerView()
         setObserver()
-        viewModel.getHolidayYear(
-            getString(R.string.holidayEncodingKey)
-        )
+        if(viewModel.calendarAdapter.itemCount==0){
+            viewModel.getHolidayYear(
+                getString(R.string.holidayEncodingKey)
+            )
+        }
         return binding.root
     }
 
     private fun setObserver() {
         viewModel.updateCalendarData.observe(viewLifecycleOwner, EventObserver { result ->
-            if(result){
+            if (viewModel.firstUpdate) {
+                viewModel.firstUpdate = !viewModel.firstUpdate
                 binding.rcCustomCalendar.scrollToPosition(((viewModel.calendarAdapter.itemCount - 1) / 2))
             }
         })
@@ -77,21 +81,23 @@ class CalendarFragment : Fragment() {
                     binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
                     if (viewModel.getAdapterCurrentList().size > position + 2 && isRightScroll) {
                         val twoStepItem = viewModel.getAdapterCurrentList()[position + 2]
-                        updateHolidayInCalendar(currentItem.year,twoStepItem.year)
-                    }else if(!isRightScroll && position - 2 > 0){
-                        val twoStepItem = viewModel.getAdapterCurrentList()[position -2]
-                        updateHolidayInCalendar(currentItem.year,twoStepItem.year)
+                        updateHolidayInCalendar(currentItem.year, twoStepItem.year)
+                    } else if (!isRightScroll && position - 2 > 0) {
+                        val twoStepItem = viewModel.getAdapterCurrentList()[position - 2]
+                        updateHolidayInCalendar(currentItem.year, twoStepItem.year)
                     }
                 }
             }
         ))
 
-        viewModel.calendarAdapter.setOnCalendarClickListener(object :CalendarMonthAdapter.CalendarClickListener{
+        viewModel.calendarAdapter.setOnCalendarClickListener(object :
+            CalendarMonthAdapter.CalendarClickListener {
             override fun onMonthClick() {
             }
 
             override fun onDayClick(year: Int, month: Int, day: Int) {
-                findNavController().navigate(R.id.action_calendarFragment_to_taskListFragment,
+                findNavController().navigate(
+                    R.id.action_calendarFragment_to_taskListFragment,
                     bundleOf(
                         "year" to year,
                         "month" to month,
@@ -110,7 +116,7 @@ class CalendarFragment : Fragment() {
     }
 
 
-    private fun updateHolidayInCalendar(originYear :Int, newYear :Int){
+    private fun updateHolidayInCalendar(originYear: Int, newYear: Int) {
         if (originYear != newYear) {
             viewModel.updateYearDb(
                 getString(R.string.holidayEncodingKey),

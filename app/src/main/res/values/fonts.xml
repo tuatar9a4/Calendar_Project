@@ -37,6 +37,30 @@
         <item name="android:textSize">16sp</item>
         <item name="android:includeFontPadding">false</item>
     </style>
+    <style name="Font32Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font24Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font20Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Font18Weight300">
+        <item name="android:fontFamily">@font/inchen_font</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
     <style name="Font16Weight300">
         <item name="android:fontFamily">@font/inchen_font</item>
         <item name="android:textFontWeight">300</item>

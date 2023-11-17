@@ -24,7 +24,7 @@ class CalendarViewModel @Inject constructor(
     val updateCalendarData: LiveData<Event<Boolean>> get() = _updateCalendarData
     val calendarAdapter = CalendarMonthAdapter()
     private var currentToday = YearMonthDayData()
-
+    var firstUpdate = true
     fun getHolidayYear(encodeKey: String) {
         viewModelScope.launch {
             val calendar = Calendar.getInstance()
@@ -37,7 +37,7 @@ class CalendarViewModel @Inject constructor(
             calendarRepository.getCalendarMergeDb(encodeKey, calendar.get(Calendar.YEAR)).run {
                 changeTodayItem(this, currentToday.year, currentToday.month, currentToday.day)
                 calendarAdapter.submitList(this) {
-                    _updateCalendarData.value = Event(true)
+                    _updateCalendarData.value = Event(firstUpdate)
                 }
             }
         }
@@ -105,6 +105,7 @@ class CalendarViewModel @Inject constructor(
             }
         }
     }
+
     private fun changeTodayItem(changeList: List<CalendarData>?, year: Int, month: Int, day: Int) {
         changeList?.filter { it.year == year && it.month == month }
             ?.forEach { calendarData ->

@@ -7,6 +7,7 @@ import android.util.Size
 import android.util.TypedValue
 import android.view.WindowManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Calendar
 
 
 fun Context.getDeviceSize() :Size {
@@ -54,4 +55,31 @@ fun RecyclerView.addSingleItemDecoRation(vararg itemDecorations : RecyclerView.I
     for(a in itemDecorations){
         addItemDecoration(a)
     }
+}
+
+fun Int.changeWeekIntToString():String{
+    return when(this){
+        1->"Sun"
+        2->"Mon"
+        3->"Tue"
+        4->"Wen"
+        5->"Thu"
+        6->"Fri"
+        else->"Sat"
+    }
+}
+fun Calendar.getWeekToText() :String{
+    return when(this.get(Calendar.DAY_OF_WEEK)){
+        1->"Sun"
+        2->"Mon"
+        3->"Tue"
+        4->"Wen"
+        5->"Thu"
+        6->"Fri"
+        else->"Sat"
+    }
+}
+fun Calendar.getFullDay(year:Int,month:Int) :Int{
+    this.set(year,month,1)
+    return this.getActualMaximum(Calendar.DAY_OF_MONTH)
 }

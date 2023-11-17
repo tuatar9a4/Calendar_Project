@@ -4,172 +4,187 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FCF6F5"
     tools:context=".ui.task.maketask.CreateTaskFragment">
+
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/taskToolbar"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="50dp"
         android:background="@color/white"
-        app:titleTextAppearance="@style/Font24Weight600"
+        app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/icon_left_arrow"
         app:title="일정 생성기"
-        app:titleTextColor="@color/commonDayColor"
-        >
+        app:titleTextAppearance="@style/Font24Weight600"
+        app:titleTextColor="@color/commonDayColor">
+
         <TextView
             android:id="@+id/tvInsertTask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginEnd="20dp"
-            android:textColor="@color/grayColor"
-            android:textAppearance="@style/Font20Weight600"
             android:text="작성"
-            />
+            android:textAppearance="@style/Font20Weight600"
+            android:textColor="@color/grayColor" />
     </com.google.android.material.appbar.MaterialToolbar>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRepeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:insetBottom="0dp"
-        android:insetTop="0dp"
-        android:minHeight="0dp"
-        android:minWidth="0dp"
-        android:background="@color/transport"
-        android:textAppearance="@style/Font18Weight600"
         android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/taskToolbar"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="20dp"
+        android:background="@color/transport"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
         android:text="반복 : 없음"
-        />
+        android:textAppearance="@style/Font18Weight600"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/taskToolbar" />
+
     <TextView
         android:id="@+id/tvTaskYear"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/btnRepeat"
-        android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        style="@style/Font32Weight600"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
         android:text="2021"
-        />
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnRepeat" />
+
     <TextView
         android:id="@+id/tvTaskYearHolder"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
-        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
-        app:layout_constraintStart_toEndOf="@id/tvTaskYear"
-        style="@style/Font32Weight600"
         android:layout_marginStart="2dp"
         android:text="년"
-        />
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskYear"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <TextView
         android:id="@+id/tvTaskMonth"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
+        android:layout_marginStart="4dp"
+        android:text="3"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
         app:layout_constraintStart_toEndOf="@id/tvTaskYearHolder"
-        android:layout_marginStart="4dp"
-        android:textColor="@color/black"
-        style="@style/Font32Weight600"
-        android:text="3"
-        />
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <TextView
         android:id="@+id/tvTaskMonthHolder"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
-        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
-        app:layout_constraintStart_toEndOf="@id/tvTaskMonth"
-        style="@style/Font32Weight600"
-        android:textColor="@color/black"
         android:layout_marginStart="2dp"
         android:text="월"
-        />
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskMonth"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <TextView
         android:id="@+id/tvTaskDay"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
-        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
-        app:layout_constraintStart_toEndOf="@id/tvTaskMonthHolder"
-        style="@style/Font32Weight600"
-        android:textColor="@color/black"
         android:layout_marginStart="4dp"
         android:text="22"
-        />
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskMonthHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <TextView
         android:id="@+id/tvTaskDayHolder"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/tvTaskYear"
-        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
-        app:layout_constraintStart_toEndOf="@id/tvTaskDay"
-        style="@style/Font32Weight600"
-        android:textColor="@color/black"
         android:layout_marginStart="2dp"
         android:text="일에"
-        />
-    <EditText
-        android:id="@+id/edtTaskTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/tvTaskYear"
         android:textColor="@color/black"
-        android:hint="선택하여 간략한 제목을 적어주세요"
-        android:maxLength="50"
-        android:background="@null"
-        style="@style/Font24Weight600"
-        android:textColorHint="@color/grayDayColor"
-        />
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskDay"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <TextView
-        android:id="@+id/tvTaskTail"
+        android:id="@+id/tvTaskRepeatHolder"
+        style="@style/Font32Weight600"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edtTaskTitle"
-        android:background="@null"
-        android:text="하기!"
-        style="@style/Font32Weight600"
-        android:textColorHint="@color/grayDayColor"
-        />
+        android:layout_marginStart="10dp"
+        android:text="매달"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvTaskYear"
+        app:layout_constraintStart_toEndOf="@id/tvTaskDayHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTaskYear" />
+
     <EditText
-        android:id="@+id/edtTaskContents"
-        android:layout_width="0dp"
+        android:id="@+id/edtTaskTitle"
+        style="@style/Font24Weight600"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="30dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/tvTaskTail"
-        android:hint="필요하시다면 자세한 일정을\n 여기 적을 수 있습니다!"
         android:background="@null"
-        style="@style/Font24Weight600"
+        android:hint="이 곳을 선택하여 간략한 제목을 적어주세요"
+        android:maxLength="50"
+        android:textColor="@color/black"
         android:textColorHint="@color/grayDayColor"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTaskYear" />
+
+    <TextView
+        android:id="@+id/tvTaskTail"
+        style="@style/Font32Weight600"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@null"
+        android:text="하기!"
+        android:textColor="@color/black"
+        android:textColorHint="@color/grayDayColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtTaskTitle" />
+
+    <EditText
+        android:id="@+id/edtTaskContents"
+        style="@style/Font24Weight600"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@null"
+        android:hint="필요하시다면 자세한 일정을\n 여기 적을 수 있습니다!"
+        android:textColorHint="@color/grayDayColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTaskTail" />
+
     <TextView
         android:id="@+id/tvTaskInfo"
+        style="@style/Font14Weight300"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edtTaskContents"
-        android:background="@null"
         android:layout_marginTop="20dp"
+        android:background="@null"
         android:text="@string/task_input_info"
-        style="@style/Font14Weight300"
         android:textColorHint="@color/grayDayColor"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtTaskContents" />
 </androidx.constraintlayout.widget.ConstraintLayout>

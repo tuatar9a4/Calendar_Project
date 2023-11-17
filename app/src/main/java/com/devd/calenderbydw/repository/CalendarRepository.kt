@@ -71,7 +71,7 @@ class CalendarRepository(
     private suspend fun getCalendarDate(holidayInfo: List<HolidayItem>) : ArrayList<CalendarData> {
         val calendar = Calendar.getInstance()
         val monthDataList = arrayListOf<CalendarData>()
-        for (monthCount in -200..200) {
+        for (monthCount in -100..100) {
             calendar.time = Date() //오늘로 설정
             calendar.add(Calendar.MONTH, monthCount) // 해당 달로 이동
             val tempMonth = calendar.get(Calendar.MONTH) + 1    // 이번 년도 값
