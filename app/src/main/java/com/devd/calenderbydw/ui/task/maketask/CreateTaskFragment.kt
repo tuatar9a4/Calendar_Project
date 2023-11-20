@@ -21,6 +21,7 @@ import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.WEEK_REPEA
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.YEAR_REPEAT
 import com.devd.calenderbydw.databinding.FragmentCreateTaskBinding
 import com.devd.calenderbydw.ui.dialog.CustomBottomSheet
+import com.devd.calenderbydw.utils.EventObserver
 import com.devd.calenderbydw.utils.autoCleared
 import com.devd.calenderbydw.utils.getWeekToText
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,7 +73,6 @@ class CreateTaskFragment : Fragment() {
                 }
                 launch {
                     viewModel.taskRepeatState.collectLatest { type ->
-                        Timber.d("RepeatType => $type")
                         setRepeatView(type)
                     }
                 }
@@ -94,6 +94,9 @@ class CreateTaskFragment : Fragment() {
                 }
             }
         }
+        viewModel.insertResult.observe(viewLifecycleOwner,EventObserver{
+            findNavController().popBackStack()
+        })
     }
 
     private fun setToolbarFunc() {

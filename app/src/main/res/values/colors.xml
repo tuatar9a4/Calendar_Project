@@ -10,10 +10,6 @@
     <color name="outOfRangeColor">#808080</color>
     <color name="transport">#00000000</color>
 
-    <color name="yearTopColor">#E02400</color>
-    <color name="monthTopColor">#FB8900</color>
-    <color name="weekTopColor">#5C00E0</color>
-    <color name="dayTopColor">#6792f9</color>
 
     <color name="taskTextColor">#6792f9</color>
     <color name="light_blue_50">#FFE1F5FE</color>
@@ -38,7 +34,12 @@
 
 -->
     <color name="palette_light_green_opacity_50">#80DCEDC2</color>
+    <color name="schedule_card_bg">#FCF6F5</color>
 
+    <color name="yearTopColor">#E02400</color>
+    <color name="monthTopColor">#FB8900</color>
+    <color name="weekTopColor">#5C00E0</color>
+    <color name="dayTopColor">#6792f9</color>
 
     <color name="sunDayColor">#E83100</color>
     <color name="satDayColor">#778FD2</color>

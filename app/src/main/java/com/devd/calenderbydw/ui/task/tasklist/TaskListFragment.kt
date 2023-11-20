@@ -21,6 +21,7 @@ import com.devd.calenderbydw.databinding.FragmentTaskListBinding
 import com.devd.calenderbydw.utils.EventObserver
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -45,6 +46,7 @@ class TaskListFragment : Fragment() {
         binding = FragmentTaskListBinding.inflate(inflater, container, false)
         setToolbarFunc()
         setTopDateRecyclerview()
+        setScheduleRecyclerView()
         setObserver()
         if (viewModel.topDateAdapter.itemCount == 0) {
             viewModel.getCalendarList(
@@ -62,21 +64,27 @@ class TaskListFragment : Fragment() {
             binding.rcScheduledDate.scrollToPosition(it)
             viewModel.topDateAdapter.setSelectPos(it)
         })
+        viewModel.taskListDate.observe(viewLifecycleOwner,EventObserver{ taskItems ->
+            viewModel.scheduleItemAdapter.submitList(taskItems)
+        })
     }
 
     private fun setCollectFlows() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.taskList?.collectLatest {
-                    it.forEach { dbEntity ->
-                        Timber.d("TaskCheck -> ${dbEntity.title} ${dbEntity.weekCount} ${dbEntity.repeatType}")
-                    }
+                    viewModel.scheduleItemAdapter.submitList(it)
                 }
             }
         }
     }
 
     private fun getTaskListOfDat() {
+        viewModel.selectYearToDay = YearMonthDayData(
+            year = navArgs.year,
+            month = navArgs.month,
+            day = navArgs.day
+        )
         viewModel.getSelectDateTaskList(
             navArgs.year.toString(),
             navArgs.month.toString(),
@@ -88,14 +96,16 @@ class TaskListFragment : Fragment() {
         binding.taskListToolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.createTask -> {
-                    findNavController().navigate(
-                        R.id.action_taskListFragment_to_createTaskFragment,
-                        bundleOf(
-                            "year" to navArgs.year,
-                            "month" to navArgs.month,
-                            "day" to navArgs.day,
+                    viewModel.selectYearToDay?.let { date ->
+                        findNavController().navigate(
+                            R.id.action_taskListFragment_to_createTaskFragment,
+                            bundleOf(
+                                "year" to date.year,
+                                "month" to date.month,
+                                "day" to date.day,
+                            )
                         )
-                    )
+                    }
                 }
             }
             return@setOnMenuItemClickListener false
@@ -125,6 +135,7 @@ class TaskListFragment : Fragment() {
                     month = month.toInt(),
                     day = day.toInt()
                 )
+                viewModel.getSelectDateTaskListInit(year,month, day)
                 binding.tvDay.text ="${year}.${month}.${day}"
             }
         })
@@ -155,6 +166,11 @@ class TaskListFragment : Fragment() {
 
             fun isScrollRight(x: Int) = x > 0
         })
+    }
+
+    private fun setScheduleRecyclerView(){
+        binding.rcSelectTaskList.layoutManager=LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false)
+        binding.rcSelectTaskList.adapter = viewModel.scheduleItemAdapter
     }
 
 }

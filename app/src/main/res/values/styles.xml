@@ -30,5 +30,20 @@
         <item name="android:background">?android:attr/colorBackground</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
+    <style name="Calendar"/>
+
+    <style name="Calendar.HeaderDateText">
+        <item name="android:textSize">20dp</item>
+        <item name="android:textColor">#263238</item>
+    </style>
+
+    <style name="Calendar.CalendarViewStyle">
+        <item name="dayHeight">65dp</item>
+    </style>
+
+    <style name="Calendar.ItemViewStyle">
+        <item name="dayTextSize">14dp</item>
+        <item name="taskTextSize">11dp</item>
+    </style>
 
 </resources>

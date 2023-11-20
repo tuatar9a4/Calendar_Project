@@ -111,19 +111,19 @@ class TaskDatabaseHelper(context : Context?, dbName:String?,factory:SQLiteDataba
 
         fun createTask(taskItem: TaskItem,database : SQLiteDatabase,context: Context,dataClient : DataClient){
 
-            val contentValue = ContentValues();
+            val contentValue = ContentValues()
             contentValue.put("year",taskItem.year)
             contentValue.put("month",taskItem.month)
-            contentValue.put("day",taskItem.day);
-            contentValue.put("week",taskItem.week);
-            contentValue.put("time",taskItem.time);
-            contentValue.put("title",taskItem.title);
-            contentValue.put("text",taskItem.text);
-            contentValue.put("repeatY",taskItem.repeatY);
-            contentValue.put("repeatM",taskItem.repeatM);
-            contentValue.put("repeatW",taskItem.repeatW);
-            contentValue.put("repeatN",taskItem.repeatN);
-            contentValue.put("notice",taskItem.notice);
+            contentValue.put("day",taskItem.day)
+            contentValue.put("week",taskItem.week)
+            contentValue.put("time",taskItem.time)
+            contentValue.put("title",taskItem.title)
+            contentValue.put("text",taskItem.text)
+            contentValue.put("repeatY",taskItem.repeatY)
+            contentValue.put("repeatM",taskItem.repeatM)
+            contentValue.put("repeatW",taskItem.repeatW)
+            contentValue.put("repeatN",taskItem.repeatN)
+            contentValue.put("notice",taskItem.notice)
             contentValue.put("priority",taskItem.priority)
             contentValue.put("expectDay",taskItem.expectDay)
 

@@ -80,6 +80,6 @@ fun Calendar.getWeekToText() :String{
     }
 }
 fun Calendar.getFullDay(year:Int,month:Int) :Int{
-    this.set(year,month,1)
+    this.set(year,month-1,1)
     return this.getActualMaximum(Calendar.DAY_OF_MONTH)
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.data.local.calendar.CalendarDayData
+import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
 import com.devd.calenderbydw.databinding.CustomCalendarDayItemBinding
 import com.devd.calenderbydw.utils.ConstVariable.WEEK_SAT_DAY
 import com.devd.calenderbydw.utils.ConstVariable.WEEK_SUN_DAY
@@ -20,7 +21,7 @@ import timber.log.Timber
 
 class CalendarDayAdapter(
     private val listener : CalendarMonthAdapter.CalendarClickListener?=null
-) : ListAdapter<CalendarDayData, CalendarDayAdapter.CalendarDayVH>(diff) {
+) : ListAdapter<CalendarDayEntity, CalendarDayAdapter.CalendarDayVH>(diff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarDayVH {
         val view = LayoutInflater.from(parent.context)
@@ -41,7 +42,7 @@ class CalendarDayAdapter(
         private val listener : CalendarMonthAdapter.CalendarClickListener?
     ) : ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun dayBind(item: CalendarDayData) {
+        fun dayBind(item: CalendarDayEntity) {
             setContainerSize()
             setTodayBackground(item.toDay)
             setDateTextView(
@@ -105,7 +106,7 @@ class CalendarDayAdapter(
             }
         }
 
-        private fun setOnclickListener(item :CalendarDayData){
+        private fun setOnclickListener(item :CalendarDayEntity){
             binding.root.setOnClickListener {
                 listener?.onDayClick(item.year.toInt(),item.month.toInt(),item.day.toInt())
 //                val adapter =bindingAdapter
@@ -124,17 +125,17 @@ class CalendarDayAdapter(
     }
 
     companion object {
-        val diff = object : ItemCallback<CalendarDayData>() {
+        val diff = object : ItemCallback<CalendarDayEntity>() {
             override fun areItemsTheSame(
-                oldItem: CalendarDayData,
-                newItem: CalendarDayData
+                oldItem: CalendarDayEntity,
+                newItem: CalendarDayEntity
             ): Boolean {
                 return oldItem == newItem
             }
 
             override fun areContentsTheSame(
-                oldItem: CalendarDayData,
-                newItem: CalendarDayData
+                oldItem: CalendarDayEntity,
+                newItem: CalendarDayEntity
             ): Boolean {
                 return oldItem.day == newItem.day &&
                         oldItem.isHoliday == newItem.isHoliday &&

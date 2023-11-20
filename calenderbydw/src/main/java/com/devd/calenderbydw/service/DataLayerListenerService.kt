@@ -16,7 +16,6 @@ class DataLayerListenerService : WearableListenerService() {
         super.onDataChanged(p0)
         dbHelper= TaskDatabaseHelper(applicationContext,"wearTask.db",null,3);
         database=dbHelper.readableDatabase
-        Log.d("도원","onDataChaned service????")
         for (event in p0){
             if (event.type == DataEvent.TYPE_CHANGED){
                 val path = event.dataItem.uri.path

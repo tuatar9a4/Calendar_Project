@@ -1,24 +1,30 @@
 package com.devd.calenderbydw.repository
 
 import android.annotation.SuppressLint
-import com.devd.calenderbydw.data.local.calendar.CalendarData
 import com.devd.calenderbydw.data.local.calendar.CalendarDayData
+import com.devd.calenderbydw.data.local.dao.CalendarDao
 import com.devd.calenderbydw.data.local.dao.HolidayDao
+import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
+import com.devd.calenderbydw.data.local.entity.CalendarMonthEntity
 import com.devd.calenderbydw.data.remote.CallResult
 import com.devd.calenderbydw.data.remote.api.HolidayService
 import com.devd.calenderbydw.data.remote.holiday.HolidayItem
 import com.devd.calenderbydw.di.NetworkModule
 import com.devd.calenderbydw.utils.SafeNetCall
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
 
 class CalendarRepository(
     @NetworkModule.HolidayServer private val holidayService: HolidayService,
-    private val holidayDao: HolidayDao
+    private val holidayDao: HolidayDao,
+    private val calendarDao: CalendarDao
 ) : SafeNetCall() {
 
-    suspend fun getHolidayOfYear(
+    suspend fun getHolidayOfYearApi(
         serviceKey: String,
         year: Int,
         checkUpdate: Boolean,
@@ -46,18 +52,134 @@ class CalendarRepository(
         }
     }
 
-    suspend fun getCalendarMergeDb(serviceKey: String, year: Int): List<CalendarData> {
+    suspend fun getCalendarMergeHolidayDb(
+        serviceKey: String,
+        year: Int,
+        startIndex: Int,
+        endIndex: Int
+    ): List<CalendarMonthEntity> {
         val holidayData = holidayDao.selectHolidayItemOfYear(year)
-        return if(holidayData.isNotEmpty()){
-            getCalendarDate(holidayData.map { it.toHolidayItem() })
-        }else{
-            getHolidayOfYear(serviceKey, year, false, 0).run {
-                return getCalendarDate(this)
+        return if (holidayData.isNotEmpty()) {
+            getCalendarDate(holidayData.map { it.toHolidayItem() }, startIndex, endIndex)
+        } else {
+            getHolidayOfYearApi(serviceKey, year, false, 0).run {
+                return getCalendarDate(this, startIndex, endIndex)
             }
         }
 //        return holidayData.ifEmpty {
 //            getHolidayOfYear(serviceKey, year, false, 0)
 //        }
+    }
+
+    suspend fun getCalendarDataSize() = calendarDao.getCalendarDataSize()
+    suspend fun insertCalendarDateInDB(progressCount: (pro: Int) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val calendar = Calendar.getInstance()
+            var proValue = 0
+            val monthDataList = arrayListOf<CalendarMonthEntity>()
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            for (monthCount in -1200..1200) {
+                if (proValue != (((monthCount + 1200) / 2400f) * 100).toInt()) {
+                    proValue = (((monthCount + 1200) / 2400f) * 100).toInt()
+                    progressCount(if (proValue == 100) 99 else proValue)
+                }
+                val dayDataList = arrayListOf<CalendarDayEntity>()
+                calendar.time = Date()
+                calendar.add(Calendar.MONTH, monthCount)                             // 해당 달로 이동
+                val tempMonth = calendar.get(Calendar.MONTH) + 1                // 이번 년도 값
+                val tempYear = calendar.get(Calendar.YEAR)                      // 이번 달 값
+                calendar.set(Calendar.DAY_OF_MONTH, 1)                              // 달의 첫번째로 이동
+                val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)  // 달의 날짜 수
+                val firstWeek = calendar.get(Calendar.DAY_OF_WEEK)              // 날짜의 요일
+                //지난달 날짜 구하기
+                if (firstWeek != 1) {
+                    calendar.add(Calendar.DAY_OF_MONTH, (1 - firstWeek))
+                    for (i in 0 until firstWeek - 1) {
+                        addCalendarEntityList(
+                            inputList = dayDataList,
+//                        holidayInfo = holidayInfo,
+                            calendar = calendar,
+                            day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                            isCurrentMonth = false
+                        )
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                    }
+                }
+                for (i in 1..lastDay) {
+                    addCalendarEntityList(
+                        inputList = dayDataList,
+//                        holidayInfo = holidayInfo,
+                        calendar = calendar,
+                        day = i.toString(),
+                        isCurrentMonth = true
+                    )
+                    if (i != lastDay) {
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                    } //마지막 날에 add 1 하면 다음달로 넘어가 버린다.
+                }
+                calendar.set(Calendar.DAY_OF_MONTH, lastDay)
+                val lastWeek = calendar.get(Calendar.DAY_OF_WEEK)
+                if (lastWeek != 7) {
+                    for (i in 7 downTo lastWeek + 1) {
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                        addCalendarEntityList(
+                            inputList = dayDataList,
+//                            holidayInfo = holidayInfo,
+                            calendar = calendar,
+                            day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+                            isCurrentMonth = false
+                        )
+                    }
+                }
+                monthDataList.add(
+                    CalendarMonthEntity(
+                        year = tempYear,
+                        month = tempMonth,
+                        dayList = dayDataList
+                    )
+                )
+            }
+            calendarDao.insertCalendarItemList(monthDataList).run {
+                CoroutineScope(Dispatchers.Main).launch {
+                    progressCount(100)
+                }
+            }
+        }
+    }
+
+    private fun addCalendarEntityList(
+        inputList: ArrayList<CalendarDayEntity>,
+        day: String,
+        calendar: Calendar,
+        isCurrentMonth: Boolean
+    ) {
+        val tempY = calendar.get(Calendar.YEAR)
+        val tempM = calendar.get(Calendar.MONTH) + 1
+//        var tempHolidayName: String? = null
+//        var tempIsHoliday = false
+//        checkHolidayItem(
+//            holidayInfo, getYearToDayFormat(
+//                year = tempY,
+//                month = tempM,
+//                day = calendar.get(Calendar.DAY_OF_MONTH)
+//            )
+//        )?.let {
+//            tempHolidayName = it.holidayName
+//            tempIsHoliday= it.isHolidayBoolean
+//        }
+        inputList.add(
+            CalendarDayEntity(
+                year = tempY.toString(),
+                month = tempM.toString(),
+                day = day,
+                weekCount = calendar.get(Calendar.DAY_OF_WEEK),
+                isCurrentMonth = isCurrentMonth,
+                dateTimeLong = calendar.timeInMillis
+            )
+        )
     }
 
     suspend fun checkHolidayDBOfYear(year: Int) =
@@ -68,66 +190,95 @@ class CalendarRepository(
      * calendar.getActualMaximum(Calendar.DAY_OF_MONTH) : 해당 월의 날짜 수
      */
     @SuppressLint("SimpleDateFormat")
-    private suspend fun getCalendarDate(holidayInfo: List<HolidayItem>) : ArrayList<CalendarData> {
-        val calendar = Calendar.getInstance()
-        val monthDataList = arrayListOf<CalendarData>()
-        for (monthCount in -100..100) {
-            calendar.time = Date() //오늘로 설정
-            calendar.add(Calendar.MONTH, monthCount) // 해당 달로 이동
-            val tempMonth = calendar.get(Calendar.MONTH) + 1    // 이번 년도 값
-            val tempYear = calendar.get(Calendar.YEAR)         //이번 달 값
-            val calendarList = arrayListOf<CalendarDayData>()
-            calendar.set(Calendar.DAY_OF_MONTH, 1)   // 달의 첫번째로 이동
-            val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) //달의 날짜 수
-            val firstWeek = calendar.get(Calendar.DAY_OF_WEEK)  //날짜의 요일
-            //지난달 날짜 구하기
-            if (firstWeek != 1) {
-                calendar.add(Calendar.DAY_OF_MONTH, (1 - firstWeek))
-                for (i in 0 until firstWeek - 1) {
-                    addCalendarList(
-                        inputList = calendarList,
-                        holidayInfo = holidayInfo,
-                        calendar = calendar,
-                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
-                        isCurrentMonth = false
-                    )
-                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-                }
-            }
-            for (i in 1..lastDay) {
-                addCalendarList(
-                    inputList = calendarList,
-                    holidayInfo = holidayInfo,
-                    calendar = calendar,
-                    day = i.toString(),
-                    isCurrentMonth = true
-                )
-                if (i != lastDay) {
-                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-                } //마지막 날에 add 1 하면 다음달로 넘어가 버린다.
-            }
-            calendar.set(Calendar.DAY_OF_MONTH, lastDay)
-            val lastWeek = calendar.get(Calendar.DAY_OF_WEEK)
-            if (lastWeek != 7) {
-                for (i in 7 downTo lastWeek + 1) {
-                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-                    addCalendarList(
-                        inputList = calendarList,
-                        holidayInfo = holidayInfo,
-                        calendar = calendar,
-                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
-                        isCurrentMonth = false
-                    )
-                }
-            }
-            monthDataList.add(
-                CalendarData(
-                    year = tempYear, month = tempMonth, dayList = calendarList
-                )
-            )
-        }
-        calendar.time = Date()
-        return monthDataList
+    private suspend fun getCalendarDate(
+        holidayInfo: List<HolidayItem>,
+        startYear: Int,
+        endYear: Int
+    ): List<CalendarMonthEntity> {
+        val calendarData = calendarDao.getAllCalendarData(startYear, endYear)
+//            .map {
+//            it.dayList.forEach {dayData ->
+//                var tempHolidayName: String? = null
+//                var tempIsHoliday = false
+//                checkHolidayItem(
+//                    holidayInfo, getYearToDayFormat(
+//                        year = dayData.day.year.toInt(),
+//                        month = dayData.day.month.toInt(),
+//                        day = dayData.day.toInt()
+//                    )
+//                )?.let {
+//                    tempHolidayName = it.holidayName
+//                    tempIsHoliday= it.isHolidayBoolean
+//                }
+//                dayData.holidayName = tempHolidayName
+//                dayData.isHoliday = tempIsHoliday
+//            }
+//            it
+//        }
+
+//        val calendar = Calendar.getInstance()
+//        val monthDataList = arrayListOf<CalendarData>()
+//        for (monthCount in -100..100) {
+//            calendar.time = Date() //오늘로 설정
+//            calendar.add(Calendar.MONTH, monthCount) // 해당 달로 이동
+//            calendar.set(Calendar.DAY_OF_MONTH, 1)
+//            calendar.set(Calendar.HOUR_OF_DAY, 0)
+//            calendar.set(Calendar.MINUTE, 0)
+//            calendar.set(Calendar.SECOND, 0)
+//            val tempMonth = calendar.get(Calendar.MONTH) + 1    // 이번 년도 값
+//            val tempYear = calendar.get(Calendar.YEAR)         //이번 달 값
+//            val calendarList = arrayListOf<CalendarDayData>()
+//            calendar.set(Calendar.DAY_OF_MONTH, 1)   // 달의 첫번째로 이동
+//            val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) //달의 날짜 수
+//            val firstWeek = calendar.get(Calendar.DAY_OF_WEEK)  //날짜의 요일
+//            //지난달 날짜 구하기
+//            if (firstWeek != 1) {
+//                calendar.add(Calendar.DAY_OF_MONTH, (1 - firstWeek))
+//                for (i in 0 until firstWeek - 1) {
+//                    addCalendarList(
+//                        inputList = calendarList,
+//                        holidayInfo = holidayInfo,
+//                        calendar = calendar,
+//                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+//                        isCurrentMonth = false
+//                    )
+//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
+//                }
+//            }
+//            for (i in 1..lastDay) {
+//                addCalendarList(
+//                    inputList = calendarList,
+//                    holidayInfo = holidayInfo,
+//                    calendar = calendar,
+//                    day = i.toString(),
+//                    isCurrentMonth = true
+//                )
+//                if (i != lastDay) {
+//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
+//                } //마지막 날에 add 1 하면 다음달로 넘어가 버린다.
+//            }
+//            calendar.set(Calendar.DAY_OF_MONTH, lastDay)
+//            val lastWeek = calendar.get(Calendar.DAY_OF_WEEK)
+//            if (lastWeek != 7) {
+//                for (i in 7 downTo lastWeek + 1) {
+//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
+//                    addCalendarList(
+//                        inputList = calendarList,
+//                        holidayInfo = holidayInfo,
+//                        calendar = calendar,
+//                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
+//                        isCurrentMonth = false
+//                    )
+//                }
+//            }
+//            monthDataList.add(
+//                CalendarData(
+//                    year = tempYear, month = tempMonth, dayList = calendarList
+//                )
+//            )
+//        }
+//        calendar.time = Date()
+        return calendarData
     }
 
     private fun addCalendarList(
@@ -149,7 +300,7 @@ class CalendarRepository(
             )
         )?.let {
             tempHolidayName = it.holidayName
-            tempIsHoliday= it.isHolidayBoolean
+            tempIsHoliday = it.isHolidayBoolean
         }
         inputList.add(
             CalendarDayData(
@@ -159,7 +310,8 @@ class CalendarRepository(
                 weekCount = calendar.get(Calendar.DAY_OF_WEEK),
                 isCurrentMonth = isCurrentMonth,
                 holidayName = tempHolidayName,
-                isHoliday = tempIsHoliday
+                isHoliday = tempIsHoliday,
+                dateTimeLong = calendar.timeInMillis
             )
         )
     }

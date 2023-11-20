@@ -18,6 +18,7 @@ import com.devd.calenderbydw.utils.SnapPagerScrollListener
 import com.devd.calenderbydw.utils.addSingleItemDecoRation
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CalendarFragment : Fragment() {
@@ -46,7 +47,9 @@ class CalendarFragment : Fragment() {
         setObserver()
         if(viewModel.calendarAdapter.itemCount==0){
             viewModel.getHolidayYear(
-                getString(R.string.holidayEncodingKey)
+                getString(R.string.holidayEncodingKey),
+                true,
+                2023
             )
         }
         return binding.root
@@ -56,7 +59,12 @@ class CalendarFragment : Fragment() {
         viewModel.updateCalendarData.observe(viewLifecycleOwner, EventObserver { result ->
             if (viewModel.firstUpdate) {
                 viewModel.firstUpdate = !viewModel.firstUpdate
-                binding.rcCustomCalendar.scrollToPosition(((viewModel.calendarAdapter.itemCount - 1) / 2))
+                binding.rcCustomCalendar.scrollToPosition(
+                    viewModel.calendarAdapter.currentList.indexOfFirst {
+                        it.year == viewModel.currentToday.year &&
+                            it.month == viewModel.currentToday.month
+                    }
+                )
             }
         })
     }
@@ -79,11 +87,24 @@ class CalendarFragment : Fragment() {
 //                    Timber.d("UpdateHoliday onSnapped position : $position | isRightScroll $isRightScroll ")
                     val currentItem = viewModel.getAdapterCurrentList()[position]
                     binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
-                    if (viewModel.getAdapterCurrentList().size > position + 2 && isRightScroll) {
-                        val twoStepItem = viewModel.getAdapterCurrentList()[position + 2]
+                    if (viewModel.getAdapterCurrentList().size > position + 3 && isRightScroll) {
+                        viewModel.getHolidayYear(
+                            getString(R.string.holidayEncodingKey),
+                            true,
+                            viewModel.calendarAdapter.currentList[position+3].year+1
+                        )
+                    } else if (!isRightScroll && position - 3 > 0) {
+                        viewModel.getHolidayYear(
+                            getString(R.string.holidayEncodingKey),
+                            false,
+                            viewModel.calendarAdapter.currentList[position-3].year-1
+                        )
+                    }
+                    if (viewModel.getAdapterCurrentList().size > position + 1 && isRightScroll) {
+                        val twoStepItem = viewModel.getAdapterCurrentList()[position + 1]
                         updateHolidayInCalendar(currentItem.year, twoStepItem.year)
-                    } else if (!isRightScroll && position - 2 > 0) {
-                        val twoStepItem = viewModel.getAdapterCurrentList()[position - 2]
+                    } else if (!isRightScroll && position - 1 > 0) {
+                        val twoStepItem = viewModel.getAdapterCurrentList()[position - 1]
                         updateHolidayInCalendar(currentItem.year, twoStepItem.year)
                     }
                 }
@@ -96,6 +117,7 @@ class CalendarFragment : Fragment() {
             }
 
             override fun onDayClick(year: Int, month: Int, day: Int) {
+                Timber.d("onDayClick onDayClickonDayClick")
                 findNavController().navigate(
                     R.id.action_calendarFragment_to_taskListFragment,
                     bundleOf(

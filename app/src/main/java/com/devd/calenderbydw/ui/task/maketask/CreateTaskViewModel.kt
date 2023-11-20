@@ -1,6 +1,8 @@
 package com.devd.calenderbydw.ui.task.maketask
 
 import android.view.Gravity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devd.calenderbydw.data.local.calendar.YearMonthDayData
@@ -12,7 +14,9 @@ import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.NO_REPEAT
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.WEEK_REPEAT
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.YEAR_REPEAT
 import com.devd.calenderbydw.repository.TaskRepository
+import com.devd.calenderbydw.utils.Event
 import com.devd.calenderbydw.utils.getFullDay
+import com.devd.calenderbydw.utils.getWeekToText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +32,9 @@ import javax.inject.Inject
 class CreateTaskViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
 ) : ViewModel() {
+
+    private val _insertResult = MutableLiveData<Event<Boolean>>()
+    val insertResult : LiveData<Event<Boolean>> get() = _insertResult
     val originDate = YearMonthDayData()
     private val _taskTitle = MutableStateFlow("")
     val taskTitle: StateFlow<String> = _taskTitle
@@ -77,7 +84,6 @@ class CreateTaskViewModel @Inject constructor(
             taskRepeatSheetList.forEach { item ->
                 item.isCheck = item.type == type
             }
-            Timber.d("RepeatType 111=> ${type}")
             _taskRepeatState.value =type
         }
     }
@@ -113,16 +119,17 @@ class CreateTaskViewModel @Inject constructor(
 
     fun insertTaskInDB() {
         viewModelScope.launch {
-            val startDate = Calendar.getInstance().apply {
+            val calendar =  Calendar.getInstance().apply {
                 set(
                     originDate.year.toString().toInt(),
-                    originDate.month.toString().toInt(),
+                    originDate.month.toString().toInt()-1,
                     originDate.day.toString().toInt(),
                     0,
                     0,
                     0
                 )
-            }.time.time
+            }
+            val startDate = calendar.time.time
             taskRepository.insertTaskItem(
                 TaskDBEntity(
                     year = originDate.year.toString(),
@@ -131,9 +138,12 @@ class CreateTaskViewModel @Inject constructor(
                     title = taskTitle.value,
                     contents = taskContents,
                     repeatType = taskRepeatState.value,
-                    createDate = startDate
+                    createDate = startDate,
+                    weekCount = calendar.get(Calendar.DAY_OF_WEEK)
                 )
-            )
+            ).run {
+                _insertResult.value = Event(true)
+            }
         }
     }
 

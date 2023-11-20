@@ -14,7 +14,7 @@
         android:theme="@style/Theme.CalenderByDW"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="com.devd.calenderbydw.SplashActivity"
+            android:name="com.devd.calenderbydw.ui.splash.SplashActivity"
             android:exported="true"
             android:theme="@style/mainStyle">
             <intent-filter>

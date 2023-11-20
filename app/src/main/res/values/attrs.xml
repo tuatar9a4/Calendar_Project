@@ -5,4 +5,14 @@
         <attr name="appWidgetPadding" format="dimension" />
         <attr name="appWidgetInnerRadius" format="dimension" />
         <attr name="appWidgetRadius" format="dimension" />
-    </declare-styleable></resources>
+    </declare-styleable>
+
+    <declare-styleable name="CalendarView">
+        <attr name="calendarViewStyle" format="reference" />
+        <attr name="itemViewStyle" format="reference" />
+
+        <attr name="dayHeight" format="dimension"/>
+        <attr name="dayTextSize" format="dimension"/>
+        <attr name="taskTextSize" format="dimension"/>
+    </declare-styleable>
+</resources>
