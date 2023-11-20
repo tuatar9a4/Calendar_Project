@@ -5,8 +5,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
-import com.devd.calenderbydw.data.local.calendar.CalendarData
-import com.devd.calenderbydw.data.local.calendar.CalendarDayData
 import com.google.gson.Gson
 
 @Entity(
@@ -24,10 +22,6 @@ data class CalendarMonthEntity(
     @ColumnInfo("dayList")
     val dayList: List<CalendarDayEntity> = listOf(),
 ){
-    fun toCalendarData()=CalendarData(
-        year, month,
-        dayList = dayList.map { it.toCalendarDayItem() }
-    )
 }
 
 /**
@@ -53,13 +47,13 @@ data class CalendarDayEntity(
     var holidayName: String? = null,
     @ColumnInfo("existsTask")
     var existsTask: Boolean = false,
+    @ColumnInfo("taskTitle")
+    var taskTitle: String = "",
+    @ColumnInfo("stickerId")
+    var stickerId: String = "",
     @ColumnInfo("dateTimeLong")
     var dateTimeLong: Long = 0L
-){
-    fun toCalendarDayItem()=CalendarDayData(
-        year, month, day, isCurrentMonth, weekCount, toDay, isHoliday, holidayName, existsTask, dateTimeLong
-    )
-}
+)
 
 class CalendarDayConverters{
     @TypeConverter

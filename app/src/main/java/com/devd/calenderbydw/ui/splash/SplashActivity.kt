@@ -26,19 +26,19 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySplashBinding.inflate(layoutInflater,null,false)
+        binding = ActivitySplashBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
-        viewModel.checkCalendarDB{progress ->
+        viewModel.checkCalendarDB(getString(R.string.holidayEncodingKey)) { progress ->
             runOnUiThread {
-                binding.tvCalendarProgress.text="달력 생성중\n${progress}%"
+                binding.tvCalendarProgress.text = "달력 생성중\n${progress}%"
             }
         }
-         viewModel.completeCalendarCreate.observe(this,EventObserver{
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                    val i=Intent(applicationContext, MainActivity::class.java)
-                    startActivity(i)
-                    finish()
-                },500L)
-            })
+        viewModel.completeCalendarCreate.observe(this, EventObserver {
+            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                val i = Intent(applicationContext, MainActivity::class.java)
+                startActivity(i)
+                finish()
+            }, 500L)
+        })
     }
 }

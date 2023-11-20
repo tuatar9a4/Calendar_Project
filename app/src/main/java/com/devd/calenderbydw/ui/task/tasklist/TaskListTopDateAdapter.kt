@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DiffUtil.ItemCallback
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.devd.calenderbydw.R
-import com.devd.calenderbydw.data.local.calendar.CalendarDayData
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
 import com.devd.calenderbydw.databinding.TaskListTopDateItemBinding
 import com.devd.calenderbydw.utils.changeWeekIntToString

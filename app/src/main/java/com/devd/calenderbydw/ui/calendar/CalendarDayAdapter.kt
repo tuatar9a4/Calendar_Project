@@ -10,14 +10,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.devd.calenderbydw.R
-import com.devd.calenderbydw.data.local.calendar.CalendarDayData
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
 import com.devd.calenderbydw.databinding.CustomCalendarDayItemBinding
 import com.devd.calenderbydw.utils.ConstVariable.WEEK_SAT_DAY
 import com.devd.calenderbydw.utils.ConstVariable.WEEK_SUN_DAY
 import com.devd.calenderbydw.utils.getDeviceSize
 import com.devd.calenderbydw.utils.getDpValue
-import timber.log.Timber
 
 class CalendarDayAdapter(
     private val listener : CalendarMonthAdapter.CalendarClickListener?=null

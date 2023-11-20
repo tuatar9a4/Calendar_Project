@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getBackPressCallback() = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            if (navController.popBackStack()) {
+            if (navController.navigateUp()) {
                 return
             } else if (System.currentTimeMillis() - backKeyPressedTime > 2000) {
                 backKeyPressedTime = System.currentTimeMillis()

@@ -10,6 +10,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.children
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
+import com.devd.calenderbydw.data.local.entity.TaskDBEntity
 import com.devd.calenderbydw.ui.calendar.CalendarMonthAdapter
 import com.devd.calenderbydw.utils.ConstVariable.WEEKS_PER_MONTH
 import org.joda.time.DateTimeConstants.DAYS_PER_WEEK
@@ -61,13 +62,14 @@ class CustomCalenderView @JvmOverloads constructor(
      * @param firstDayOfMonth   한 달의 시작 요일
      * @param list              달력이 가지고 있는 요일과 이벤트 목록 (총 42개)
      */
-    fun initCalendar( list: List<CalendarDayEntity>,listener : CalendarMonthAdapter.CalendarClickListener?) {
+    fun initCalendar( list: List<CalendarDayEntity>,taskList :List<TaskDBEntity>,listener : CalendarMonthAdapter.CalendarClickListener?) {
         removeAllViews()
         monthWeekCount= list.size/7
         list.forEach {
             addView(
                 CustomDayItemView(
                     context = context,
+                    taskList = taskList,
                     dayDate = it,
                     listener  = listener
                 )

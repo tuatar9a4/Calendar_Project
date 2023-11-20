@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devd.calenderbydw.data.local.calendar.CalendarDayData
 import com.devd.calenderbydw.data.local.calendar.YearMonthDayData
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity
@@ -42,7 +41,7 @@ class TaskListViewModel @Inject constructor(
     private var startIndex = 2021
     fun getCalendarList(encodeKey:String,year:Int,month:Int,day:Int){
         viewModelScope.launch {
-            calendarRepository.getCalendarMergeHolidayDb(encodeKey,year,startIndex,startIndex+2).run {
+            calendarRepository.getCalendarDataInDB(startIndex,startIndex+2).run {
                 val fullDayList = ArrayList<CalendarDayEntity>()
                 this.forEachIndexed { index, calendarData ->
                     fullDayList +=calendarData.dayList.filter { it.isCurrentMonth }
@@ -84,7 +83,7 @@ class TaskListViewModel @Inject constructor(
     fun getSelectDateTaskList(year:String,month:String,day:String){
         viewModelScope.launch {
             taskList = taskRepository.getSpecifyDateTaskItems(year, month, day).stateIn(
-                scope = viewModelScope,
+                scope = this,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = listOf()
             )

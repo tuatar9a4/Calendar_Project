@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -18,7 +21,11 @@ import com.devd.calenderbydw.utils.SnapPagerScrollListener
 import com.devd.calenderbydw.utils.addSingleItemDecoRation
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.Calendar
+import java.util.Date
 
 @AndroidEntryPoint
 class CalendarFragment : Fragment() {
@@ -36,6 +43,14 @@ class CalendarFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         horizontalMarginItemDecoration = HorizontalMarginItemDecoration(10f, 10f, requireContext())
+        val toDayCalendar = Calendar.getInstance().apply {
+            time = Date()
+        }
+        viewModel.setMonthTaskList(
+            toDayCalendar.get(Calendar.YEAR).toString(),
+            (toDayCalendar.get(Calendar.MONTH) + 1).toString()
+        )
+        setCollectTaskData()
     }
 
     override fun onCreateView(
@@ -43,14 +58,11 @@ class CalendarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        setToolbarFunc()
         setRecyclerView()
         setObserver()
         if(viewModel.calendarAdapter.itemCount==0){
-            viewModel.getHolidayYear(
-                getString(R.string.holidayEncodingKey),
-                true,
-                2023
-            )
+            viewModel.getHolidayYear(true, 2023)
         }
         return binding.root
     }
@@ -59,14 +71,34 @@ class CalendarFragment : Fragment() {
         viewModel.updateCalendarData.observe(viewLifecycleOwner, EventObserver { result ->
             if (viewModel.firstUpdate) {
                 viewModel.firstUpdate = !viewModel.firstUpdate
-                binding.rcCustomCalendar.scrollToPosition(
-                    viewModel.calendarAdapter.currentList.indexOfFirst {
-                        it.year == viewModel.currentToday.year &&
-                            it.month == viewModel.currentToday.month
-                    }
-                )
+                scrollCurrentMonth()
             }
         })
+    }
+
+    private fun setCollectTaskData(){
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED){
+                viewModel.monthTaskList?.collectLatest {
+                    viewModel.addTaskDataInItem(it)
+                }
+            }
+        }
+    }
+
+    private fun setToolbarFunc(){
+        binding.tvCurrentMonth.setOnClickListener {
+            scrollCurrentMonth()
+        }
+    }
+
+    private fun scrollCurrentMonth(){
+        binding.rcCustomCalendar.scrollToPosition(
+            viewModel.calendarAdapter.currentList.indexOfFirst {
+                it.year == viewModel.currentToday.year &&
+                        it.month == viewModel.currentToday.month
+            }
+        )
     }
 
     private fun setRecyclerView() {
@@ -86,16 +118,15 @@ class CalendarFragment : Fragment() {
                 override fun onSnapped(position: Int, isRightScroll: Boolean) {
 //                    Timber.d("UpdateHoliday onSnapped position : $position | isRightScroll $isRightScroll ")
                     val currentItem = viewModel.getAdapterCurrentList()[position]
+                    viewModel.currentPos = position
                     binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
                     if (viewModel.getAdapterCurrentList().size > position + 3 && isRightScroll) {
                         viewModel.getHolidayYear(
-                            getString(R.string.holidayEncodingKey),
                             true,
                             viewModel.calendarAdapter.currentList[position+3].year+1
                         )
                     } else if (!isRightScroll && position - 3 > 0) {
                         viewModel.getHolidayYear(
-                            getString(R.string.holidayEncodingKey),
                             false,
                             viewModel.calendarAdapter.currentList[position-3].year-1
                         )

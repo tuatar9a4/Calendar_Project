@@ -71,7 +71,7 @@ class TaskListFragment : Fragment() {
 
     private fun setCollectFlows() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.taskList?.collectLatest {
                     viewModel.scheduleItemAdapter.submitList(it)
                 }

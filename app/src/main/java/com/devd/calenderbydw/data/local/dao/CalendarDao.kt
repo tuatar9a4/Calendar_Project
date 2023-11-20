@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.devd.calenderbydw.data.local.entity.CalendarMonthEntity
 
 @Dao
@@ -16,4 +17,10 @@ interface CalendarDao {
 
     @Query("SELECT SUM(LENGTH('id')) FROM calendar_table ")
     suspend fun getCalendarDataSize() : Long?
+
+    @Query("Select * from calendar_table")
+    suspend fun getAllCalendar() : List<CalendarMonthEntity>
+
+    @Update
+    suspend fun updateCalendarDataAddHoliday(list: List<CalendarMonthEntity>)
 }

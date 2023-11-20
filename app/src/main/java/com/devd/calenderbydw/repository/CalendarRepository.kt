@@ -1,7 +1,6 @@
 package com.devd.calenderbydw.repository
 
 import android.annotation.SuppressLint
-import com.devd.calenderbydw.data.local.calendar.CalendarDayData
 import com.devd.calenderbydw.data.local.dao.CalendarDao
 import com.devd.calenderbydw.data.local.dao.HolidayDao
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
@@ -14,7 +13,6 @@ import com.devd.calenderbydw.utils.SafeNetCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
 
@@ -52,27 +50,15 @@ class CalendarRepository(
         }
     }
 
-    suspend fun getCalendarMergeHolidayDb(
-        serviceKey: String,
-        year: Int,
+    suspend fun getCalendarDataInDB(
         startIndex: Int,
         endIndex: Int
     ): List<CalendarMonthEntity> {
-        val holidayData = holidayDao.selectHolidayItemOfYear(year)
-        return if (holidayData.isNotEmpty()) {
-            getCalendarDate(holidayData.map { it.toHolidayItem() }, startIndex, endIndex)
-        } else {
-            getHolidayOfYearApi(serviceKey, year, false, 0).run {
-                return getCalendarDate(this, startIndex, endIndex)
-            }
-        }
-//        return holidayData.ifEmpty {
-//            getHolidayOfYear(serviceKey, year, false, 0)
-//        }
+        return getCalendarDate(startIndex, endIndex)
     }
-
-    suspend fun getCalendarDataSize() = calendarDao.getCalendarDataSize()
-    suspend fun insertCalendarDateInDB(progressCount: (pro: Int) -> Unit) {
+    suspend fun getCalendarAllData() = calendarDao.getAllCalendar()
+    //달력 생성
+    suspend fun insertCalendarDateInDB(holidayList : List<HolidayItem>,currentYear:Int,progressCount: (pro: Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val calendar = Calendar.getInstance()
             var proValue = 0
@@ -100,7 +86,6 @@ class CalendarRepository(
                     for (i in 0 until firstWeek - 1) {
                         addCalendarEntityList(
                             inputList = dayDataList,
-//                        holidayInfo = holidayInfo,
                             calendar = calendar,
                             day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
                             isCurrentMonth = false
@@ -111,7 +96,6 @@ class CalendarRepository(
                 for (i in 1..lastDay) {
                     addCalendarEntityList(
                         inputList = dayDataList,
-//                        holidayInfo = holidayInfo,
                         calendar = calendar,
                         day = i.toString(),
                         isCurrentMonth = true
@@ -127,7 +111,6 @@ class CalendarRepository(
                         calendar.add(Calendar.DAY_OF_MONTH, 1)
                         addCalendarEntityList(
                             inputList = dayDataList,
-//                            holidayInfo = holidayInfo,
                             calendar = calendar,
                             day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
                             isCurrentMonth = false
@@ -142,12 +125,71 @@ class CalendarRepository(
                     )
                 )
             }
-            calendarDao.insertCalendarItemList(monthDataList).run {
+            //DB정보에 공휴일 정보 넣기
+            val mergeHoliday = if (holidayList.isNotEmpty()) {
+                monthDataList.map {
+                    if (currentYear == it.year){
+                        it.dayList.forEach { dayData ->
+                            var tempHolidayName: String? = null
+                            var tempIsHoliday = false
+                            checkHolidayItem(
+                                holidayList, getYearToDayFormat(
+                                    year = dayData.year.toInt(),
+                                    month = dayData.month.toInt(),
+                                    day = dayData.day.toInt()
+                                )
+                            )?.let {
+                                tempHolidayName = it.holidayName
+                                tempIsHoliday = it.isHolidayBoolean
+                            }
+                            dayData.holidayName = tempHolidayName
+                            dayData.isHoliday = tempIsHoliday
+                        }
+                    }
+                    it
+                }
+            } else {
+                monthDataList
+            }
+            calendarDao.insertCalendarItemList(mergeHoliday).run {
                 CoroutineScope(Dispatchers.Main).launch {
                     progressCount(100)
                 }
             }
         }
+    }
+
+    suspend fun updateCalendarChangeHoliday(calendarList:List<CalendarMonthEntity>, holidayList: List<HolidayItem>,currentYear: Int){
+        val mergeHoliday = if (holidayList.isNotEmpty()) {
+            calendarList.map {
+                if (currentYear == it.year){
+                    it.dayList.forEach { dayData ->
+                        var tempHolidayName: String? = null
+                        var tempIsHoliday = false
+                        checkHolidayItem(
+                            holidayList, getYearToDayFormat(
+                                year = dayData.year.toInt(),
+                                month = dayData.month.toInt(),
+                                day = dayData.day.toInt()
+                            )
+                        )?.let {
+                            tempHolidayName = it.holidayName
+                            tempIsHoliday = it.isHolidayBoolean
+                        }
+                        dayData.holidayName = tempHolidayName
+                        dayData.isHoliday = tempIsHoliday
+                    }
+                }
+                it
+            }
+        } else {
+            calendarList
+        }
+        updateCalendarData(mergeHoliday)
+    }
+
+    suspend fun updateCalendarData(calendarList:List<CalendarMonthEntity>){
+        calendarDao.updateCalendarDataAddHoliday(calendarList)
     }
 
     private fun addCalendarEntityList(
@@ -156,24 +198,10 @@ class CalendarRepository(
         calendar: Calendar,
         isCurrentMonth: Boolean
     ) {
-        val tempY = calendar.get(Calendar.YEAR)
-        val tempM = calendar.get(Calendar.MONTH) + 1
-//        var tempHolidayName: String? = null
-//        var tempIsHoliday = false
-//        checkHolidayItem(
-//            holidayInfo, getYearToDayFormat(
-//                year = tempY,
-//                month = tempM,
-//                day = calendar.get(Calendar.DAY_OF_MONTH)
-//            )
-//        )?.let {
-//            tempHolidayName = it.holidayName
-//            tempIsHoliday= it.isHolidayBoolean
-//        }
         inputList.add(
             CalendarDayEntity(
-                year = tempY.toString(),
-                month = tempM.toString(),
+                year = calendar.get(Calendar.YEAR).toString(),
+                month =(calendar.get(Calendar.MONTH) + 1).toString(),
                 day = day,
                 weekCount = calendar.get(Calendar.DAY_OF_WEEK),
                 isCurrentMonth = isCurrentMonth,
@@ -191,129 +219,16 @@ class CalendarRepository(
      */
     @SuppressLint("SimpleDateFormat")
     private suspend fun getCalendarDate(
-        holidayInfo: List<HolidayItem>,
         startYear: Int,
         endYear: Int
     ): List<CalendarMonthEntity> {
         val calendarData = calendarDao.getAllCalendarData(startYear, endYear)
-//            .map {
-//            it.dayList.forEach {dayData ->
-//                var tempHolidayName: String? = null
-//                var tempIsHoliday = false
-//                checkHolidayItem(
-//                    holidayInfo, getYearToDayFormat(
-//                        year = dayData.day.year.toInt(),
-//                        month = dayData.day.month.toInt(),
-//                        day = dayData.day.toInt()
-//                    )
-//                )?.let {
-//                    tempHolidayName = it.holidayName
-//                    tempIsHoliday= it.isHolidayBoolean
-//                }
-//                dayData.holidayName = tempHolidayName
-//                dayData.isHoliday = tempIsHoliday
+//        calendarData.forEach {
+//            it.dayList.forEach { day ->
+//                Timber.d(" calendarData : ${day.year} :${day.month} : ${day.day} : ${day.holidayName} : ${day.isHoliday}")
 //            }
-//            it
 //        }
-
-//        val calendar = Calendar.getInstance()
-//        val monthDataList = arrayListOf<CalendarData>()
-//        for (monthCount in -100..100) {
-//            calendar.time = Date() //오늘로 설정
-//            calendar.add(Calendar.MONTH, monthCount) // 해당 달로 이동
-//            calendar.set(Calendar.DAY_OF_MONTH, 1)
-//            calendar.set(Calendar.HOUR_OF_DAY, 0)
-//            calendar.set(Calendar.MINUTE, 0)
-//            calendar.set(Calendar.SECOND, 0)
-//            val tempMonth = calendar.get(Calendar.MONTH) + 1    // 이번 년도 값
-//            val tempYear = calendar.get(Calendar.YEAR)         //이번 달 값
-//            val calendarList = arrayListOf<CalendarDayData>()
-//            calendar.set(Calendar.DAY_OF_MONTH, 1)   // 달의 첫번째로 이동
-//            val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) //달의 날짜 수
-//            val firstWeek = calendar.get(Calendar.DAY_OF_WEEK)  //날짜의 요일
-//            //지난달 날짜 구하기
-//            if (firstWeek != 1) {
-//                calendar.add(Calendar.DAY_OF_MONTH, (1 - firstWeek))
-//                for (i in 0 until firstWeek - 1) {
-//                    addCalendarList(
-//                        inputList = calendarList,
-//                        holidayInfo = holidayInfo,
-//                        calendar = calendar,
-//                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
-//                        isCurrentMonth = false
-//                    )
-//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-//                }
-//            }
-//            for (i in 1..lastDay) {
-//                addCalendarList(
-//                    inputList = calendarList,
-//                    holidayInfo = holidayInfo,
-//                    calendar = calendar,
-//                    day = i.toString(),
-//                    isCurrentMonth = true
-//                )
-//                if (i != lastDay) {
-//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-//                } //마지막 날에 add 1 하면 다음달로 넘어가 버린다.
-//            }
-//            calendar.set(Calendar.DAY_OF_MONTH, lastDay)
-//            val lastWeek = calendar.get(Calendar.DAY_OF_WEEK)
-//            if (lastWeek != 7) {
-//                for (i in 7 downTo lastWeek + 1) {
-//                    calendar.add(Calendar.DAY_OF_MONTH, 1)
-//                    addCalendarList(
-//                        inputList = calendarList,
-//                        holidayInfo = holidayInfo,
-//                        calendar = calendar,
-//                        day = calendar.get(Calendar.DAY_OF_MONTH).toString(),
-//                        isCurrentMonth = false
-//                    )
-//                }
-//            }
-//            monthDataList.add(
-//                CalendarData(
-//                    year = tempYear, month = tempMonth, dayList = calendarList
-//                )
-//            )
-//        }
-//        calendar.time = Date()
         return calendarData
-    }
-
-    private fun addCalendarList(
-        inputList: ArrayList<CalendarDayData>,
-        holidayInfo: List<HolidayItem>,
-        day: String,
-        calendar: Calendar,
-        isCurrentMonth: Boolean
-    ) {
-        val tempY = calendar.get(Calendar.YEAR)
-        val tempM = calendar.get(Calendar.MONTH) + 1
-        var tempHolidayName: String? = null
-        var tempIsHoliday = false
-        checkHolidayItem(
-            holidayInfo, getYearToDayFormat(
-                year = tempY,
-                month = tempM,
-                day = calendar.get(Calendar.DAY_OF_MONTH)
-            )
-        )?.let {
-            tempHolidayName = it.holidayName
-            tempIsHoliday = it.isHolidayBoolean
-        }
-        inputList.add(
-            CalendarDayData(
-                year = tempY.toString(),
-                month = tempM.toString(),
-                day = day,
-                weekCount = calendar.get(Calendar.DAY_OF_WEEK),
-                isCurrentMonth = isCurrentMonth,
-                holidayName = tempHolidayName,
-                isHoliday = tempIsHoliday,
-                dateTimeLong = calendar.timeInMillis
-            )
-        )
     }
 
     //SimpleDateFormat 를 사용하기에는 메모리 소비가 너무 강함

@@ -27,11 +27,17 @@ interface TaskDao {
     @Query("SELECT * FROM task_table WHERE weekCount LIKE :weekCount AND repeatType LIKE 2 AND createDate < :searchDate")
     suspend fun getTaskRepeatWeek(weekCount:Int,searchDate:Long) : List<TaskDBEntity>
     //매일 반복 하는 일정
-    @Query("SELECT * FROM task_table WHERE repeatType LIKE 1 AND createDate < :searchDate")
+    @Query("SELECT * FROM task_table WHERE repeatType LIKE 1 AND createDate >= :searchDate")
     suspend fun getTaskRepeatDay(searchDate:Long) : List<TaskDBEntity>
-    //해당 달에 해당하는 매달,매년 반복 일정과 반복 없는 일정
-    @Query("SELECT * FROM task_table WHERE month Like :month AND (repeatType LIKE 3 OR repeatType LIKE 4 OR repeatType LIKE 0) AND createDate < :searchDate")
-    suspend fun getTaskSpecifyMonth(month:String, searchDate:Long) : List<TaskDBEntity>
+    //해당 달에 해당하는 매달,매년 반복 일정
+    @Query("SELECT * FROM task_table WHERE month Like :month AND (repeatType LIKE 3 OR repeatType LIKE 4) AND createDate >= :searchDate")
+    suspend fun getTaskRepeatYearMonthSpecifyMonth(month:String, searchDate:Long) : List<TaskDBEntity>
+    //해당 달에 해당하는 반복 없음
+    @Query("SELECT * FROM task_table WHERE year LIKE :year  AND month Like :month  AND repeatType LIKE 0 AND createDate >= :searchDate")
+    suspend fun getTaskSpecifyMonth(year:String,month:String, searchDate:Long) : List<TaskDBEntity>
+    //해당 달의 매주 반복하는 일정들
+    @Query("SELECT * FROM task_table WHERE repeatType LIKE 2 AND createDate >= :searchDate")
+    suspend fun getTaskRepeatTotalWeek(searchDate:Long) : List<TaskDBEntity>
     @Query("SELECT * FROM task_table WHERE year LIKE :year AND month LIKE :month AND day LIKE :day")
     suspend fun getTempTaskSpecifyDay(year:String,month:String,day:String) : List<TaskDBEntity>
     @Query("SELECT * FROM task_table")

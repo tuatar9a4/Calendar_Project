@@ -6,15 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devd.calenderbydw.data.local.calendar.YearMonthDayData
 import com.devd.calenderbydw.data.local.entity.CalendarMonthEntity
+import com.devd.calenderbydw.data.local.entity.TaskDBEntity
 import com.devd.calenderbydw.data.remote.holiday.HolidayItem
 import com.devd.calenderbydw.repository.CalendarRepository
 import com.devd.calenderbydw.repository.TaskRepository
 import com.devd.calenderbydw.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
+import java.util.concurrent.Flow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,26 +31,28 @@ class CalendarViewModel @Inject constructor(
     private val _updateCalendarData = MutableLiveData<Event<Boolean>>()
     val updateCalendarData: LiveData<Event<Boolean>> get() = _updateCalendarData
     val calendarAdapter = CalendarMonthAdapter()
+    var monthTaskList : StateFlow<List<TaskDBEntity>>? = null
     var currentToday = YearMonthDayData()
+    var currentPos = 0
     var firstUpdate = true
     private var startIndex = 2022
     private var endIndex = 2023
-    fun getHolidayYear(encodeKey: String, isNextYear: Boolean, callYear: Int) {
+    fun getHolidayYear(isNextYear: Boolean, callYear: Int) {
         viewModelScope.launch {
-            val calendar = Calendar.getInstance()
-            calendar.time = Date()
+            val calendar = Calendar.getInstance().apply {
+                time = Date()
+            }
             currentToday = YearMonthDayData(
                 year = calendar.get(Calendar.YEAR),
                 month = (calendar.get(Calendar.MONTH) + 1),
                 day = calendar.get(Calendar.DAY_OF_MONTH)
             )
             if ((isNextYear && endIndex == callYear) || (!isNextYear && startIndex == callYear)) {
-                calendarRepository.getCalendarMergeHolidayDb(
-                    encodeKey,
-                    calendar.get(Calendar.YEAR),
+                calendarRepository.getCalendarDataInDB(
                     if (isNextYear) endIndex else startIndex - 2,
                     if (isNextYear) endIndex + 2 else startIndex
                 ).run {
+                    taskRepository.getTaskItems()
                     changeTodayItem(this, currentToday.year, currentToday.month, currentToday.day)
                     if (calendarAdapter.itemCount == 0) {
                         calendarAdapter.submitList(this) {
@@ -65,6 +72,25 @@ class CalendarViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun setMonthTaskList(year:String,month:String){
+        viewModelScope.launch {
+            monthTaskList = taskRepository.getSpecifyMonthTaskItemList(year,month).stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = listOf()
+            )
+        }
+    }
+
+    fun addTaskDataInItem(items :List<TaskDBEntity>){
+        viewModelScope.launch {
+            items.forEach {
+                Timber.d("task List : ${it}")
+            }
+            calendarAdapter.setTaskData(items,currentPos)
         }
     }
 
@@ -117,19 +143,20 @@ class CalendarViewModel @Inject constructor(
                         }
                     }
                 } ?: kotlin.run {
-//                val holidayList = calendarRepository.getHolidayOfYearApi(encodeKey, year, true, 0)
-//                calendarAdapter.currentList.filter { it.year == year }.forEach { calendarData ->
-//                    calendarData.dayList.forEach { dayItem ->
-//                        checkHolidayItem(
-//                            holidayList, getYearToDayFormat(
-//                                dayItem.year.toInt(), dayItem.month.toInt(), dayItem.day.toInt()
-//                            )
-//                        )?.let { holidayItem ->
-//                            dayItem.holidayName = holidayItem.holidayName
-//                            dayItem.isHoliday = holidayItem.isHolidayBoolean
-//                        }
-//                    }
-//                }
+                val holidayList = calendarRepository.getHolidayOfYearApi(encodeKey, year, true, 0)
+                calendarAdapter.currentList.filter { it.year == year }.forEach { calendarData ->
+                    calendarData.dayList.forEach { dayItem ->
+                        checkHolidayItem(
+                            holidayList, getYearToDayFormat(
+                                dayItem.year.toInt(), dayItem.month.toInt(), dayItem.day.toInt()
+                            )
+                        )?.let { holidayItem ->
+                            dayItem.holidayName = holidayItem.holidayName
+                            dayItem.isHoliday = holidayItem.isHolidayBoolean
+                        }
+                    }
+                }
+                calendarRepository.updateCalendarData(calendarAdapter.currentList)
             }
         }
     }
