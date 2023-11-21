@@ -87,9 +87,9 @@ class CalendarViewModel @Inject constructor(
 
     fun addTaskDataInItem(items :List<TaskDBEntity>){
         viewModelScope.launch {
-            items.forEach {
-                Timber.d("task List : ${it}")
-            }
+//            items.forEach {
+//                Timber.d("task List : ${it}")
+//            }
             calendarAdapter.setTaskData(items,currentPos)
         }
     }

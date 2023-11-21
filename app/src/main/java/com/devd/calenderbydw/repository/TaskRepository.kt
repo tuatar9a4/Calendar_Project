@@ -33,7 +33,7 @@ class TaskRepository @Inject constructor(
 
     suspend fun updateTaskItem(taskItem :TaskDBEntity):Int{
         taskDao.updateTaskItem(taskItem).run {
-            Timber.d("DeleteResult [${taskItem.id}]-> ${this}")
+            Timber.d("UpdateResult [${taskItem.id}]-> ${this}")
             return this
         }
     }
