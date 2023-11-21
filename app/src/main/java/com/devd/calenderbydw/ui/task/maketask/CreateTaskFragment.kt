@@ -20,15 +20,14 @@ import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.NO_REPEAT
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.WEEK_REPEAT
 import com.devd.calenderbydw.data.local.entity.TaskDBEntity.Companion.YEAR_REPEAT
 import com.devd.calenderbydw.databinding.FragmentCreateTaskBinding
-import com.devd.calenderbydw.ui.dialog.CustomBottomSheet
+import com.devd.calenderbydw.ui.dialog.CustomBottomSheetDialog
+import com.devd.calenderbydw.utils.ConstVariable
 import com.devd.calenderbydw.utils.EventObserver
 import com.devd.calenderbydw.utils.autoCleared
 import com.devd.calenderbydw.utils.getWeekToText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.Calendar
 
 @AndroidEntryPoint
@@ -40,6 +39,9 @@ class CreateTaskFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.setOriginDate(navArgs.year, navArgs.month, navArgs.day)
+        if(navArgs.type == ConstVariable.MODIFY_TASK && navArgs.taskData !=null){
+            viewModel.setModifyTaskInfo(navArgs.taskData!!)
+        }
     }
 
     override fun onCreateView(
@@ -49,6 +51,7 @@ class CreateTaskFragment : Fragment() {
         binding = FragmentCreateTaskBinding.inflate(inflater, container, false)
         setToolbarFunc()
         setEditTextFunc()
+        checkModifyState()
         setChangeTaskOptions()
         setDateText()
         setObserver()
@@ -62,7 +65,7 @@ class CreateTaskFragment : Fragment() {
                     viewModel.taskTitle.collectLatest {
                         context?.let { context ->
                             val taskColor = if (it.isEmpty()) {
-                                context.getColor(R.color.grayColor)
+                                context.getColor(R.color.gray_default)
                             } else {
                                 context.getColor(R.color.black)
                             }
@@ -78,7 +81,7 @@ class CreateTaskFragment : Fragment() {
                 }
                 launch {
                     viewModel.taskYear.collectLatest {
-                        viewModel.originDate.year = it.toInt()
+                        viewModel.selectDate.year = it.toInt()
                         binding.tvTaskYear.text = it
                     }
                 }
@@ -99,13 +102,26 @@ class CreateTaskFragment : Fragment() {
         })
     }
 
+    private fun checkModifyState(){
+        if(navArgs.type == ConstVariable.MODIFY_TASK){
+            binding.edtTaskTitle.setText(navArgs.taskData?.title?:"")
+            binding.edtTaskContents.setText(navArgs.taskData?.contents?:"")
+            binding.taskToolbar.title = "일정 수정기"
+            binding.tvInsertTask.text = "수정"
+        }
+    }
+
     private fun setToolbarFunc() {
         binding.taskToolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
         binding.tvInsertTask.setOnClickListener {
-            viewModel.insertTaskInDB()
+            if(navArgs.type==ConstVariable.MODIFY_TASK){
+                viewModel.modifyTaskInDB()
+            }else{
+                viewModel.insertTaskInDB()
+            }
         }
     }
 
@@ -117,10 +133,10 @@ class CreateTaskFragment : Fragment() {
 
     private fun setChangeTaskOptions() {
         binding.btnRepeat.setOnClickListener {
-            CustomBottomSheet.Builder().apply {
+            CustomBottomSheetDialog.Builder().apply {
                 title = "반복"
                 bottomSheetItems = viewModel.taskRepeatSheetList
-                itemClickListener = object : CustomBottomSheet.BottomSheetClickListener {
+                itemClickListener = object : CustomBottomSheetDialog.BottomSheetClickListener {
                     override fun onItemClick(type: Int, text: String) {
                         viewModel.setChangeRepeatState(type)
                     }
@@ -131,11 +147,11 @@ class CreateTaskFragment : Fragment() {
         binding.tvTaskYear.setOnClickListener {
             if(viewModel.taskRepeatState.value == DAILY_REPEAT ||
                 viewModel.taskRepeatState.value == WEEK_REPEAT) return@setOnClickListener
-            CustomBottomSheet.Builder().apply {
+            CustomBottomSheetDialog.Builder().apply {
                 title = "년도"
                 bottomSheetItems = viewModel.taskYearSheetList
                 scrollPos = viewModel.taskYearSheetList.indexOfFirst { it.isCheck }
-                itemClickListener = object : CustomBottomSheet.BottomSheetClickListener {
+                itemClickListener = object : CustomBottomSheetDialog.BottomSheetClickListener {
                     override fun onItemClick(type: Int, text: String) {
                         if(text == binding.tvTaskYear.text.toString()) return
                         viewModel.setChangeSelectYear(text)
@@ -147,11 +163,11 @@ class CreateTaskFragment : Fragment() {
         binding.tvTaskMonth.setOnClickListener {
             if(viewModel.taskRepeatState.value == MONTH_REPEAT ||
                 viewModel.taskRepeatState.value == WEEK_REPEAT) return@setOnClickListener
-            CustomBottomSheet.Builder().apply {
+            CustomBottomSheetDialog.Builder().apply {
                 title = "달"
                 bottomSheetItems = viewModel.taskMonthSheetList
                 scrollPos = viewModel.taskMonthSheetList.indexOfFirst { it.isCheck }
-                itemClickListener = object : CustomBottomSheet.BottomSheetClickListener {
+                itemClickListener = object : CustomBottomSheetDialog.BottomSheetClickListener {
                     override fun onItemClick(type: Int, text: String) {
                         if(text == binding.tvTaskMonth.text.toString()) return
                         viewModel.setChangeSelectMonth(text)
@@ -163,11 +179,11 @@ class CreateTaskFragment : Fragment() {
         binding.tvTaskDay.setOnClickListener {
             if(viewModel.taskRepeatState.value == YEAR_REPEAT ||
                 viewModel.taskRepeatState.value == WEEK_REPEAT) return@setOnClickListener
-            CustomBottomSheet.Builder().apply {
+            CustomBottomSheetDialog.Builder().apply {
                 title = "일"
                 bottomSheetItems = viewModel.taskDaySheetList
                 scrollPos = viewModel.taskDaySheetList.indexOfFirst { it.isCheck }
-                itemClickListener = object : CustomBottomSheet.BottomSheetClickListener {
+                itemClickListener = object : CustomBottomSheetDialog.BottomSheetClickListener {
                     override fun onItemClick(type: Int, text: String) {
                         if(text == binding.tvTaskDay.text.toString()) return
                         viewModel.setChangeSelectDay(text)

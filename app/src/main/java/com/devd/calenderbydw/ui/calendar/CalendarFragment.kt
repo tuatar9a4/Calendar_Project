@@ -148,7 +148,6 @@ class CalendarFragment : Fragment() {
             }
 
             override fun onDayClick(year: Int, month: Int, day: Int) {
-                Timber.d("onDayClick onDayClickonDayClick")
                 findNavController().navigate(
                     R.id.action_calendarFragment_to_taskListFragment,
                     bundleOf(

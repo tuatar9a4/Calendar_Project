@@ -17,8 +17,12 @@ import com.devd.calenderbydw.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,72 +32,75 @@ class TaskListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _taskDateResult = MutableLiveData<Event<Int>>()
-    val taskDateResult :LiveData<Event<Int>> get() = _taskDateResult
-    var taskList : StateFlow<List<TaskDBEntity>>? = null
+    val taskDateResult: LiveData<Event<Int>> get() = _taskDateResult
+    var taskList: StateFlow<List<TaskDBEntity>>? = null
 
     val topDateAdapter = TaskListTopDateAdapter()
     val scheduleItemAdapter = TaskListScheduleItemAdapter()
+    var allTaskList : StateFlow<List<TaskDBEntity>>? = null
     var currentTopYearMonth = ""
-    var selectYearToDay :YearMonthDayData? =null
+    var selectYearToDay: YearMonthDayData? = null
 
     private val _taskListDate = MutableLiveData<Event<List<TaskDBEntity>>>()
-    val taskListDate : LiveData<Event<List<TaskDBEntity>>> get() = _taskListDate
-    private var startIndex = 2021
-    fun getCalendarList(encodeKey:String,year:Int,month:Int,day:Int){
+    val taskListDate: LiveData<Event<List<TaskDBEntity>>> get() = _taskListDate
+    var startIndex = 2023
+    var endIndex = 2024
+    fun getCalendarList(year: Int, month: Int, day: Int, isNextYear: Boolean, callYear: Int) {
         viewModelScope.launch {
-            calendarRepository.getCalendarDataInDB(startIndex,startIndex+2).run {
-                val fullDayList = ArrayList<CalendarDayEntity>()
-                this.forEachIndexed { index, calendarData ->
-                    fullDayList +=calendarData.dayList.filter { it.isCurrentMonth }
-                }
-                val allTask = taskRepository.getTaskItems()
-                fullDayList.forEach { calendar ->
-                    calendar.existsTask = allTask.any{ task ->
-                        if(calendar.dateTimeLong < task.createDate){
-                            false
-                        }else{
-                            when(task.repeatType){
-                                DAILY_REPEAT->{
-                                    true
-                                }
-                                WEEK_REPEAT->{
-                                    calendar.weekCount==task.weekCount
-                                }
-                                MONTH_REPEAT->{
-                                    calendar.day == task.day
-                                }
-                                YEAR_REPEAT->{
-                                    calendar.month == task.month && calendar.day == task.day
-                                }
-                                else->{
-                                    calendar.year == task.year && calendar.month == task.month && calendar.day == task.day
-                                }
-                            }
+            if((isNextYear && callYear>=endIndex) || (!isNextYear &&callYear<=startIndex)){
+                calendarRepository.getCalendarDataInDB(
+                    if(isNextYear) endIndex else startIndex,
+                    if(isNextYear) endIndex+2 else startIndex -2
+                ).run {
+                    val fullDayList = ArrayList<CalendarDayEntity>()
+                    this.forEachIndexed { index, calendarData ->
+                        fullDayList += calendarData.dayList.filter { it.isCurrentMonth }
+                    }
+                    if(isNextYear){
+                        endIndex+=3
+                    }else{
+                        startIndex-=3
+                    }
+                    if(topDateAdapter.itemCount == 0){
+                        topDateAdapter.submitList(fullDayList){
+                            _taskDateResult.value = Event(
+                                fullDayList.indexOfFirst { it.year == year.toString() && it.month == month.toString() && it.day == day.toString() }
+                            )
                         }
+                    }else if(isNextYear){
+                        topDateAdapter.submitList(topDateAdapter.currentList+fullDayList)
+                    }else{
+                        topDateAdapter.submitList(fullDayList+topDateAdapter.currentList)
                     }
                 }
-                topDateAdapter.submitList(fullDayList)
-                _taskDateResult.value= Event(
-                    fullDayList.indexOfFirst { it.year == year.toString() && it.month ==month.toString() && it.day == day.toString() }
-                )
             }
         }
     }
 
-    fun getSelectDateTaskList(year:String,month:String,day:String){
+    fun updateTaskState(){
         viewModelScope.launch {
-            taskList = taskRepository.getSpecifyDateTaskItems(year, month, day).stateIn(
-                scope = this,
-                started = SharingStarted.WhileSubscribed(5000),
+            allTaskList = taskRepository.getTaskItems().stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(4000),
                 initialValue = listOf()
             )
         }
     }
-    fun getSelectDateTaskListInit(year:String,month:String,day:String){
+
+    fun deleteTaskItemInDB(id:Int){
         viewModelScope.launch {
-            getSelectDateTaskList(year,month,day)
-            taskRepository.getSpecifyDateTaskItemsInit(year, month, day).run {
-                _taskListDate.value = Event(this)
+            taskRepository.deleteTaskItem(id)
+        }
+    }
+    fun getSelectDateTaskList(year: String, month: String, day: String) {
+        viewModelScope.launch {
+            taskList = taskRepository.getSpecifyDateTaskItems(year, month, day).stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = listOf()
+            )
+            taskList?.collectLatest {
+                scheduleItemAdapter.submitList(it)
             }
         }
     }

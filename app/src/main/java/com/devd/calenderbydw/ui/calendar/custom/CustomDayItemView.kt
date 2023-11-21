@@ -2,7 +2,6 @@ package com.devd.calenderbydw.ui.calendar.custom
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -25,7 +24,6 @@ import com.devd.calenderbydw.data.local.entity.TaskDBEntity
 import com.devd.calenderbydw.ui.calendar.CalendarMonthAdapter
 import com.devd.calenderbydw.utils.ConstVariable
 import com.devd.calenderbydw.utils.getDpValue
-import timber.log.Timber
 
 
 class CustomDayItemView @JvmOverloads constructor(
@@ -103,12 +101,12 @@ class CustomDayItemView @JvmOverloads constructor(
                 }
             }
             if(taskItem.isNotEmpty()){
-                Timber.d("task1!!!!${dayDate.year},${dayDate.month},${dayDate.day} ${taskTitle} ")
+//                Timber.d("task1!!!!${dayDate.year},${dayDate.month},${dayDate.day} ${taskTitle} ")
                 taskTitle = taskItem[0].title
                 sticker = "testIcon"
             }
             linePaint.apply {
-                color = context.getColor(R.color.grayColor)
+                color = context.getColor(R.color.gray_default)
                 style = Paint.Style.STROKE
             }
         }
@@ -116,7 +114,6 @@ class CustomDayItemView @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Timber.d("onDayClick onTouchEvent : ${event?.action}")
         return when(event?.action){
             MotionEvent.ACTION_DOWN->{
 //                Timber.d("onDayClick ACTION_DOWN : ${listener!=null}")
@@ -124,7 +121,6 @@ class CustomDayItemView @JvmOverloads constructor(
                 true
             }
             MotionEvent.ACTION_UP->{
-                Timber.d("onDayClick asdasd ${listener!=null}")
                 listener?.onDayClick(dayDate.year.toInt(),dayDate.month.toInt(),dayDate.day.toInt())
                 true
             }

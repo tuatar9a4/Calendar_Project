@@ -60,5 +60,15 @@
             app:argType="integer"
             android:defaultValue="22"
             />
+<!--        type : 0: 생성 1: 수정-->
+        <argument
+            android:name="type"
+            app:argType="integer"
+            android:defaultValue="0"
+            />
+        <argument
+            android:name="taskData"
+            app:argType="com.devd.calenderbydw.data.local.entity.TaskDBEntity"
+            app:nullable="true" />
     </fragment>
 </navigation>

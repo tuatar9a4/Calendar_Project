@@ -1,20 +1,16 @@
 package com.devd.calenderbydw.ui.dialog
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.devd.calenderbydw.data.local.dialog.BottomSheetItem
 import com.devd.calenderbydw.databinding.CustomBottomSheetDialogLayoutBinding
 import com.devd.calenderbydw.utils.autoCleared
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-open class CustomBottomSheet() : BottomSheetDialogFragment() {
+open class CustomBottomSheetDialog() : BottomSheetDialogFragment() {
 
     private var builder: Builder? = null
     private var binding by autoCleared<CustomBottomSheetDialogLayoutBinding>()
@@ -69,7 +65,7 @@ open class CustomBottomSheet() : BottomSheetDialogFragment() {
         var bottomSheetItems: List<BottomSheetItem>? = null
         var itemClickListener: BottomSheetClickListener? = null
         var scrollPos : Int? =null
-        fun build() = CustomBottomSheet(this)
+        fun build() = CustomBottomSheetDialog(this)
         fun title(title: String) = apply { this.title = title }
         fun sheetItem(sheetItem: List<BottomSheetItem>) =
             apply { this.bottomSheetItems = sheetItem }

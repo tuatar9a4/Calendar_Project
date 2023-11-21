@@ -1,6 +1,5 @@
 package com.devd.calenderbydw.ui.dialog
 
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +12,9 @@ import com.devd.calenderbydw.databinding.CustomBottomSheetDialogItemBinding
 
 class DialogItemAdapter : ListAdapter<BottomSheetItem, DialogItemAdapter.DialogItemVH>(diff) {
 
-    private var itemClickListener : CustomBottomSheet.BottomSheetClickListener? =null
+    private var itemClickListener : CustomBottomSheetDialog.BottomSheetClickListener? =null
 
-    fun setOnItemClickListener(listener : CustomBottomSheet.BottomSheetClickListener){
+    fun setOnItemClickListener(listener : CustomBottomSheetDialog.BottomSheetClickListener){
         itemClickListener = listener
     }
 
@@ -29,7 +28,7 @@ class DialogItemAdapter : ListAdapter<BottomSheetItem, DialogItemAdapter.DialogI
     }
 
 
-    class DialogItemVH(private val binding : CustomBottomSheetDialogItemBinding,private val listener : CustomBottomSheet.BottomSheetClickListener?) : ViewHolder(binding.root){
+    class DialogItemVH(private val binding : CustomBottomSheetDialogItemBinding,private val listener : CustomBottomSheetDialog.BottomSheetClickListener?) : ViewHolder(binding.root){
         fun onBind(item : BottomSheetItem){
             binding.tvBottomSheetText.text = item.text
             item.gravity?.let {

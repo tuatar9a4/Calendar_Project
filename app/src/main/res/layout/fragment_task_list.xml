@@ -13,7 +13,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:title="TaskList"
+        app:title=""
         app:titleTextColor="@color/black"
         app:titleTextAppearance="@style/Font32Weight600"
         app:menu="@menu/task_toolbar_menu"
@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/taskListToolbar"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:minHeight="45dp"
         android:orientation="horizontal"
         tools:listitem="@layout/task_list_top_date_item"
         tools:itemCount="4"
@@ -40,12 +41,6 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
         >
-        <Button
-            android:id="@+id/preDate"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="gone"
-            />
         <TextView
             android:id="@+id/tvDay"
             android:layout_width="wrap_content"
@@ -57,12 +52,6 @@
             style="@style/Font24Weight600"
             android:textFontWeight="400"
             android:text="2021.01.01"
-            />
-        <Button
-            android:id="@+id/nextDate"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="gone"
             />
     </LinearLayout>
 
