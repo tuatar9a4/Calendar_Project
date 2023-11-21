@@ -1,11 +1,13 @@
 package com.devd.calenderbydw.data.local.entity
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import com.google.gson.Gson
+import kotlinx.parcelize.Parcelize
 
 @Entity(
     indices = [Index(value = ["year","month"])],
@@ -21,13 +23,13 @@ data class CalendarMonthEntity(
     val month: Int = -1,
     @ColumnInfo("dayList")
     val dayList: List<CalendarDayEntity> = listOf(),
-){
-}
+)
 
 /**
  * weekCount : 일:1 ~ 토:7
  */
 
+@Parcelize
 data class CalendarDayEntity(
     @ColumnInfo("year")
     val year: String = "",
@@ -49,11 +51,15 @@ data class CalendarDayEntity(
     var existsTask: Boolean = false,
     @ColumnInfo("taskTitle")
     var taskTitle: String = "",
+    @ColumnInfo("taskSecondTitle")
+    var taskSecondTitle :String? = null,
+    @ColumnInfo("taskCount")
+    var taskCount :Int = 0,
     @ColumnInfo("stickerId")
     var stickerId: String = "",
     @ColumnInfo("dateTimeLong")
     var dateTimeLong: Long = 0L
-)
+) :Parcelable
 
 class CalendarDayConverters{
     @TypeConverter

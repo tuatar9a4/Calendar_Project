@@ -70,5 +70,8 @@ interface TaskDao {
     @Query("SELECT * FROM task_table")
     fun getAllTask(): Flow<List<TaskDBEntity>>
 
+    @Query("SELECT * FROM task_table")
+    suspend fun getAllTaskForWidget(): List<TaskDBEntity>
+
 
 }

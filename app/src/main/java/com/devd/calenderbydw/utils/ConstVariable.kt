@@ -26,4 +26,5 @@ object ConstVariable {
     const val CREATE_TASK = 0
     const val MODIFY_TASK = 1
 
+    const val WIDGET_SHOW_DATE= "showDate"
 }

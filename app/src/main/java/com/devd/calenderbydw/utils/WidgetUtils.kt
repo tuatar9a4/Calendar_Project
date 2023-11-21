@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.devd.calenderbydw.CalendarWidget
+import com.devd.calenderbydw.ui.widget.CalendarWidget
 import com.devd.calenderbydw.database.TaskDatabaseHelper
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*

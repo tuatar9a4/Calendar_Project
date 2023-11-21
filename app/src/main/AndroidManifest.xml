@@ -25,7 +25,7 @@
         </activity>
 
         <receiver
-            android:name="com.devd.calenderbydw.CalendarWidget"
+            android:name="com.devd.calenderbydw.ui.widget.CalendarWidget"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -50,7 +50,7 @@
         </activity>
 
         <service
-            android:name="com.devd.calenderbydw.adapters.WidgetAdapter"
+            android:name="com.devd.calenderbydw.ui.widget.WidgetAdapter"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <service

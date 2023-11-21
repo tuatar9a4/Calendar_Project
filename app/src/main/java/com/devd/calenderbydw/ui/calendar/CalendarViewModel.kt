@@ -52,7 +52,7 @@ class CalendarViewModel @Inject constructor(
                     if (isNextYear) endIndex else startIndex - 2,
                     if (isNextYear) endIndex + 2 else startIndex
                 ).run {
-                    taskRepository.getTaskItems()
+//                    taskRepository.getTaskItems()
                     changeTodayItem(this, currentToday.year, currentToday.month, currentToday.day)
                     if (calendarAdapter.itemCount == 0) {
                         calendarAdapter.submitList(this) {
