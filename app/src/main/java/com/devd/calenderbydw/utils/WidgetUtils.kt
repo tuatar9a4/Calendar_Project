@@ -3,16 +3,11 @@ package com.devd.calenderbydw.utils
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import androidx.core.content.PackageManagerCompat.LOG_TAG
-import com.devd.calenderbydw.BuildConfig
 import com.devd.calenderbydw.ui.widget.CalendarWidget
-import com.devd.calenderbydw.database.TaskDatabaseHelper
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
