@@ -17,7 +17,7 @@
         app:titleTextColor="@color/black"
         app:titleTextAppearance="@style/Font32Weight600"
         app:menu="@menu/task_toolbar_menu"
-        android:paddingEnd="20dp"
+        android:paddingEnd="10dp"
         >
     </com.google.android.material.appbar.MaterialToolbar>
     <androidx.recyclerview.widget.RecyclerView
@@ -47,7 +47,7 @@
             android:layout_height="match_parent"
             android:layout_marginRight="30dp"
             android:layout_marginLeft="30dp"
-            android:textColor="#7b9acc"
+            android:textColor="@color/black"
             android:gravity="center"
             style="@style/Font24Weight600"
             android:textFontWeight="400"
@@ -65,6 +65,8 @@
         android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:paddingHorizontal="20dp"
+        tools:listitem="@layout/task_list_schedule_item"
+        tools:itemCount="2"
         android:scrollbars="none"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

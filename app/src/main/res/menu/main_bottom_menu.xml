@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/calendar"
+        android:enabled="true"
+        android:icon="@drawable/icon_calendar"
+        android:title="calendar"
+        app:showAsAction="ifRoom"
+        />
+    <item
+        android:id="@+id/diary"
+        android:enabled="true"
+        android:icon="@drawable/icon_diary"
+        android:title="diary"
+        app:showAsAction="ifRoom"
+        />
+    <item
+        android:id="@+id/my"
+        android:enabled="true"
+        android:icon="@drawable/icon_my"
+        android:title="my"
+        app:showAsAction="ifRoom"
+        />
+</menu>

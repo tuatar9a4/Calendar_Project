@@ -140,7 +140,6 @@ class CalendarWidget : AppWidgetProvider() {
                 val showDateTime = Calendar.getInstance().apply {
                     time = Date(it)
                 }
-                Timber.d("Check? :${showTimeDate}=> ${showDateTime.get(Calendar.YEAR)}.${showDateTime.get(Calendar.MONTH)+1}")
                 //상단 날짜 저장
                 views.setTextViewText(
                     R.id.tvTopDate,

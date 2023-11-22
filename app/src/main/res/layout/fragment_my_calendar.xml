@@ -80,7 +80,6 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNav"
         app:layout_constraintRight_toLeftOf="@+id/btnPlus"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:src="@drawable/calendar_list"
         android:background="@drawable/main_home_btn_img"
         />
 
@@ -94,7 +93,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNav"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:src="@drawable/calendar_create"
+        android:src="@drawable/icon_create_task"
         android:background="@drawable/main_create_btn_img"
         />
     <ImageView
@@ -107,7 +106,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNav"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/btnPlus"
-        android:src="@drawable/calendar_home"
+        android:src="@drawable/icon_calendar"
         android:background="@drawable/main_home_btn_img"
         />
 

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/createTask"
-        android:icon="@drawable/calendar_create"
+        android:icon="@drawable/icon_create_task"
         app:showAsAction="ifRoom"
         android:title="craete"
         />

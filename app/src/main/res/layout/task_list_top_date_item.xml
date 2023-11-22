@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="@id/tvWeek"
         app:layout_constraintBottom_toBottomOf="@id/tvWeek"
         app:tint = "@color/palette_light_green"
-        android:src="@drawable/check"
+        android:src="@drawable/icon_check"
         />
     <TextView
         android:id="@+id/tvDay"

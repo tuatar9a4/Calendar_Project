@@ -69,6 +69,8 @@
         <argument
             android:name="taskData"
             app:argType="com.devd.calenderbydw.data.local.entity.TaskDBEntity"
-            app:nullable="true" />
+            app:nullable="true"
+            android:defaultValue="@null"
+            />
     </fragment>
 </navigation>
