@@ -27,7 +27,12 @@ class SplashViewModel @Inject constructor(
             calendar.time = Date()
             calendarRepository.getHolidayOfYearApi(serviceKey,calendar.get(Calendar.YEAR),false,0).run {
                 if((calendarRepository.checkHolidayDBOfYear(calendar.get(Calendar.YEAR))?.size?:0) == this.size){
-                    _completeCalendarCreate.value=Event(true)
+                    val items = calendarRepository.getCalendarAllData()
+                    if(items.isEmpty()){
+                        createCalendarData(updateCount,calendar.get(Calendar.YEAR),this)
+                    }else{
+                        _completeCalendarCreate.value=Event(true)
+                    }
                 }else{
                     createCalendarData(updateCount,calendar.get(Calendar.YEAR),this)
                 }

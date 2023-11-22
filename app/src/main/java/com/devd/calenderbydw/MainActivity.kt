@@ -1,13 +1,17 @@
 package com.devd.calenderbydw
 
 import android.os.Bundle
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.devd.calenderbydw.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -21,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        Timber.d("dbpath :${applicationContext.getDatabasePath("calendar_db").absolutePath}")
         setBackPressFunc()
         setContentView(binding.root)
         setNavigation()
@@ -29,6 +34,24 @@ class MainActivity : AppCompatActivity() {
     private fun setNavigation() {
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        binding.bottomNav.setupWithNavController(navController)
+        binding.bottomNav.setOnApplyWindowInsetsListener(null)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val visibility = if (
+                destination.id == R.id.calendarFragment ||
+                destination.id == R.id.diaryFragment ||
+                destination.id == R.id.myFragment
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+            binding.bottomNav.visibility = visibility
+            binding.bottomNav.visibility = visibility
+        }
+
         navController = navHostFragment.navController
     }
 

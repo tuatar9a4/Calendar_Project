@@ -23,6 +23,7 @@ import com.devd.calenderbydw.databinding.FragmentCreateTaskBinding
 import com.devd.calenderbydw.ui.dialog.CustomBottomSheetDialog
 import com.devd.calenderbydw.utils.ConstVariable
 import com.devd.calenderbydw.utils.EventObserver
+import com.devd.calenderbydw.utils.WidgetUtils
 import com.devd.calenderbydw.utils.autoCleared
 import com.devd.calenderbydw.utils.getWeekToText
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,6 +99,8 @@ class CreateTaskFragment : Fragment() {
             }
         }
         viewModel.insertResult.observe(viewLifecycleOwner,EventObserver{
+            WidgetUtils.updateWidgetData(requireContext())
+            WidgetUtils.changeDBToBytes(requireContext())
             findNavController().popBackStack()
         })
     }

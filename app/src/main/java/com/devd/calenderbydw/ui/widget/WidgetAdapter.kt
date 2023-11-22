@@ -70,7 +70,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         coroutineScope.launch {
             launch {
                 dataStore.preferLongFlow(PREF_KEY_WIDGET_SHOW_TIME).collectLatest {
-                    Timber.d("receiveTime collect: ${receiveTime}")
+//                    Timber.d("receiveTime collect: ${receiveTime}")
                     it?.let {
                         receiveTime = it
                     }
@@ -78,7 +78,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             }
             launch {
                 dataStore.preferStringFlow(DataStoreKey.PREF_KET_WIDGET_CLICK_DATE).collectLatest {
-                    Timber.d("selectedDate collect: ${receiveTime}")
+//                    Timber.d("selectedDate collect: ${receiveTime}")
                     selectedDate = it
                 }
             }
@@ -90,7 +90,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
 //            Log.d("도원","getViewAt : "+ mWidgetItem[position])
         val rv = RemoteViews(context.packageName, R.layout.widget_calender_grid_item)
         val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
-        Timber.d("WidgetTest getViewAt[${position}] ${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}null? [${widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"] == null}]")
+//        Timber.d("WidgetTest getViewAt[${position}] ${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}null? [${widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"] == null}]")
         widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"]?.let {
             when (position) {
                 0, 1, 2, 3, 4, 5, 6 -> { // 요일 텍스트
@@ -121,6 +121,9 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             todayCalendar.get(Calendar.DAY_OF_MONTH)
         }"
         val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        CoroutineScope(Dispatchers.IO).launch {
+            updateCalendarTask(appDatabase.taskDao().getAllTaskForWidget())
+        }
         if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) + 1}.1" } && !isDataLoading) {
             setCalendarList(true, (monthFirstDate.get(Calendar.YEAR) + 1))
         } else if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) - 1}.12" } && !isDataLoading) {
@@ -321,4 +324,53 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         }
     }
 
+    private fun updateCalendarTask(taskData :List<TaskDBEntity>){
+        widgetList.forEach { (_, calendarDayEntities) ->
+            calendarDayEntities.forEach { dayDate ->
+                val taskItem = taskData.filter { task ->
+                    if (dayDate.dateTimeLong < task.createDate) {
+                        false
+                    } else {
+                        when (task.repeatType) {
+                            TaskDBEntity.DAILY_REPEAT -> {
+                                true
+                            }
+
+                            TaskDBEntity.WEEK_REPEAT -> {
+                                dayDate.weekCount == task.weekCount
+                            }
+
+                            TaskDBEntity.MONTH_REPEAT -> {
+                                dayDate.day == task.day
+                            }
+
+                            TaskDBEntity.YEAR_REPEAT -> {
+                                dayDate.month == task.month && dayDate.day == task.day
+                            }
+
+                            else -> {
+                                dayDate.year == task.year && dayDate.month == task.month && dayDate.day == task.day
+                            }
+                        }
+                    }
+                }
+                taskItem.forEachIndexed { index, taskDBEntity ->
+                    when (index) {
+                        0 -> {
+                            dayDate.taskTitle = taskDBEntity.title
+                        }
+
+                        1 -> {
+                            dayDate.taskSecondTitle = taskDBEntity.title
+                        }
+
+                        else -> {
+                            return@forEachIndexed
+                        }
+                    }
+                }
+                dayDate.taskCount = taskItem.size
+            }
+        }
+    }
 }

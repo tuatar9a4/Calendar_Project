@@ -107,24 +107,6 @@ class MyCalendarFragment : Fragment() {
 //            transaction.commit()
         }
 
-        resultLauncher=registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
-            ActivityResultCallback {
-                //Task 등록 데이터 받는 곳
-                Log.d("도원","recevie Data ? ")
-                if (it.resultCode == AppCompatActivity.RESULT_OK){
-                    val intent = it.data
-//                    if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
-//                        database=dbHelper.writableDatabase
-//                        dbHelper.onCreate(database)
-//                        TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database,applicationContext,Wearable.getDataClient(applicationContext))
-//                        calendarFragment.notifydataChange()
-//                        taskListFragment.notifydataChange()
-//                        WidgetUtils.updateWidgetData(applicationContext)
-//                        WidgetUtils.changeDBToBytes(applicationContext)
-//                    }
-                }
-            })
     }
 
     private fun setSendWatchClickFunc(){
@@ -141,7 +123,6 @@ class MyCalendarFragment : Fragment() {
         val dbPath = TaskDatabaseHelper(requireContext(),"task.db",null,3).readableDatabase.path
         val dbFile = File(dbPath)
         val dbUri = Uri.fromFile(dbFile)
-//        val realAsset = Asset.createFromUri(dbUri)
         val bytesFromDB = Files.readAllBytes(dbFile.toPath())
         val realAsset = Asset.createFromBytes(bytesFromDB)
         sendDBData(realAsset,dbPath)

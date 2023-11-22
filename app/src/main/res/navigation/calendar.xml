@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/calendar"
+    app:startDestination="@id/calendarFragment">
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.devd.calenderbydw.ui.calendar.CalendarFragment"
+        android:label="fragment_calendar"
+        tools:layout="@layout/fragment_calendar" >
+        <action
+            android:id="@+id/action_calendarFragment_to_taskListFragment"
+            app:destination="@id/taskListFragment" />
+        <action
+            android:id="@+id/action_calendarFragment_to_createTaskFragment"
+            app:destination="@id/createTaskFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/taskListFragment"
+        android:name="com.devd.calenderbydw.ui.task.tasklist.TaskListFragment"
+        android:label="fragment_task_list"
+        tools:layout="@layout/fragment_task_list" >
+        <argument
+            android:name="year"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <argument
+            android:name="month"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <argument
+            android:name="day"
+            app:argType="integer"
+            android:defaultValue="-1"
+            />
+        <action
+            android:id="@+id/action_taskListFragment_to_createTaskFragment"
+            app:destination="@id/createTaskFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createTaskFragment"
+        android:name="com.devd.calenderbydw.ui.task.maketask.CreateTaskFragment"
+        android:label="fragment_create_task"
+        tools:layout="@layout/fragment_create_task" >
+        <argument
+            android:name="year"
+            app:argType="integer"
+            android:defaultValue="2021"
+            />
+        <argument
+            android:name="month"
+            app:argType="integer"
+            android:defaultValue="3"
+            />
+        <argument
+            android:name="day"
+            app:argType="integer"
+            android:defaultValue="22"
+            />
+        <!--        type : 0: 생성 1: 수정-->
+        <argument
+            android:name="type"
+            app:argType="integer"
+            android:defaultValue="0"
+            />
+        <argument
+            android:name="taskData"
+            app:argType="com.devd.calenderbydw.data.local.entity.TaskDBEntity"
+            app:nullable="true"
+            android:defaultValue="@null"
+            />
+    </fragment>
+</navigation>
