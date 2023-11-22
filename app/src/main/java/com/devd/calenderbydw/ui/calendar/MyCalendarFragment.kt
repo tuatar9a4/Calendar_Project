@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,10 +12,10 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.devd.calenderbydw.database.TaskDatabaseHelper
 import com.devd.calenderbydw.databinding.FragmentMyCalendarBinding
-import com.devd.calenderbydw.item.TaskItem
 import com.devd.calenderbydw.utils.autoCleared
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
@@ -25,7 +24,6 @@ import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
-import java.lang.Exception
 import java.nio.file.Files
 import java.time.Instant
 import java.util.concurrent.CancellationException
@@ -116,7 +114,7 @@ class MyCalendarFragment : Fragment() {
                 Log.d("도원","recevie Data ? ")
                 if (it.resultCode == AppCompatActivity.RESULT_OK){
                     val intent = it.data
-                    if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
+//                    if (intent?.getParcelableExtra<TaskItem>("createItem")!=null){
 //                        database=dbHelper.writableDatabase
 //                        dbHelper.onCreate(database)
 //                        TaskDatabaseHelper.createTask(intent.getParcelableExtra<TaskItem>("createItem")!!,database,applicationContext,Wearable.getDataClient(applicationContext))
@@ -124,7 +122,7 @@ class MyCalendarFragment : Fragment() {
 //                        taskListFragment.notifydataChange()
 //                        WidgetUtils.updateWidgetData(applicationContext)
 //                        WidgetUtils.changeDBToBytes(applicationContext)
-                    }
+//                    }
                 }
             })
     }

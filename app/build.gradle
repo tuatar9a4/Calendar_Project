@@ -114,6 +114,10 @@ dependencies {
     //Timber 라이브러리
     implementation "com.jakewharton.timber:timber:$rootProject.timber_version"
 
+    //dataStore 라이브러리
+    implementation "androidx.datastore:datastore-preferences:$rootProject.dataStore_version"
+    implementation "androidx.datastore:datastore-core:$rootProject.dataStore_version"
+
     // room 라이브러리
     implementation "androidx.room:room-runtime:$rootProject.room_version"
     kapt "androidx.room:room-compiler:$rootProject.room_version"

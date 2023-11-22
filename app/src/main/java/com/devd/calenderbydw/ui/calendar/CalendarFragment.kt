@@ -62,7 +62,10 @@ class CalendarFragment : Fragment() {
         setRecyclerView()
         setObserver()
         if(viewModel.calendarAdapter.itemCount==0){
-            viewModel.getHolidayYear(true, 2023)
+            val calendar = Calendar.getInstance().apply {
+                time = Date()
+            }
+            viewModel.getHolidayYear(true, calendar.get(Calendar.YEAR))
         }
         return binding.root
     }

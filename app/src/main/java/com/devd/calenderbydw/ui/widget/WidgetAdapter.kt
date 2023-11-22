@@ -3,28 +3,34 @@ package com.devd.calenderbydw.ui.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.data.local.AppDatabase
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
-import com.devd.calenderbydw.database.TaskDatabaseHelper
+import com.devd.calenderbydw.data.local.entity.TaskDBEntity
+import com.devd.calenderbydw.di.calendarDataStore
+import com.devd.calenderbydw.repository.CalendarDataStore
+import com.devd.calenderbydw.repository.DataStoreKey
+import com.devd.calenderbydw.repository.DataStoreKey.Companion.PREF_KEY_WIDGET_SHOW_TIME
+import com.devd.calenderbydw.utils.ConstVariable.WEEK_SAT_DAY
+import com.devd.calenderbydw.utils.ConstVariable.WEEK_SUN_DAY
 import com.devd.calenderbydw.utils.ConstVariable.WIDGET_SHOW_DATE
-import com.devd.calenderbydw.utils.SharedDataUtils
-import com.google.gson.Gson
-import dagger.hilt.android.AndroidEntryPoint
+import com.devd.calenderbydw.utils.changeWeekIntToString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.joda.time.DateTime
-import org.joda.time.DateTimeConstants
 import timber.log.Timber
-import javax.inject.Inject
+import java.sql.Time
+import java.util.Calendar
+import java.util.Date
 
 class WidgetAdapter : RemoteViewsService() {
     //#7b9acc 파랑
@@ -38,36 +44,20 @@ class WidgetAdapter : RemoteViewsService() {
 class StackRemoteViewsFactory(private val context: Context, private val intent: Intent?) :
     RemoteViewsService.RemoteViewsFactory {
 
-//    @Inject
-//    private lateinit var db :AppDatabase
-
-    private val mCount = 49
-    private val mWidgetItem = ArrayList<String>()
-
-    private var monthDayList = listOf<String>()
+    private lateinit var appDatabase: AppDatabase
+    private lateinit var dataStore: CalendarDataStore
+    private var widgetList: HashMap<String, List<CalendarDayEntity>> = hashMapOf()
+    private var isDataLoading = false
 
     private var mAppWidgetId = 0
-
-    private lateinit var dbHelper: TaskDatabaseHelper
-    private lateinit var database: SQLiteDatabase
-
-    private lateinit var selectMonth: DateTime
-
-    //일정 hashMap
-    private val taskMap = HashMap<String, String>()
-
-    //휴일 HashSet
-    private val holidayMap = HashSet<String>()
 
     private var todayDate = ""
     private var selectedDate: String? = null
 
     private var receiveTime: Long = 0L
-
+    private var job = Job()
+    private var coroutineScope = CoroutineScope(Dispatchers.IO + job)
     override fun onCreate() {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            Timber.d("db.calendarDao().getAllCalendarData(2023,2023) : ${db.calendarDao().getAllCalendarData(2023,2023)}")
-//        }
         if (intent != null) {
             mAppWidgetId = intent.getIntExtra(
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -75,303 +65,181 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             )
             receiveTime = intent.getLongExtra(WIDGET_SHOW_DATE, 0)
         }
-        Log.d("도원", "onCreate : : ${intent?.getStringExtra("calendarDate")}")
-        Timber.d("checkData -> ${intent?.getStringExtra("calendarDate")}")
-        Gson().fromJson(intent?.getStringExtra("calendarDate"),Array<CalendarDayEntity>::class.java).forEach {
-            Log.d("도원", "checkData : ${it}")
+        appDatabase = AppDatabase.buildDatabase(context)
+        dataStore = CalendarDataStore(context.calendarDataStore)
+        coroutineScope.launch {
+            launch {
+                dataStore.preferLongFlow(PREF_KEY_WIDGET_SHOW_TIME).collectLatest {
+                    Timber.d("receiveTime collect: ${receiveTime}")
+                    it?.let {
+                        receiveTime = it
+                    }
+                }
+            }
+            launch {
+                dataStore.preferStringFlow(DataStoreKey.PREF_KET_WIDGET_CLICK_DATE).collectLatest {
+                    Timber.d("selectedDate collect: ${receiveTime}")
+                    selectedDate = it
+                }
+            }
         }
-        val weekStr = arrayListOf("Sun", "Mon", "Tue", "Wen", "Thu", "Fri", "Sat")
-        for (i in weekStr) {
-            mWidgetItem.add(i)
-        }
-        monthDayList = getMonthList(DateTime(receiveTime).withDayOfMonth(1))
-        for (i in monthDayList) {
-            mWidgetItem.add(i)
-        }
-        getTaskInfo(monthDayList)
-
-    }
-
-    private fun getMonthList(dateTime: DateTime): List<String> {
-        todayDate = DateTime(System.currentTimeMillis()).toString("YYYY.MM.dd.E")
-        selectedDate = SharedDataUtils.getClickDate(context)
-        val list = mutableListOf<String>()
-
-        val date = dateTime.withDayOfMonth(1)
-        val prev = getPrevOffSet(date)
-        selectMonth = date
-        val startValue = date.minusDays(prev)
-
-        val totalDay = DateTimeConstants.DAYS_PER_WEEK * 6
-
-        for (i in 0 until totalDay) {
-            list.add(DateTime(startValue.plusDays(i)).toString("YYYY.MM.dd.E"))
-        }
-
-        return list
-    }
-
-    private fun getPrevOffSet(dateTime: DateTime): Int {
-        var prevMonthTailOffset = dateTime.dayOfWeek
-
-        if (prevMonthTailOffset >= 7) prevMonthTailOffset %= 7
-
-        return prevMonthTailOffset
-    }
-
-    override fun onDataSetChanged() {
-        mWidgetItem.clear()
-        val weekStr = arrayListOf("Sun", "Mon", "Tue", "Wen", "Thu", "Fri", "Sat")
-        for (i in weekStr) {
-            mWidgetItem.add(i)
-        }
-        monthDayList =
-            getMonthList(DateTime(SharedDataUtils.getDateMillis(context)).withDayOfMonth(1))
-        for (i in monthDayList) {
-            mWidgetItem.add(i)
-        }
-        getTaskInfo(monthDayList)
-    }
-
-
-    override fun onDestroy() {
-
-    }
-
-    override fun getCount(): Int {
-        return mCount
+        setCalendarList(null, 2023)
     }
 
     override fun getViewAt(position: Int): RemoteViews {
 //            Log.d("도원","getViewAt : "+ mWidgetItem[position])
         val rv = RemoteViews(context.packageName, R.layout.widget_calender_grid_item)
-        if (mWidgetItem[position] == "Mon" || mWidgetItem[position] == "Tue" || mWidgetItem[position] == "Wen"
-            || mWidgetItem[position] == "Thu" || mWidgetItem[position] == "Fri" || mWidgetItem[position] == "Sat" ||
-            mWidgetItem[position] == "Sun"
-        ) {
-            rv.setViewVisibility(R.id.tvTask1, View.GONE)
-            rv.setViewVisibility(R.id.tvTask2, View.GONE)
-            rv.setViewVisibility(R.id.tvTaskCnt, View.GONE)
-            rv.setViewVisibility(R.id.viewLine, View.VISIBLE)
-            //날짜 색상
-            if (mWidgetItem[position] == "Sun") {
-                rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
-            } else if (mWidgetItem[position] == "Sat") {
-                rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+        val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        Timber.d("WidgetTest getViewAt[${position}] ${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}null? [${widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"] == null}]")
+        widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"]?.let {
+            when (position) {
+                0, 1, 2, 3, 4, 5, 6 -> { // 요일 텍스트
+                    setWeekContainer((position + 1).changeWeekIntToString(), rv)
+                }
+
+                else -> { //날짜 텍스트
+                    setDayContainer(it[position - 7], rv)
+                }
             }
-            rv.setTextViewText(R.id.tvDate, mWidgetItem[position])
+            if (position > 6) {
+                //보내는 intent
+                val fillIntent = Intent()
+                fillIntent.putExtra(
+                    CalendarWidget.COLLECTION_VIEW_EXTRA,
+                    "${it[position - 7].year}.${it[position - 7].month}.${it[position - 7].day}"
+                )
+                rv.setOnClickFillInIntent(R.id.calendarContainer, fillIntent)
+            }
+        }
+
+        return rv
+    }
+
+    override fun onDataSetChanged() {
+        val todayCalendar = Calendar.getInstance().apply { time = Date() }
+        todayDate = "${todayCalendar.get(Calendar.YEAR)}.${todayCalendar.get(Calendar.MONTH) + 1}.${
+            todayCalendar.get(Calendar.DAY_OF_MONTH)
+        }"
+        val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) + 1}.1" } && !isDataLoading) {
+            setCalendarList(true, (monthFirstDate.get(Calendar.YEAR) + 1))
+        } else if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) - 1}.12" } && !isDataLoading) {
+            setCalendarList(false, (monthFirstDate.get(Calendar.YEAR) - 1))
+        }
+    }
+
+
+    override fun onDestroy() {
+        job.cancel()
+    }
+
+    override fun getCount(): Int {
+        val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"]?.let {
+            return it.size + 7
+        } ?: kotlin.run {
+            return 0
+        }
+    }
+
+    private fun setWeekContainer(text: String, rv: RemoteViews) {
+        rv.setViewVisibility(R.id.tvTask1, View.GONE)
+        rv.setViewVisibility(R.id.tvTask2, View.GONE)
+        rv.setViewVisibility(R.id.tvTaskCnt, View.GONE)
+        rv.setViewVisibility(R.id.viewLine, View.VISIBLE)
+        if (text == "Sun") {
+            rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
+        } else if (text == "Sat") {
+            rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+        }
+        rv.setTextViewText(R.id.tvDate, text)
+    }
+
+    private fun setDayContainer(item: CalendarDayEntity, rv: RemoteViews) {
+        rv.setViewVisibility(R.id.tvTask1, View.INVISIBLE)
+        rv.setViewVisibility(R.id.tvTask2, View.INVISIBLE)
+        rv.setViewVisibility(R.id.tvTaskCnt, View.INVISIBLE)
+        rv.setViewVisibility(R.id.viewLine, View.INVISIBLE)
+        //날짜 입력
+        rv.setTextViewText(R.id.tvDate, item.day)
+        //오늘
+        if (todayDate == "${item.year}.${item.month}.${item.day}") {
+            rv.setInt(
+                R.id.tvDate,
+                "setBackgroundResource",
+                R.drawable.widget_today_background_circle
+            )
+            rv.setTextColor(R.id.tvDate, context.getColor(R.color.white))
         } else {
-            //일단 전부 안보이게 처리
-            rv.setViewVisibility(R.id.tvTask1, View.INVISIBLE)
-            rv.setViewVisibility(R.id.tvTask2, View.INVISIBLE)
-            rv.setViewVisibility(R.id.tvTaskCnt, View.INVISIBLE)
-            rv.setViewVisibility(R.id.viewLine, View.INVISIBLE)
-            val str = mWidgetItem[position].split(".")
-            //날짜는 적어주고
-            rv.setTextViewText(R.id.tvDate, str[2])
-            //날짜 색상
-            val monthStr = selectMonth.toString("MM")
-            Log.d("도원", "")
-            //오늘
-            if (todayDate == mWidgetItem[position]) {
-                Log.d(
-                    "도원",
-                    "todayDate : ${todayDate}   | mWidgetItem[position] : ${mWidgetItem[position]}"
-                )
-                rv.setInt(
-                    R.id.tvDate,
-                    "setBackgroundResource",
-                    R.drawable.widget_today_background_circle
-                )
-                rv.setTextColor(R.id.tvDate, Color.parseColor("#FFFFFF"))
-            } else {
-                rv.setInt(
-                    R.id.tvDate,
-                    "setBackgroundResource",
-                    R.drawable.widget_basic_background_circle
-                )
-                //다른달
-                if (str[1] != monthStr) {
-                    when {
-                        str[3] == "일" -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#88FF0000"))
-                        }
-
-                        str[3] == "토" -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#880000FF"))
-                        }
-
-                        else -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#88000000"))
-                        }
-                    }
-                } else {
-                    //같은달
-                    when {
-                        str[3] == "일" -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
-                        }
-
-                        str[3] == "토" -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
-                        }
-
-                        else -> {
-                            rv.setTextColor(R.id.tvDate, Color.parseColor("#000000"))
-                        }
-                    }
-                    if (holidayMap.contains(str[2])) {
-                        rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
-                    }
-                }
-            }
-            //선택 배경
-            selectedDate?.let {
-                if (it == mWidgetItem[position]) {
-                    rv.setInt(
-                        R.id.calendarContainer,
-                        "setBackgroundResource",
-                        R.drawable.widget_container_background_select
-                    )
-                } else {
-                    rv.setInt(
-                        R.id.calendarContainer,
-                        "setBackgroundResource",
-                        R.drawable.widget_container_background_basic
-                    )
-                }
-            }
-
-            var taskStr = ""
-            //해당 날짜가 taskMap 에 들어가 있으면 작성
-            if (taskMap.containsKey("${str[0]}.${str[1]}.${str[2]}")) {
-                taskStr = taskMap["${str[0]}.${str[1]}.${str[2]}"].toString()
-//                    rv.setTextViewText(R.id.tvTask1,taskMap[mWidgetItem.get(position)].toString())
-            }
-            if (taskMap.containsKey(str[3])) {
-                taskStr = if (taskStr != "") {
-                    "${taskStr}&${taskMap[str[3]].toString()}"
-                } else {
-                    taskMap[str[3]].toString()
-                }
-
-            }
-            if (taskStr != "") {
-                val temp = taskStr.split("&")
-                when (temp.size) {
-                    1 -> {
-                        if (temp[0].startsWith("**")) {
-                            rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
-                            rv.setTextColor(R.id.tvTask1, Color.WHITE)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                android.graphics.Color.RED
-                            );
-                        } else {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
-                            rv.setTextColor(R.id.tvTask1, Color.BLACK)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                Color.parseColor("#00FFFFFF")
-                            );
-
-                        }
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+            rv.setInt(
+                R.id.tvDate,
+                "setBackgroundResource",
+                R.drawable.widget_basic_background_circle
+            )
+            if (!item.isCurrentMonth) { // 다른달
+                rv.setTextColor(R.id.tvDate, context.getColor(R.color.widget_gray_day))
+            } else if (item.isHoliday) { // 휴일
+                rv.setTextColor(R.id.tvDate, context.getColor(R.color.sunDayColor))
+            } else { //같은달
+                when (item.weekCount) {
+                    WEEK_SUN_DAY -> {
+                        rv.setTextColor(R.id.tvDate, context.getColor(R.color.sunDayColor))
                     }
 
-                    2 -> {
-                        if (temp[0].startsWith("**")) {
-                            rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
-                            rv.setTextColor(R.id.tvTask1, Color.WHITE)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                android.graphics.Color.RED
-                            );
-                        } else {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
-                            rv.setTextColor(R.id.tvTask1, Color.BLACK)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                Color.parseColor("#00FFFFFF")
-                            );
-                        }
-                        if (temp[1].startsWith("**")) {
-                            rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
-                            rv.setTextColor(R.id.tvTask2, Color.WHITE)
-                            rv.setInt(
-                                R.id.tvTask2,
-                                "setBackgroundColor",
-                                android.graphics.Color.RED
-                            );
-                        } else {
-                            rv.setTextViewText(R.id.tvTask2, temp[1])
-                            rv.setTextColor(R.id.tvTask2, Color.BLACK)
-                            rv.setInt(
-                                R.id.tvTask2,
-                                "setBackgroundColor",
-                                Color.parseColor("#00FFFFFF")
-                            );
-                        }
-
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+                    WEEK_SAT_DAY -> {
+                        rv.setTextColor(R.id.tvDate, context.getColor(R.color.satDayColor))
                     }
 
                     else -> {
-                        if (temp[0].startsWith("**")) {
-                            rv.setTextViewText(R.id.tvTask1, temp[0].substring(2))
-                            rv.setTextColor(R.id.tvTask1, Color.WHITE)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                android.graphics.Color.RED
-                            );
-                        } else {
-                            rv.setTextViewText(R.id.tvTask1, temp[0])
-                            rv.setTextColor(R.id.tvTask1, Color.BLACK)
-                            rv.setInt(
-                                R.id.tvTask1,
-                                "setBackgroundColor",
-                                Color.parseColor("#00FFFFFF")
-                            );
-                        }
-                        if (temp[1].startsWith("**")) {
-                            rv.setTextViewText(R.id.tvTask2, temp[1].substring(2))
-                            rv.setTextColor(R.id.tvTask2, Color.WHITE)
-                            rv.setInt(
-                                R.id.tvTask2,
-                                "setBackgroundColor",
-                                android.graphics.Color.RED
-                            );
-                        } else {
-                            rv.setTextViewText(R.id.tvTask2, temp[1])
-                            rv.setTextColor(R.id.tvTask2, Color.BLACK)
-                            rv.setInt(
-                                R.id.tvTask2,
-                                "setBackgroundColor",
-                                Color.parseColor("#00FFFFFF")
-                            );
-                        }
-
-                        rv.setTextViewText(R.id.tvTaskCnt, "+${(temp.size - 2)}")
-                        rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
-                        rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
-                        rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
+                        rv.setTextColor(R.id.tvDate, context.getColor(R.color.black))
                     }
                 }
             }
         }
+        //선택 배경
+        selectedDate?.let {
+            if (it == "${item.year}.${item.month}.${item.day}") {
+                rv.setInt(
+                    R.id.calendarContainer,
+                    "setBackgroundResource",
+                    R.drawable.widget_container_background_select
+                )
+            } else {
+                rv.setInt(
+                    R.id.calendarContainer,
+                    "setBackgroundResource",
+                    R.drawable.widget_container_background_basic
+                )
+            }
+        }
+        if (item.taskTitle.isNotEmpty()) {
+            rv.setTextViewText(R.id.tvTask1, item.taskTitle)
+            rv.setTextColor(R.id.tvTask1, Color.BLACK)
+            rv.setViewVisibility(R.id.tvTask1, View.VISIBLE)
+        } else {
+            rv.setViewVisibility(R.id.tvTask1, View.INVISIBLE)
+        }
 
-        //보내는 intent
-        val fillIntent = Intent()
-        fillIntent.putExtra(CalendarWidget.COLLECTION_VIEW_EXTRA, mWidgetItem[position])
-        rv.setOnClickFillInIntent(R.id.calendarContainer, fillIntent)
+        if (!item.taskSecondTitle.isNullOrEmpty()) {
+            rv.setTextViewText(R.id.tvTask2, item.taskSecondTitle)
+            rv.setTextColor(R.id.tvTask2, Color.BLACK)
+            rv.setViewVisibility(R.id.tvTask2, View.VISIBLE)
+        } else {
+            rv.setViewVisibility(R.id.tvTask2, View.INVISIBLE)
+        }
 
-        return rv
+        if (item.taskCount > 2) {
+            rv.setTextViewText(R.id.tvTaskCnt, "+${(item.taskCount - 2)}")
+            rv.setViewVisibility(R.id.tvTaskCnt, View.VISIBLE)
+        } else {
+            rv.setViewVisibility(R.id.tvTaskCnt, View.INVISIBLE)
+        }
+        if (!item.holidayName.isNullOrEmpty()) {
+            rv.setTextViewText(R.id.tvHoliday, item.holidayName)
+            rv.setViewVisibility(R.id.tvHoliday, View.VISIBLE)
+        } else {
+            rv.setViewVisibility(R.id.tvHoliday, View.GONE)
+        }
     }
 
     override fun getLoadingView(): RemoteViews? {
@@ -390,207 +258,67 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         return true
     }
 
-    private fun getTaskInfo(monthDayList: List<String>) {
-        taskMap.clear()
-        dbHelper = TaskDatabaseHelper(context, "task.db", null, 3)
-        database = dbHelper.readableDatabase
-        getYearTask(database, monthDayList)
-        getMonthTask(database, monthDayList)
-        getDayTask(database, monthDayList)
-        getWeekTask(database, monthDayList)
-        getCheckHoliday(database, monthDayList)
-    }
+    private fun setCalendarList(isNextYear: Boolean?, startIndex: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            isDataLoading = true
+            val taskData = appDatabase.taskDao().getAllTaskForWidget()
+            val tempStartIndex =
+                if (isNextYear == null) startIndex - 1 else if (isNextYear) startIndex else startIndex - 1
+            val tempendIndex =
+                if (isNextYear == null) startIndex + 1 else if (isNextYear) startIndex + 1 else startIndex
+            appDatabase.calendarDao().getAllCalendarData(tempStartIndex, tempendIndex).let {
+                it.forEach { monthData ->
+                    val item = monthData.dayList.map { dayDate ->
+                        val taskItem = taskData.filter { task ->
+                            if (dayDate.dateTimeLong < task.createDate) {
+                                false
+                            } else {
+                                when (task.repeatType) {
+                                    TaskDBEntity.DAILY_REPEAT -> {
+                                        true
+                                    }
 
-    private fun getCheckHoliday(database: SQLiteDatabase, monthDayList: List<String>) {
-        val holidayCursor: Cursor? = TaskDatabaseHelper.searchHoliday(
-            database,
-            selectMonth.year,
-            selectMonth.monthOfYear,
-            "holiday${selectMonth.year}Tbl"
-        )
-        holidayMap.clear()
-        holidayCursor?.let {
-            while (it.moveToNext()) {
-                if (it.getInt(2).toString().length == 1) {
-                    holidayMap.add("0${it.getInt(2).toString()}")
-                } else {
-                    holidayMap.add(it.getInt(2).toString())
-                }
-                val tempMonth: String =
-                    if ((it.getInt(it.getColumnIndex("month")).toString().length) == 1)
-                        "0${
-                            (it.getInt(it.getColumnIndex("month")).toString())
-                        }" else (it.getInt(it.getColumnIndex("month")).toString())
-                val tempDay: String =
-                    if ((it.getInt(it.getColumnIndex("day")).toString().length) == 1)
-                        "0${
-                            (it.getInt(it.getColumnIndex("day")).toString())
-                        }" else (it.getInt(it.getColumnIndex("day")).toString())
-                for (a in monthDayList) {
-                    val split = a.split(".")
-                    if (split[1] == tempMonth && split[2] == tempDay) {
-                        val tempStr1 = "${split[0]}.${split[1]}.${tempDay}"
-                        val tempStr2 = it.getString(it.getColumnIndex("title"))
-                        if (taskMap[tempStr1] == null) {
-                            taskMap[tempStr1] = "**${tempStr2}"
-                        } else {
-                            taskMap[tempStr1] = "**${tempStr2}&${taskMap[tempStr1]}"
-                        }
-                    }
-                }
-            }
-        }
+                                    TaskDBEntity.WEEK_REPEAT -> {
+                                        dayDate.weekCount == task.weekCount
+                                    }
 
+                                    TaskDBEntity.MONTH_REPEAT -> {
+                                        dayDate.day == task.day
+                                    }
 
-    }
+                                    TaskDBEntity.YEAR_REPEAT -> {
+                                        dayDate.month == task.month && dayDate.day == task.day
+                                    }
 
-    private fun getYearTask(database: SQLiteDatabase, monthDayList: List<String>) {
-        val cursor = TaskDatabaseHelper.searchDBOfYearRepeat(database)
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                val tempMonth: String =
-                    if ((cursor.getInt(cursor.getColumnIndex("month")).toString().length) == 1)
-                        "0${
-                            (cursor.getInt(cursor.getColumnIndex("month")).toString())
-                        }" else (cursor.getInt(cursor.getColumnIndex("month")).toString())
-                val tempDay: String =
-                    if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length) == 1)
-                        "0${
-                            (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                        }" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                for (a in monthDayList) {
-                    val split = a.split(".")
-                    if (tempMonth == split[1] &&
-                        tempDay == split[2]
-                    ) {
-                        val tempStr1 = "${split[0]}.${split[1]}.${tempDay}"
-                        val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
-                        if (taskMap[tempStr1] == null) {
-                            taskMap[tempStr1] = tempStr2
-                        } else {
-                            taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun getMonthTask(database: SQLiteDatabase, monthDayList: List<String>) {
-        val cursor = TaskDatabaseHelper.searchDBOfMonthRepeat(database)
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                val tempDay: String =
-                    if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length) == 1)
-                        "0${
-                            (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                        }" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                for (a in monthDayList) {
-                    val split = a.split(".")
-                    if (tempDay == split[2]) {
-                        val tempStr1 = "${split[0]}.${split[1]}.${tempDay}"
-                        val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
-                        if (taskMap[tempStr1] == null) {
-                            taskMap[tempStr1] = tempStr2
-                        } else {
-                            taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun getDayTask(database: SQLiteDatabase, monthDayList: List<String>) {
-        val cursor = TaskDatabaseHelper.searchDBOfNoRepeat(database)
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                val tempYear: String = cursor.getInt(cursor.getColumnIndex("year")).toString()
-                val tempMonth: String =
-                    if ((cursor.getInt(cursor.getColumnIndex("month")).toString().length) == 1)
-                        "0${
-                            (cursor.getInt(cursor.getColumnIndex("month")).toString())
-                        }" else (cursor.getInt(cursor.getColumnIndex("month")).toString())
-                val tempDay: String =
-                    if ((cursor.getInt(cursor.getColumnIndex("day")).toString().length) == 1)
-                        "0${
-                            (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                        }" else (cursor.getInt(cursor.getColumnIndex("day")).toString())
-                for (a in monthDayList) {
-                    val split = a.split(".")
-                    if (tempYear == split[0] && tempMonth == split[1] && tempDay == split[2]) {
-                        val tempStr1 = "${split[0]}.${split[1]}.${tempDay}"
-                        val tempStr2 = cursor.getString(cursor.getColumnIndex("title"))
-                        if (taskMap[tempStr1] == null) {
-                            taskMap[tempStr1] = tempStr2
-                        } else {
-                            taskMap[tempStr1] = "${taskMap[tempStr1]}&${tempStr2}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    private fun getWeekTask(database: SQLiteDatabase, monthDayList: List<String>) {
-        val cursor = TaskDatabaseHelper.searchDBOfWeekRepeat(database)
-        cursor?.let {
-            while (it.moveToNext()) {
-                val temp = it.getString(it.getColumnIndex("week")).split("&")
-                val task = it.getString(it.getColumnIndex("title"))
-                for (dayList in monthDayList) {
-                    for (a in temp.indices) {
-                        if (temp[a] == "1") {
-                            when (a) {
-                                0 -> if (dayList.split(".")[3] == "일") putWeekTaskMap(
-                                    "일",
-                                    task
-                                )//SUN
-                                1 -> if (dayList.split(".")[3] == "월") putWeekTaskMap(
-                                    "월",
-                                    task
-                                ) //MON
-                                2 -> if (dayList.split(".")[3] == "화") putWeekTaskMap(
-                                    "화",
-                                    task
-                                )//TUE
-                                3 -> if (dayList.split(".")[3] == "수") putWeekTaskMap(
-                                    "수",
-                                    task
-                                ) //WEN
-                                4 -> if (dayList.split(".")[3] == "목") putWeekTaskMap(
-                                    "목",
-                                    task
-                                )//THU
-                                5 -> if (dayList.split(".")[3] == "금") putWeekTaskMap(
-                                    "금",
-                                    task
-                                ) //FRI
-                                6 -> if (dayList.split(".")[3] == "토") putWeekTaskMap(
-                                    "토",
-                                    task
-                                )//SAT
+                                    else -> {
+                                        dayDate.year == task.year && dayDate.month == task.month && dayDate.day == task.day
+                                    }
+                                }
                             }
                         }
+                        taskItem.forEachIndexed { index, taskDBEntity ->
+                            when (index) {
+                                0 -> {
+                                    dayDate.taskTitle = taskDBEntity.title
+                                }
+
+                                1 -> {
+                                    dayDate.taskSecondTitle = taskDBEntity.title
+                                }
+
+                                else -> {
+                                    return@forEachIndexed
+                                }
+                            }
+                        }
+                        dayDate.taskCount = taskItem.size
+                        dayDate
                     }
+                    widgetList["${monthData.year}.${monthData.month}"] = item
                 }
             }
-
-        }
-
-
-    }
-
-    private fun putWeekTaskMap(key: String, value: String) {
-        if (taskMap[key] == null) {
-            taskMap[key] = value
-        } else {
-            if (!taskMap[key].equals(value)) {
-                taskMap[key] = "${taskMap[key]}&${value}"
-            }
+            isDataLoading = false
         }
     }
-
 
 }

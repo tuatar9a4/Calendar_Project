@@ -56,4 +56,6 @@
     <color name="palette_peach">#FFD3B5</color>
     <color name="palette_light_pink">#FFAAA6</color>
     <color name="palette_pink">#FF8C94</color>
+
+    <color name="widget_gray_day">#88000000</color>
 </resources>

@@ -35,8 +35,8 @@ class CalendarViewModel @Inject constructor(
     var currentToday = YearMonthDayData()
     var currentPos = 0
     var firstUpdate = true
-    private var startIndex = 2022
-    private var endIndex = 2023
+    private var startIndex = Calendar.getInstance().apply { time = Date() }.get(Calendar.YEAR)-1
+    private var endIndex = Calendar.getInstance().apply { time = Date() }.get(Calendar.YEAR)
     fun getHolidayYear(isNextYear: Boolean, callYear: Int) {
         viewModelScope.launch {
             val calendar = Calendar.getInstance().apply {
