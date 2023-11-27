@@ -6,6 +6,7 @@ import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.WearableListenerService
+import timber.log.Timber
 
 class DataRecevieService : WearableListenerService() {
 

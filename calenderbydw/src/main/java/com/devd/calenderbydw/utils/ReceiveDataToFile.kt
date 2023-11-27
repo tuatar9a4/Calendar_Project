@@ -25,8 +25,7 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
 
     fun createDBFromSendData(){
         val dbAsset : ByteArray = bytesArrayFromAsset(receiveAsset)
-        val newFile = File(context.getDatabasePath("wearTask.db").path)
-
+        val newFile = File(context.getDatabasePath("wear_calendar_task").path)
         CoroutineScope(Dispatchers.IO).launch {
             writeBytesToFile(newFile,dbAsset)
         }
@@ -47,6 +46,7 @@ class ReceiveDataToFile(context :Context,receiveAsset :Asset) {
         try{
             val fos : FileOutputStream = FileOutputStream(theFile,false)
             bos = BufferedOutputStream(fos)
+            Log.d("도원"," theFile   ${bos}")
             bos.write(bytes)
         }catch (e : IOException){
             Log.d("도원"," 에러에러   ${e.localizedMessage}")

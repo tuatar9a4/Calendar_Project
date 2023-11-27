@@ -5,8 +5,9 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "33.0.1"
+    defaultConfig{
+        compileSdk 34
+    }
 
     signingConfigs {
         release {
@@ -26,7 +27,7 @@ android {
     defaultConfig {
         applicationId "com.devd.calenderbydw"
         minSdkVersion 28
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 110
         versionName "1.0.10"
 
@@ -47,11 +48,11 @@ android {
         viewBinding true
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 }
 
@@ -60,7 +61,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.6.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.6.0'
-    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
+    implementation 'com.google.android.gms:play-services-wearable:18.1.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
@@ -84,5 +85,10 @@ dependencies {
     implementation "androidx.room:room-runtime:$rootProject.room_version"
     kapt "androidx.room:room-compiler:$rootProject.room_version"
     implementation "androidx.room:room-ktx:$rootProject.room_version"
+
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofit_version"
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.lifecycle_version"
 
 }

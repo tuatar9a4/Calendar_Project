@@ -20,6 +20,7 @@ import androidx.wear.tiles.TileService
 import androidx.wear.widget.WearableLinearLayoutManager
 import androidx.wear.widget.WearableRecyclerView
 import com.devd.calenderbydw.adapters.MyTaskAdapter
+import com.devd.calenderbydw.database.TaskDatabase
 import com.devd.calenderbydw.database.TaskDatabaseHelper
 import com.devd.calenderbydw.item.CreateTaskData
 import com.devd.calenderbydw.utils.Consts
@@ -28,6 +29,9 @@ import com.devd.calenderbydw.utils.TaskRecyclerViewDecoration
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import java.io.File
 import java.lang.Exception
@@ -192,8 +196,8 @@ class MainActivity : Activity() {
 //        dbHelper= TaskDatabaseHelper(view.context,"task.db",null,1);
         database=dbHelper.writableDatabase;
         var c2: Cursor =database.rawQuery("DROP TABLE IF EXISTS ${tblName.toString()}",null)
-        while (c2.moveToNext())
-        Log.d("도원","c2  ${c2} || ${database.version}")
+//        while (c2.moveToNext())
+//        Log.d("도원","c2  ${c2} || ${database.version}")
     }
 
     //오늘 포함 7일 날짜 알기
