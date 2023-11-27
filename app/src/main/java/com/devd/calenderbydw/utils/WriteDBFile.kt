@@ -15,7 +15,7 @@ class WriteDBFile(private val context : Context,private val receiveAsset : Asset
 
     fun createDBFromSendData(){
         val dbAsset : ByteArray = bytesArrayFromAsset(receiveAsset)
-        val newFile = File(context.getDatabasePath("task.db").path)
+        val newFile = File(context.getDatabasePath("calendar_db.db").path)
 
         CoroutineScope(Dispatchers.IO).launch {
             writeBytesToFile(newFile,dbAsset)

@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.devd.calenderbydw.data.local.entity.TaskDBEntity
 
 
 @Database(
-    entities = [],
+    entities = [TaskDBEntity::class],
     version = 1,
     exportSchema = false
 )
@@ -16,7 +17,7 @@ abstract class TaskDatabase : RoomDatabase() {
 
     companion object{
         fun buildDatabase(context: Context) : TaskDatabase{
-            return Room.databaseBuilder(context, TaskDatabase::class.java, "calendar_db")
+            return Room.databaseBuilder(context, TaskDatabase::class.java, "wear_calendar_db")
                 // pre-populate the database
                 .addCallback(
                     object : RoomDatabase.Callback() {
