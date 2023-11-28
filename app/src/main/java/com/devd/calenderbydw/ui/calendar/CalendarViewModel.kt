@@ -12,14 +12,16 @@ import com.devd.calenderbydw.repository.CalendarRepository
 import com.devd.calenderbydw.repository.TaskRepository
 import com.devd.calenderbydw.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
-import java.util.concurrent.Flow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +33,7 @@ class CalendarViewModel @Inject constructor(
     private val _updateCalendarData = MutableLiveData<Event<Boolean>>()
     val updateCalendarData: LiveData<Event<Boolean>> get() = _updateCalendarData
     val calendarAdapter = CalendarMonthAdapter()
-    var monthTaskList : StateFlow<List<TaskDBEntity>>? = null
+    var monthTaskList : SharedFlow<List<TaskDBEntity>>? = null
     var currentToday = YearMonthDayData()
     var currentPos = 0
     var firstUpdate = true
@@ -75,13 +77,27 @@ class CalendarViewModel @Inject constructor(
         }
     }
 
-    fun setMonthTaskList(year:String,month:String){
+    var tempJob = SupervisorJob()
+    fun setMonthTaskList(year:String,month:String,lastDay :Int){
         viewModelScope.launch {
-            monthTaskList = taskRepository.getSpecifyMonthTaskItemList(year,month).stateIn(
+            Timber.d("setMonthTaskList ${year}.${month}.${lastDay}")
+            monthTaskList = taskRepository.getSpecifyMonthTaskItemList(year,month,lastDay).stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = listOf()
             )
+            tempJob = SupervisorJob()
+            templateCollectItem()
+        }
+    }
+    private fun templateCollectItem(){
+        CoroutineScope(Dispatchers.IO + tempJob).launch {
+            Timber.d("collectLatest2 1111")
+            monthTaskList?.collectLatest{
+                Timber.d("collectLatest2 ?? ${it.size}")
+                addTaskDataInItem(it)
+                tempJob.cancel()
+                Timber.d("collectLatest2 ?? 44444")
+            }
+            Timber.d("collectLatest2 ?? 33333")
         }
     }
 

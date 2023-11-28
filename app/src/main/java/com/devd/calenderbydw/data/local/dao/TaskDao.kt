@@ -20,6 +20,9 @@ interface TaskDao {
     @Delete
     suspend fun deleteTaskItem(item: TaskDBEntity): Int
 
+    @Query("DELETE FROM task_table WHERE id LIKE :id")
+    suspend fun deleteQueryTaskItem(id :Int): Int
+
     @Update
     suspend fun updateTaskItem(item: TaskDBEntity): Int
 
@@ -31,7 +34,7 @@ interface TaskDao {
                 "(day LIKE :day AND repeatType LIKE 3) OR" +
                 "(weekCount LIKE :weekCount AND repeatType LIKE 2) OR" +
                 "(repeatType LIKE 1))" +
-                " AND createDate < :searchDate"
+                " AND createDate <= :searchDate"
     )
     fun getTaskSpecifyDay(
         year: String,
@@ -40,32 +43,19 @@ interface TaskDao {
         weekCount: Int,
         searchDate: Long
     ): Flow<List<TaskDBEntity>>
-
-    //매일 반복 하는 일정
-    @Query("SELECT * FROM task_table WHERE repeatType LIKE 1 AND createDate >= :searchDate")
-    suspend fun getTaskRepeatDay(searchDate: Long): List<TaskDBEntity>
-
-    //해당 달에 해당하는 매달,매년 반복 일정
-    @Query("SELECT * FROM task_table WHERE month Like :month AND (repeatType LIKE 3 OR repeatType LIKE 4) AND createDate >= :searchDate")
-    suspend fun getTaskRepeatYearMonthSpecifyMonth(
-        month: String,
-        searchDate: Long
-    ): List<TaskDBEntity>
-
     //해당 달에 해당하는 반복 없음
-    @Query("SELECT * FROM task_table WHERE year LIKE :year  AND month Like :month  AND repeatType LIKE 0 AND createDate >= :searchDate")
-    suspend fun getTaskSpecifyMonth(
+
+    @Query("SELECT * FROM task_table WHERE " +
+            "((year LIKE :year  AND month Like :month  AND repeatType LIKE 0 AND createDate <= :searchDate) OR" +
+            "(repeatType LIKE 3 AND createDate <= :searchDate) OR" +
+            "(month Like :month AND repeatType LIKE 4 AND createDate <= :searchDate) OR" +
+            "(repeatType LIKE 1 AND createDate <= :searchDate) OR" +
+            "(repeatType LIKE 2 AND createDate <= :searchDate))")
+    fun getTaskSpecifyMonth(
         year: String,
         month: String,
         searchDate: Long
-    ): List<TaskDBEntity>
-
-    //해당 달의 매주 반복하는 일정들
-    @Query("SELECT * FROM task_table WHERE repeatType LIKE 2 AND createDate >= :searchDate")
-    suspend fun getTaskRepeatTotalWeek(searchDate: Long): List<TaskDBEntity>
-
-    @Query("SELECT * FROM task_table WHERE year LIKE :year AND month LIKE :month AND day LIKE :day")
-    suspend fun getTempTaskSpecifyDay(year: String, month: String, day: String): List<TaskDBEntity>
+    ): Flow<List<TaskDBEntity>>
 
     @Query("SELECT * FROM task_table")
     fun getAllTask(): Flow<List<TaskDBEntity>>

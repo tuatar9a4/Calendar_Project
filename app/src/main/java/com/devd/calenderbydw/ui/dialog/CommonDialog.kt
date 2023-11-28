@@ -2,10 +2,14 @@ package com.devd.calenderbydw.ui.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowManager
 import androidx.annotation.ColorInt
 import androidx.fragment.app.DialogFragment
 import com.devd.calenderbydw.databinding.CommonDialogBinding
@@ -25,6 +29,7 @@ class CommonDialog() : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         return binding.root
     }
 

@@ -1,5 +1,6 @@
 package com.devd.calenderbydw.ui.calendar
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -48,7 +49,8 @@ class CalendarFragment : Fragment() {
         }
         viewModel.setMonthTaskList(
             toDayCalendar.get(Calendar.YEAR).toString(),
-            (toDayCalendar.get(Calendar.MONTH) + 1).toString()
+            (toDayCalendar.get(Calendar.MONTH) + 1).toString(),
+            toDayCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
         )
         setCollectTaskData()
     }
@@ -81,7 +83,7 @@ class CalendarFragment : Fragment() {
 
     private fun setCollectTaskData(){
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED){
+            repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.monthTaskList?.collectLatest {
                     viewModel.addTaskDataInItem(it)
                 }
@@ -96,12 +98,11 @@ class CalendarFragment : Fragment() {
     }
 
     private fun scrollCurrentMonth(){
-        binding.rcCustomCalendar.scrollToPosition(
-            viewModel.calendarAdapter.currentList.indexOfFirst {
-                it.year == viewModel.currentToday.year &&
-                        it.month == viewModel.currentToday.month
-            }
-        )
+        viewModel.currentPos = viewModel.calendarAdapter.currentList.indexOfFirst {
+            it.year == viewModel.currentToday.year &&
+                    it.month == viewModel.currentToday.month
+        }
+        binding.rcCustomCalendar.scrollToPosition(viewModel.currentPos)
     }
 
     private fun setRecyclerView() {
@@ -118,11 +119,18 @@ class CalendarFragment : Fragment() {
             SnapPagerScrollListener.ON_SCROLL,
             true,
             object : SnapPagerScrollListener.OnChangeListener {
+                @SuppressLint("SetTextI18n")
                 override fun onSnapped(position: Int, isRightScroll: Boolean) {
 //                    Timber.d("UpdateHoliday onSnapped position : $position | isRightScroll $isRightScroll ")
                     val currentItem = viewModel.getAdapterCurrentList()[position]
+                    if(viewModel.currentPos == position) return
                     viewModel.currentPos = position
                     binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
+                    viewModel.setMonthTaskList(
+                        currentItem.year.toString(),
+                        currentItem.month.toString(),
+                        currentItem.dayList.last { it.isCurrentMonth }.day.toInt()
+                    )
                     if (viewModel.getAdapterCurrentList().size > position + 3 && isRightScroll) {
                         viewModel.getHolidayYear(
                             true,

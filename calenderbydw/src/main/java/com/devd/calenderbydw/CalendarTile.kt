@@ -387,6 +387,7 @@ class CalendarTile : TileService() {
         }
         for (a in allDayOfMonth) {
             val strs: List<String> = a.split(".")
+            Log.d("도원","AlldayChek -> ${strs}")
             val strMonthDay = "${strs[0]}.${strs[1]}"
             if (count == 0) {
                 //한줄을 다 채우면 가로(Row) 행 Builder를 새로 만든다.
@@ -411,7 +412,7 @@ class CalendarTile : TileService() {
                 dotContainer.addContent(scheduleItem.build())
                     .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(1f)).build())
             }
-            if (dotDaySetM.contains(strMonthDay.split(".")[1])) {
+            if (dotDaySetM.contains(strMonthDay)) {
                 isDot = true
                 scheduleItem =
                     LayoutElementBuilders.Image.Builder().setHeight(dp(2f)).setWidth(dp(2f))

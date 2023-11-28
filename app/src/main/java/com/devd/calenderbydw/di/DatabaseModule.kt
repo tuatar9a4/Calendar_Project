@@ -22,14 +22,17 @@ class DatabaseModule {
         AppDatabase.buildDatabase(context)
 
 
+    @Singleton
     @Provides
     fun provideHolidayDao(appDatabase: AppDatabase) : HolidayDao =
         appDatabase.holidayDao()
 
+    @Singleton
     @Provides
     fun provideTaskDao(appDatabase: AppDatabase) : TaskDao =
         appDatabase.taskDao()
 
+    @Singleton
     @Provides
     fun provideCalendarDao(appDatabase: AppDatabase) : CalendarDao =
         appDatabase.calendarDao()

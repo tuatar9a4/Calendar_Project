@@ -25,13 +25,17 @@ class TaskRepository @Inject constructor(
     ) {
         taskDao.insertTaskItem(insertItem)
     }
-    suspend fun deleteTaskItem(id:Int){
-        taskDao.deleteTaskItem(TaskDBEntity(id)).run {
+
+    suspend fun deleteTaskItem(id: Int) {
+        taskDao.deleteQueryTaskItem(id).run {
             Timber.d("DeleteResult [${id}]-> ${this}")
         }
+//        taskDao.deleteTaskItem(TaskDBEntity(id)).run {
+//            Timber.d("DeleteResult [${id}]-> ${this}")
+//        }
     }
 
-    suspend fun updateTaskItem(taskItem :TaskDBEntity):Int{
+    suspend fun updateTaskItem(taskItem: TaskDBEntity): Int {
         taskDao.updateTaskItem(taskItem).run {
             Timber.d("UpdateResult [${taskItem.id}]-> ${this}")
             return this
@@ -40,43 +44,23 @@ class TaskRepository @Inject constructor(
 
     fun getTaskItems() = taskDao.getAllTask()
 
-   fun getSpecifyDateTaskItems(year: String, month: String, day: String) :Flow<List<TaskDBEntity>>{
-       val calendar = Calendar.getInstance().apply { set(year.toInt(), month.toInt()-1, day.toInt()) }
-       val weekTime  =calendar.get(Calendar.DAY_OF_WEEK)
-       val dateLongTime = calendar.time.time
-       return taskDao.getTaskSpecifyDay(year, month, day,weekTime, dateLongTime)
-   }
-//
-    suspend fun getSpecifyMonthTaskItemList(year: String, month: String)= flow<List<TaskDBEntity>>{
-        val calendarTime = Calendar.getInstance().apply {
-            set(year.toInt(),month.toInt()-1,1,0,0,0)
-        }.time.time
-        val taskList = arrayListOf<TaskDBEntity>()
-
-//            val t1 =taskDao.getTaskRepeatDay(calendarTime)
-//            val t2 =taskDao.getTaskRepeatTotalWeek(calendarTime)
-//            val t3 =taskDao.getTaskRepeatYearMonthSpecifyMonth(month,calendarTime)
-//            val t4 =taskDao.getTaskSpecifyMonth(year,month,calendarTime)
-//            Timber.d("DBCHECK getTaskRepeatDay1698796800 003 < 1698796800 423${calendarTime}: ${t1}")
-//            Timber.d("DBCHECK getTaskRepeatTotalWeek : ${t2}")
-//            Timber.d("DBCHECK getTaskRepeatYearMonthSpecifyMonth : ${t3}")
-//            Timber.d("DBCHECK getTaskSpecifyMonth : ${t4}")
-//        taskList.addAll(taskDao.getTaskRepeatDay(calendarTime))
-        taskList.addAll(taskDao.getTaskRepeatTotalWeek(calendarTime))
-        taskList.addAll(taskDao.getTaskRepeatYearMonthSpecifyMonth(month,calendarTime))
-        taskList.addAll(taskDao.getTaskSpecifyMonth(year,month,calendarTime))
-        emit(taskList)
+    fun getSpecifyDateTaskItems(
+        year: String,
+        month: String,
+        day: String
+    ): Flow<List<TaskDBEntity>> {
+        val calendar =
+            Calendar.getInstance().apply { set(year.toInt(), month.toInt() - 1, day.toInt()) }
+        val weekTime = calendar.get(Calendar.DAY_OF_WEEK)
+        val dateLongTime = calendar.time.time
+        return taskDao.getTaskSpecifyDay(year, month, day, weekTime, dateLongTime)
     }
 
-    suspend fun getSpecifyMonthTaskItemsInit(year: String, month: String,):List<TaskDBEntity>{
+    //
+    fun getSpecifyMonthTaskItemList(year: String, month: String,lastDay:Int): Flow<List<TaskDBEntity>> {
         val calendarTime = Calendar.getInstance().apply {
-            set(year.toInt(),month.toInt()-1,1,0,0,0)
+            set(year.toInt(), month.toInt() - 1, lastDay, 24, 60, 59)
         }.time.time
-        val taskList = arrayListOf<TaskDBEntity>()
-        taskList.addAll(taskDao.getTaskRepeatDay(calendarTime))
-        taskList.addAll(taskDao.getTaskRepeatTotalWeek(calendarTime))
-        taskList.addAll(taskDao.getTaskRepeatYearMonthSpecifyMonth(month,calendarTime))
-        taskList.addAll(taskDao.getTaskSpecifyMonth(year,month,calendarTime))
-        return taskList
+        return taskDao.getTaskSpecifyMonth(year, month, calendarTime)
     }
 }

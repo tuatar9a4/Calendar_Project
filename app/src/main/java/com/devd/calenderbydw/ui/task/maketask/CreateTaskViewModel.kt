@@ -109,7 +109,7 @@ class CreateTaskViewModel @Inject constructor(
             taskMonthSheetList.forEach { item ->
                 item.isCheck = item.text == month
             }
-            selectDate.year = month.toInt()
+            selectDate.month = month.toInt()
             _taskYear.emit(month)
             taskDaySheetList =
                 getTaskDaySheetItems(selectDate.year, selectDate.month, selectDate.day)
@@ -121,7 +121,7 @@ class CreateTaskViewModel @Inject constructor(
             taskDaySheetList.forEach { item ->
                 item.isCheck = item.text == day
             }
-            selectDate.year = day.toInt()
+            selectDate.day = day.toInt()
             _taskYear.emit(day)
         }
     }

@@ -182,18 +182,18 @@ class CustomDayItemView @JvmOverloads constructor(
             taskPaint
         )
         // 스티커 이미지 그리기
-        if(sticker=="testIcon"){
-            canvas.drawBitmap(
-                bitmap, null,
-                Rect(
-                    context.getDpValue(8f).toInt() + (imageSize * 2).toInt(),
-                    (bounds.height()+context.getDpValue(20f)+context.getDpValue(4f)+taskBounds.height()).toInt(),
-                    context.getDpValue(8f).toInt() + (imageSize * 3).toInt(),
-                    (bounds.height()+context.getDpValue(20f)+context.getDpValue(4f)+taskBounds.height()+(imageSize)).toInt()
-                ),
-                null
-            )
-        }
+//        if(sticker=="testIcon"){
+//            canvas.drawBitmap(
+//                bitmap, null,
+//                Rect(
+//                    context.getDpValue(8f).toInt() + (imageSize * 2).toInt(),
+//                    (bounds.height()+context.getDpValue(20f)+context.getDpValue(4f)+taskBounds.height()).toInt(),
+//                    context.getDpValue(8f).toInt() + (imageSize * 3).toInt(),
+//                    (bounds.height()+context.getDpValue(20f)+context.getDpValue(4f)+taskBounds.height()+(imageSize)).toInt()
+//                ),
+//                null
+//            )
+//        }
 
         rect = RectF(2f,0f,width.toFloat(),height.toFloat()-2)
         canvas.drawRect(rect, linePaint)
