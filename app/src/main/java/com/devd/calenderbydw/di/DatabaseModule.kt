@@ -3,6 +3,7 @@ package com.devd.calenderbydw.di
 import android.content.Context
 import com.devd.calenderbydw.data.local.AppDatabase
 import com.devd.calenderbydw.data.local.dao.CalendarDao
+import com.devd.calenderbydw.data.local.dao.DiaryDao
 import com.devd.calenderbydw.data.local.dao.HolidayDao
 import com.devd.calenderbydw.data.local.dao.TaskDao
 import dagger.Module
@@ -36,4 +37,9 @@ class DatabaseModule {
     @Provides
     fun provideCalendarDao(appDatabase: AppDatabase) : CalendarDao =
         appDatabase.calendarDao()
+
+    @Singleton
+    @Provides
+    fun provideDiaryDao(appDatabase: AppDatabase) : DiaryDao =
+        appDatabase.diaryDao()
 }

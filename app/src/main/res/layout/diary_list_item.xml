@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:layout_marginTop="5dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/ivFeelIcon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/test_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/radius_15"
+        android:backgroundTint="@color/palette_peach"
+        android:padding="5dp"
+        />
+    <TextView
+        android:id="@+id/tvWeather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/ivFeelIcon"
+        app:layout_constraintStart_toEndOf="@id/ivFeelIcon"
+        android:layout_marginStart="10dp"
+        android:text="날씨 : "
+        android:textColor="@color/grayDayColor"
+        style="@style/Font16Weight600"
+        />
+    <TextView
+        android:id="@+id/tvFeel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/ivFeelIcon"
+        app:layout_constraintStart_toEndOf="@id/tvWeather"
+        android:layout_marginStart="10dp"
+        android:text="기분 : "
+        android:textColor="@color/grayDayColor"
+        style="@style/Font16Weight600"
+        />
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivFeelIcon"
+        android:layout_marginEnd="10dp"
+        android:text="2021.11.1"
+        android:textColor="@color/grayDayColor"
+        style="@style/Font16Weight300"
+        />
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tvWeather"
+        app:layout_constraintStart_toStartOf="@id/tvWeather"
+        style="@style/Font18Weight600"
+        android:text="오늘의 일기"
+        android:textColor="@color/commonDayColor"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

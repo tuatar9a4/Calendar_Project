@@ -1,10 +1,12 @@
 package com.devd.calenderbydw.di
 
 import com.devd.calenderbydw.data.local.dao.CalendarDao
+import com.devd.calenderbydw.data.local.dao.DiaryDao
 import com.devd.calenderbydw.data.local.dao.HolidayDao
 import com.devd.calenderbydw.data.local.dao.TaskDao
 import com.devd.calenderbydw.data.remote.api.HolidayService
 import com.devd.calenderbydw.repository.CalendarRepository
+import com.devd.calenderbydw.repository.DiaryRepository
 import com.devd.calenderbydw.repository.HolidayRepository
 import com.devd.calenderbydw.repository.TaskRepository
 import dagger.Module
@@ -33,4 +35,9 @@ class RepositoryModule {
     @Provides
     fun provideTaskRepository(taskDao: TaskDao) : TaskRepository =
         TaskRepository(taskDao)
+
+    @Singleton
+    @Provides
+    fun provideDiaryRepository(diaryDao: DiaryDao) : DiaryRepository =
+        DiaryRepository(diaryDao)
 }

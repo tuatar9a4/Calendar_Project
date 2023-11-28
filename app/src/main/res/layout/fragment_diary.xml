@@ -1,14 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.diary.DiaryFragment">
+    android:background="@drawable/bg_paper_texture"
+    tools:context=".ui.diary.wirte.DiaryFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/diaryToolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/icon_left_arrow"
+        app:title="오늘의 일기!"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/Font24Weight600"
+        app:titleTextColor="@color/commonDayColor">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/tvWriteDiary"
+            style="@style/Font20Weight300"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="20dp"
+            android:text="작성"
+            android:textColor="@color/grayDayColor" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <TextView
+        android:id="@+id/tvTodayWeatherHolder"
+        style="@style/Font18Weight600"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="오늘 날씨는?"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/diaryToolbar" />
+
+    <TextView
+        android:id="@+id/tvTodayWeather"
+        style="@style/Font18Weight300"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:text="맑음!"
+        android:textColor="@color/commonDayColor"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintStart_toEndOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTodayWeatherHolder" />
+
+    <EditText
+        android:id="@+id/edtTodayWeather"
+        style="@style/Font18Weight300"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:background="@null"
+        android:hint="날씨를 알려줘!"
+        android:textColor="@color/commonDayColor"
+        android:textColorHint="@color/grayDayColor"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintStart_toEndOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTodayWeatherHolder" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/weatherBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="right"
+        app:constraint_referenced_ids="tvTodayWeather,edtTodayWeather" />
+
+    <ImageView
+        android:id="@+id/ivChangeWeather"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/icon_calendar_refresh"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintStart_toEndOf="@id/weatherBarrier"
+        app:layout_constraintTop_toTopOf="@id/tvTodayWeatherHolder" />
+
+    <TextView
+        android:id="@+id/tvTodayFeelingHolder"
+        style="@style/Font18Weight600"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="오늘 기분은 어땠어?"
+        android:textColor="@color/commonDayColor"
+        app:layout_constraintStart_toStartOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintTop_toBottomOf="@id/tvTodayWeatherHolder" />
+
+    <EditText
+        android:id="@+id/edtTodayFeeling"
+        style="@style/Font18Weight300"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:background="@null"
+        android:hint="기분을 알려줘!"
+        android:textColor="@color/commonDayColor"
+        android:textColorHint="@color/grayDayColor"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintStart_toEndOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTodayFeelingHolder" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/FeelingBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="right"
+        app:constraint_referenced_ids="tvTodayFeeling,edtTodayFeeling" />
+
+    <ImageView
+        android:id="@+id/ivChangeFeeling"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/icon_calendar_refresh"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintStart_toEndOf="@id/FeelingBarrier"
+        app:layout_constraintTop_toTopOf="@id/tvTodayFeelingHolder" />
+
+    <TextView
+        android:id="@+id/tvTodayFeeling"
+        style="@style/Font18Weight300"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:text="최고였어!"
+        android:textColor="@color/commonDayColor"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintStart_toEndOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintTop_toTopOf="@id/tvTodayFeelingHolder" />
+
+    <TextView
+        android:id="@+id/tvTodayDiaryHolder"
+        style="@style/Font18Weight600"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="오늘 어떤일이 있었는지 알려줄래?"
+        android:textColor="@color/commonDayColor"
+        app:layout_constraintStart_toStartOf="@id/tvTodayFeelingHolder"
+        app:layout_constraintTop_toBottomOf="@id/tvTodayFeelingHolder" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/radius_paper_texture"
+        android:clipToOutline="true"
+        app:elevation="20dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTodayDiaryHolder">
+
+        <EditText
+            android:id="@+id/edtTodayDiary"
+            style="@style/Font20Weight300"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@drawable/bg_paper_texture"
+            android:gravity="start"
+            android:hint="여기을 선택 해서 알려줘!"
+            android:minHeight="200dp"
+            android:padding="10dp"
+            android:textColor="@color/commonDayColor"
+            android:textColorHint="@color/grayDayColor"
+            app:elevation="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

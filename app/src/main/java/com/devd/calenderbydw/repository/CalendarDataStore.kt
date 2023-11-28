@@ -147,5 +147,7 @@ class DataStoreKey{
     companion object{
         const val PREF_KEY_WIDGET_SHOW_TIME="widgetShowTime"
         const val PREF_KET_WIDGET_CLICK_DATE ="clickDate"
+        const val PREF_WRITE_DIARY_LAST_DATE = "writeDiaryLastDate"
+        const val PREF_TODAY_ALREADY_WRITE_DIARY = "alreadyWriteDiary"
     }
 }
