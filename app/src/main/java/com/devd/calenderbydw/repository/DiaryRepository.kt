@@ -18,9 +18,9 @@ class DiaryRepository @Inject constructor(
     fun getDiaryFlowList()=Pager(
         config = PagingConfig(
             pageSize = 10,
-            enablePlaceholders = false,
+            enablePlaceholders = true,
         ), pagingSourceFactory = {DiaryListPageSource(diaryDao)}
-    ).flow
+    )
 
 
 }

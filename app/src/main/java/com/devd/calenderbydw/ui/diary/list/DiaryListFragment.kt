@@ -26,7 +26,7 @@ class DiaryListFragment : Fragment() {
     private val viewModel by viewModels<DiaryListViewModel>()
 
     private val adapter = DiaryListAdapter()
-
+    private var refresh = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setCollectItems()
@@ -37,11 +37,16 @@ class DiaryListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentDiaryListBinding.inflate(inflater,container,false)
-        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         binding.rcDiaryList.adapter = adapter
+        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         binding.btn.setOnClickListener {
             findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
 //            testAddData()
+        }
+        binding.btn2.setOnClickListener {
+            adapter.refresh()
+            refresh=true
+
         }
         return binding.root
     }
@@ -49,8 +54,12 @@ class DiaryListFragment : Fragment() {
     private fun setCollectItems(){
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED){
-                viewModel.getDiaryList().collect {
+                viewModel.item.collect {
                     adapter.submitData(viewLifecycleOwner.lifecycle,it)
+                    if(refresh){
+                        binding.rcDiaryList.scrollToPosition(0)
+                        refresh=false
+                    }
                 }
             }
         }

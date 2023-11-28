@@ -4,12 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.devd.calenderbydw.data.local.entity.DiaryEntity
 import com.devd.calenderbydw.repository.CalendarDataStore
 import com.devd.calenderbydw.repository.DataStoreKey
 import com.devd.calenderbydw.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,7 +31,10 @@ class DiaryListViewModel @Inject constructor(
     }
 
 
-    fun getDiaryList()=diaryRepository.getDiaryFlowList().cachedIn(viewModelScope)
+    val item = diaryRepository.getDiaryFlowList().flow.cachedIn(viewModelScope)
+    fun getDiaryList(): Flow<PagingData<DiaryEntity>> {
+        return diaryRepository.getDiaryFlowList().flow.cachedIn(viewModelScope)
+    }
 
 
     fun testAddDatas(){
