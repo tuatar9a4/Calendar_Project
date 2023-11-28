@@ -33,11 +33,8 @@ import java.util.Calendar
 import java.util.Date
 
 class WidgetAdapter : RemoteViewsService() {
-    //#7b9acc 파랑
-    //#FCF6F5 흰색
     override fun onGetViewFactory(intent: Intent?): RemoteViewsFactory {
         return StackRemoteViewsFactory(this.applicationContext, intent)
-
     }
 }
 
@@ -83,7 +80,10 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
                 }
             }
         }
-        setCalendarList(null, 2023)
+        val calendarDate = Calendar.getInstance().apply {
+            time = Date(receiveTime)
+        }
+        setCalendarList(null, calendarDate.get(Calendar.YEAR))
     }
 
     override fun getViewAt(position: Int): RemoteViews {
@@ -151,9 +151,11 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         rv.setViewVisibility(R.id.tvTaskCnt, View.GONE)
         rv.setViewVisibility(R.id.viewLine, View.VISIBLE)
         if (text == "Sun") {
-            rv.setTextColor(R.id.tvDate, Color.parseColor("#FF0000"))
+            rv.setTextColor(R.id.tvDate, context.getColor(R.color.sunDayColor))
         } else if (text == "Sat") {
-            rv.setTextColor(R.id.tvDate, Color.parseColor("#0000FF"))
+            rv.setTextColor(R.id.tvDate, context.getColor(R.color.satDayColor))
+        }else {
+            rv.setTextColor(R.id.tvDate, context.getColor(R.color.black))
         }
         rv.setTextViewText(R.id.tvDate, text)
     }

@@ -83,30 +83,30 @@ class MyTaskAdapter(
 //                    llTaskTitleBox.addView(textView)
 
 
-                        val params2 =ConstraintLayout.LayoutParams(30,30)
-                        params2.topToTop=0
-                        params2.endToEnd=0
-                        params2.startToEnd=textView.id
-                        params2.rightMargin=10
-                        button.layoutParams=params2
-                        button.text = "삭제"
-                        button.background=context.getDrawable(R.drawable.delete_icon_w)
-                        button.setOnClickListener {
-                            val deleteAlert =AlertDialog.Builder(context)
-                                .setTitle("일정을 삭제하시겠습니까?")
-                                .setPositiveButton("OK", DialogInterface.OnClickListener { dialogInterface, int ->
-                                    TaskDatabaseHelper.deleteTask(splitIndex[1],TaskDatabaseHelper(context,"wearTask.db",null,3).writableDatabase)
-                                    llTaskTitleBox.removeView(lllayout)
-                                    SendSyncData.changeDBToBytes(context, Wearable.getDataClient(context))
-                                })
-                                .setNegativeButton("Cancel",null)
-                                .create()
-
-                        deleteAlert.show()
-                    }
+//                        val params2 =ConstraintLayout.LayoutParams(30,30)
+//                        params2.topToTop=0
+//                        params2.endToEnd=0
+//                        params2.startToEnd=textView.id
+//                        params2.rightMargin=10
+//                        button.layoutParams=params2
+//                        button.text = "삭제"
+//                        button.background=context.getDrawable(R.drawable.delete_icon_w)
+//                        button.setOnClickListener {
+//                            val deleteAlert =AlertDialog.Builder(context)
+//                                .setTitle("일정을 삭제하시겠습니까?")
+//                                .setPositiveButton("OK", DialogInterface.OnClickListener { dialogInterface, int ->
+//                                    TaskDatabaseHelper.deleteTask(splitIndex[1],TaskDatabaseHelper(context,"wearTask.db",null,3).writableDatabase)
+//                                    llTaskTitleBox.removeView(lllayout)
+//                                    SendSyncData.changeDBToBytes(context, Wearable.getDataClient(context))
+//                                })
+//                                .setNegativeButton("Cancel",null)
+//                                .create()
+//
+//                        deleteAlert.show()
+//                    }
 //                    llTaskTitleBox.addView(button)
                     lllayout.addView(textView)
-                    lllayout.addView(button)
+//                    lllayout.addView(button)
                     llTaskTitleBox.addView(lllayout)
                 }
             }else{

@@ -65,6 +65,7 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="4dp"
         android:background="@drawable/create_task_icon"
+        android:visibility="gone"
         />
 
 </androidx.wear.widget.BoxInsetLayout>
