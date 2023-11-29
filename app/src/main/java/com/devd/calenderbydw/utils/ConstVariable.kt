@@ -27,4 +27,36 @@ object ConstVariable {
     const val MODIFY_TASK = 1
 
     const val WIDGET_SHOW_DATE= "showDate"
+
+    const val HAPPY = "icon_sticker_happy.png"
+    val STICKERS_TEMP_LIST = listOf<String>(
+        "icon_sticker_happy.png",
+        "icon_sticker_whistling.png",
+        "icon_sticker_salute.png",
+        "icon_sticker_temperature.png",
+        "icon_sticker_wink.png",
+        "icon_sticker_sneeze.png",
+        "icon_sticker_annoyed.png",
+        "icon_sticker_cute.png",
+        "icon_sticker_crying.png",
+    )
+    const val WEATHER_TYPE_SUNNY = 0
+    const val WEATHER_TYPE_SUNNY_TXT = "맑음"
+    const val WEATHER_TYPE_CLOUDY = 1
+    const val WEATHER_TYPE_CLOUDY_TXT = "흐림"
+    const val WEATHER_TYPE_RAIN = 2
+    const val WEATHER_TYPE_RAIN_TXT = "비"
+    const val WEATHER_TYPE_SOSO = 3
+    const val WEATHER_TYPE_SOSO_TXT = "눈"
+    const val WEATHER_TYPE_ETC = 4
+    const val FEEL_TYPE_GOOD = 0
+    const val FEEL_TYPE_GOOD_TXT = "좋은"
+    const val FEEL_TYPE_BAD = 1
+    const val FEEL_TYPE_BAD_TXT = "나쁜"
+    const val FEEL_TYPE_SOSO = 2
+    const val FEEL_TYPE_SOSO_TXT = "그저 그런"
+    const val FEEL_TYPE_HAPPY = 3
+    const val FEEL_TYPE_HAPPY_TXT = "행복한"
+    const val FEEL_TYPE_ETC = 4
+
 }

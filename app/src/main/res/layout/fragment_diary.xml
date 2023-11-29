@@ -47,7 +47,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:text="맑음!"
+        android:text="맑음"
+        android:maxLength="8"
         android:textColor="@color/commonDayColor"
         app:layout_constraintBottom_toBottomOf="@id/tvTodayWeatherHolder"
         app:layout_constraintStart_toEndOf="@id/tvTodayWeatherHolder"
@@ -104,6 +105,7 @@
         android:layout_marginStart="5dp"
         android:background="@null"
         android:hint="기분을 알려줘!"
+        android:maxLength="8"
         android:textColor="@color/commonDayColor"
         android:textColorHint="@color/grayDayColor"
         android:visibility="gone"
@@ -134,11 +136,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:text="최고였어!"
+        android:text="좋음"
         android:textColor="@color/commonDayColor"
         app:layout_constraintBottom_toBottomOf="@id/tvTodayFeelingHolder"
         app:layout_constraintStart_toEndOf="@id/tvTodayFeelingHolder"
         app:layout_constraintTop_toTopOf="@id/tvTodayFeelingHolder" />
+    <TextView
+        android:id="@+id/tvSticker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/ivSticker"
+        app:layout_constraintEnd_toEndOf="@id/ivSticker"
+        app:layout_constraintBottom_toTopOf="@id/ivSticker"
+        style="@style/Font18Weight300"
+        android:text="Sticker"
+        />
+    <ImageView
+        android:id="@+id/ivSticker"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvTodayWeatherHolder"
+        app:layout_constraintBottom_toBottomOf="@id/tvTodayFeelingHolder"
+        android:background="@drawable/radius_15"
+        android:clipToOutline="true"
+        android:layout_marginEnd="20dp"
+        />
 
     <TextView
         android:id="@+id/tvTodayDiaryHolder"

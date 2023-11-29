@@ -174,6 +174,7 @@ class CalendarWidget : AppWidgetProvider() {
         //gvCalendar 달력 뷰에 데이터 보내기
         val intent = Intent(context, WidgetAdapter::class.java)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        Timber.d("onDataSetChnage showTimeDate333: ${showTimeDate}")
         intent.putExtra(WIDGET_SHOW_DATE, showTimeDate)
         views.setRemoteAdapter(R.id.gvCalendar, intent)
         views.setEmptyView(R.id.gvCalendar, R.id.tvTask1)

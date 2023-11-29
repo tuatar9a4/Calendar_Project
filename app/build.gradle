@@ -10,7 +10,7 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 def holidayEncodingKey = properties.getProperty('holiday_encoding_key')
-
+def oracleBucketKey = properties.getProperty('oracle_bucket_key')
 android {
     defaultConfig{
         compileSdk 34
@@ -43,6 +43,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue "string","holidayEncodingKey" , holidayEncodingKey
+        resValue "string","oracleBucketKey" , oracleBucketKey
     }
 
     buildTypes {

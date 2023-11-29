@@ -194,8 +194,7 @@ class CustomDayItemView @JvmOverloads constructor(
 //                null
 //            )
 //        }
-
-        rect = RectF(2f,0f,width.toFloat(),height.toFloat()-2)
+        rect = RectF(0f,0f,width.toFloat(),height.toFloat()-2)
         canvas.drawRect(rect, linePaint)
     }
 }

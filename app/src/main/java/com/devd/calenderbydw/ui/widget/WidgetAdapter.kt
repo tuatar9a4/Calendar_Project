@@ -7,8 +7,6 @@ import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.data.local.AppDatabase
 import com.devd.calenderbydw.data.local.entity.CalendarDayEntity
@@ -24,11 +22,9 @@ import com.devd.calenderbydw.utils.changeWeekIntToString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.sql.Time
 import java.util.Calendar
 import java.util.Date
 
@@ -55,19 +51,23 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
     private var job = Job()
     private var coroutineScope = CoroutineScope(Dispatchers.IO + job)
     override fun onCreate() {
+        dataStore = CalendarDataStore(context.calendarDataStore)
         if (intent != null) {
             mAppWidgetId = intent.getIntExtra(
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID
             )
-            receiveTime = intent.getLongExtra(WIDGET_SHOW_DATE, 0)
+            CoroutineScope(Dispatchers.IO).launch {
+                Timber.d("onDataSetChnage showTimeDate22: ${intent.getLongExtra(WIDGET_SHOW_DATE, 0)}")
+                receiveTime = dataStore.getPreferLong(PREF_KEY_WIDGET_SHOW_TIME)?:0L
+                Timber.d("onDataSetChnage collect: ${receiveTime}")
+            }
         }
         appDatabase = AppDatabase.buildDatabase(context)
-        dataStore = CalendarDataStore(context.calendarDataStore)
         coroutineScope.launch {
             launch {
                 dataStore.preferLongFlow(PREF_KEY_WIDGET_SHOW_TIME).collectLatest {
-//                    Timber.d("receiveTime collect: ${receiveTime}")
+                    Timber.d("receiveTime collect222: ${receiveTime}")
                     it?.let {
                         receiveTime = it
                     }
@@ -75,7 +75,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             }
             launch {
                 dataStore.preferStringFlow(DataStoreKey.PREF_KET_WIDGET_CLICK_DATE).collectLatest {
-//                    Timber.d("selectedDate collect: ${receiveTime}")
+                    Timber.d("selectedDate collect: ${receiveTime}")
                     selectedDate = it
                 }
             }
@@ -84,14 +84,16 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             time = Date(receiveTime)
         }
         setCalendarList(null, calendarDate.get(Calendar.YEAR))
+        Timber.d("receiveTime collect22244: ${calendarDate.get(Calendar.YEAR)}")
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-//            Log.d("도원","getViewAt : "+ mWidgetItem[position])
         val rv = RemoteViews(context.packageName, R.layout.widget_calender_grid_item)
         val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        Timber.d("getViewAt : ${monthFirstDate[Calendar.YEAR]}.${(monthFirstDate[Calendar.MONTH]+ 1)}")
 //        Timber.d("WidgetTest getViewAt[${position}] ${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}null? [${widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"] == null}]")
-        widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"]?.let {
+//        Timber.d("onDataSetChnage ${monthFirstDate[Calendar.YEAR]}.${(monthFirstDate[Calendar.MONTH]+ 1)} => ${widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH] + 1}"]}")
+        widgetList["${monthFirstDate[Calendar.YEAR]}.${monthFirstDate[Calendar.MONTH]+ 1}"]?.let {
             when (position) {
                 0, 1, 2, 3, 4, 5, 6 -> { // 요일 텍스트
                     setWeekContainer((position + 1).changeWeekIntToString(), rv)
@@ -121,18 +123,19 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
             todayCalendar.get(Calendar.DAY_OF_MONTH)
         }"
         val monthFirstDate = Calendar.getInstance().apply { time = Date(receiveTime) }
+        Timber.d("onDataSetChnage => ${widgetList.isEmpty()}")
         CoroutineScope(Dispatchers.IO).launch {
             updateCalendarTask(appDatabase.taskDao().getAllTaskForWidget())
-        }
-        Timber.d("onDataSetChnage => ${widgetList.isEmpty()}")
-        if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) + 1}.1" } && !isDataLoading) {
-            setCalendarList(true, (monthFirstDate.get(Calendar.YEAR) + 1))
-        } else if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) - 1}.12" } && !isDataLoading) {
-            setCalendarList(false, (monthFirstDate.get(Calendar.YEAR) - 1))
+            if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) + 1}.1" } && !isDataLoading) {
+                setCalendarList(true, (monthFirstDate.get(Calendar.YEAR) + 1))
+            } else if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) - 1}.12" } && !isDataLoading) {
+                setCalendarList(false, (monthFirstDate.get(Calendar.YEAR) - 1))
+            }
         }
     }
 
     override fun onDestroy() {
+        job.cancel()
     }
 
     override fun getCount(): Int {

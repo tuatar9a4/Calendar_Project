@@ -11,6 +11,24 @@ import com.devd.calenderbydw.repository.CalendarDataStore
 import com.devd.calenderbydw.repository.DataStoreKey.Companion.PREF_TODAY_ALREADY_WRITE_DIARY
 import com.devd.calenderbydw.repository.DataStoreKey.Companion.PREF_WRITE_DIARY_LAST_DATE
 import com.devd.calenderbydw.repository.DiaryRepository
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_BAD
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_BAD_TXT
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_ETC
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_GOOD
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_GOOD_TXT
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_HAPPY
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_HAPPY_TXT
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_SOSO
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_SOSO_TXT
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_CLOUDY
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_CLOUDY_TXT
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_ETC
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_RAIN
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_RAIN_TXT
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_SOSO
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_SOSO_TXT
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_SUNNY
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_SUNNY_TXT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,13 +49,15 @@ class DiaryViewModel @Inject constructor(
     val insertResult :LiveData<Boolean> get() = _insertResult
 
     private val _contents = MutableStateFlow<String>("")
-    private val _weatherType = MutableStateFlow("")
+    private val _weatherType = MutableStateFlow(WEATHER_TYPE_SUNNY.toString())
     val weatherType :StateFlow<String> get() = _weatherType
-    private val _feelType = MutableStateFlow("")
+    private val _feelType = MutableStateFlow(FEEL_TYPE_GOOD.toString())
     val feelType :StateFlow<String> get() = _feelType
     private var _customWeatherStr = MutableStateFlow("")
     private var _customFeelStr = MutableStateFlow("")
 
+    private val _currentStickerName = MutableStateFlow("icon_sticker_happy.png")
+    val currentStickerName :StateFlow<String> get() = _currentStickerName
     val checkCanWrite = combine(
         _contents,
         _weatherType,
@@ -76,6 +96,10 @@ class DiaryViewModel @Inject constructor(
         _customFeelStr.value = str
     }
 
+    fun setStickerId(id :String){
+        _currentStickerName.value = id
+    }
+
     private fun getSelectWeatherType() = weatherList.first { it.isCheck }.type
     private fun getSelectFeelType() = feelList.first { it.isCheck }.type
 
@@ -92,6 +116,7 @@ class DiaryViewModel @Inject constructor(
                 weatherType = getSelectWeatherType(),
                 customWeather = if(getSelectFeelType()== WEATHER_TYPE_ETC) _customWeatherStr.value else null,
                 feelingType = getSelectFeelType(),
+                stickerName = _currentStickerName.value,
                 customFeel = if(getSelectFeelType() == FEEL_TYPE_ETC) _customFeelStr.value else null,
                 createDate = Date().time
             )).run {
@@ -105,22 +130,22 @@ class DiaryViewModel @Inject constructor(
     private fun getWeatherBottomList() = listOf<BottomSheetItem>(
         BottomSheetItem(
             type = WEATHER_TYPE_SUNNY,
-            text = "맑음!",
+            text = WEATHER_TYPE_SUNNY_TXT,
             isCheck = true,
         ),
         BottomSheetItem(
             type = WEATHER_TYPE_CLOUDY,
-            text = "흐림..",
+            text = WEATHER_TYPE_CLOUDY_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
             type = WEATHER_TYPE_RAIN,
-            text = "비...",
+            text = WEATHER_TYPE_RAIN_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
             type = WEATHER_TYPE_SOSO,
-            text = "보통",
+            text = WEATHER_TYPE_SOSO_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
@@ -133,22 +158,22 @@ class DiaryViewModel @Inject constructor(
     private fun getFeelBottomList() = listOf<BottomSheetItem>(
         BottomSheetItem(
             type = FEEL_TYPE_GOOD,
-            text = "좋음",
+            text = FEEL_TYPE_GOOD_TXT,
             isCheck = true,
         ),
         BottomSheetItem(
             type = FEEL_TYPE_BAD,
-            text = "나쁨",
+            text = FEEL_TYPE_BAD_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
             type = FEEL_TYPE_SOSO,
-            text = "그저그럼",
+            text = FEEL_TYPE_SOSO_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
             type = FEEL_TYPE_HAPPY,
-            text = "행복함",
+            text = FEEL_TYPE_HAPPY_TXT,
             isCheck = false,
         ),
         BottomSheetItem(
@@ -158,16 +183,4 @@ class DiaryViewModel @Inject constructor(
         )
     )
 
-    companion object {
-        const val WEATHER_TYPE_SUNNY = 0
-        const val WEATHER_TYPE_CLOUDY = 1
-        const val WEATHER_TYPE_RAIN = 2
-        const val WEATHER_TYPE_SOSO = 3
-        const val WEATHER_TYPE_ETC = 4
-        const val FEEL_TYPE_GOOD = 0
-        const val FEEL_TYPE_BAD = 1
-        const val FEEL_TYPE_SOSO = 2
-        const val FEEL_TYPE_HAPPY = 3
-        const val FEEL_TYPE_ETC = 4
-    }
 }

@@ -1,29 +1,28 @@
 package com.devd.calenderbydw.ui.diary.wirte
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.databinding.FragmentDiaryBinding
 import com.devd.calenderbydw.ui.dialog.CommonDialog
 import com.devd.calenderbydw.ui.dialog.CustomBottomSheetDialog
-import com.devd.calenderbydw.ui.diary.wirte.DiaryViewModel.Companion.FEEL_TYPE_ETC
-import com.devd.calenderbydw.ui.diary.wirte.DiaryViewModel.Companion.WEATHER_TYPE_ETC
+import com.devd.calenderbydw.ui.dialog.StickerBottomSheetDialog
+import com.devd.calenderbydw.utils.ConstVariable.FEEL_TYPE_ETC
+import com.devd.calenderbydw.utils.ConstVariable.WEATHER_TYPE_ETC
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import okhttp3.internal.cacheGet
-import timber.log.Timber
 
 @AndroidEntryPoint
 class DiaryFragment : Fragment() {
@@ -84,6 +83,13 @@ class DiaryFragment : Fragment() {
                     }
                 }
             }
+            launch {
+                diaryViewModel.currentStickerName.collectLatest {
+                    activity?.runOnUiThread {
+                        setStickerImage(it)
+                    }
+                }
+            }
         }
     }
 
@@ -141,6 +147,22 @@ class DiaryFragment : Fragment() {
                 }
             }.build().show(parentFragmentManager, "feelDialog")
         }
+        binding.ivSticker.setOnClickListener {
+            StickerBottomSheetDialog.Builder().apply {
+                stickerClickListener = object :StickerBottomSheetDialog.StickerClickListener{
+                    override fun onStickerClick(stickerId: String) {
+                        diaryViewModel.setStickerId(stickerId)
+                    }
+                }
+            }.build().show(parentFragmentManager,"stickerDialog")
+        }
+    }
+
+    private fun setStickerImage(stickerId :String){
+        val key =requireContext().getString(R.string.oracleBucketKey)
+        Glide.with(requireContext())
+            .load("${requireContext().getString(R.string.oracle_bucket_image_path,key)}${stickerId}")
+            .into(binding.ivSticker)
     }
 
     private fun setEditTextsFunc() {

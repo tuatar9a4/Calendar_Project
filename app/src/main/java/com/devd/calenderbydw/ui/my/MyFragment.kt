@@ -16,6 +16,9 @@ class MyFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        //버전
+        //문의
+        //사진 정보
         binding = FragmentMyBinding.inflate(inflater,container,false)
         return binding.root
     }

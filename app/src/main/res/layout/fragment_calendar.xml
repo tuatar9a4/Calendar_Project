@@ -9,8 +9,8 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/calendarToolbar"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:background="@color/palette_light_green"
+        android:layout_height="wrap_content"
+        android:elevation="1dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -19,13 +19,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="22012.12"
-            android:textColor="@color/palette_pink"
+            android:text="Calendar"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/calendarToolbar" />
     </com.google.android.material.appbar.MaterialToolbar>
 
+    <TextView
+        android:id="@+id/tvCalendarYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/calendarToolbar"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/palette_pink"
+        style="@style/Font24Weight600"
+        android:text="2024"
+        android:textSize="30sp"
+        />
+    <TextView
+        android:id="@+id/tvCalendarMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tvCalendarYear"
+        app:layout_constraintStart_toEndOf="@id/tvCalendarYear"
+        android:textColor="@color/palette_pink"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        style="@style/Font24Weight600"
+        android:text="12"
+        android:textSize="36sp"
+        />
     <TextView
         android:id="@+id/tvSunDay"
         style="@style/Font16Weight300"
@@ -34,7 +60,7 @@
         android:layout_marginHorizontal="2dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="20dp"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:background="@drawable/calendar_left_top"
         android:gravity="center"
         android:paddingVertical="8dp"
@@ -42,14 +68,14 @@
         android:textColor="@color/yearTopColor"
         app:layout_constraintEnd_toStartOf="@id/tvMonDay"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/calendarToolbar" />
+        app:layout_constraintTop_toBottomOf="@id/tvCalendarMonth" />
 
     <TextView
         android:id="@+id/tvMonDay"
         style="@style/Font16Weight300"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:background="@drawable/select_ractangle"
         android:gravity="center"
         android:paddingVertical="8dp"
@@ -65,7 +91,7 @@
         style="@style/Font16Weight300"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:textColor="@color/commonDayColor"
         android:background="@drawable/select_ractangle"
         android:gravity="center"
@@ -82,7 +108,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/select_ractangle"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:textColor="@color/commonDayColor"
         android:gravity="center"
         android:paddingVertical="8dp"
@@ -98,7 +124,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/select_ractangle"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:textColor="@color/commonDayColor"
         android:gravity="center"
         android:paddingVertical="8dp"
@@ -114,7 +140,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/select_ractangle"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:textColor="@color/commonDayColor"
         android:gravity="center"
         android:paddingVertical="8dp"
@@ -131,7 +157,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:background="@drawable/calendar_right_top"
-        android:backgroundTint="@color/palette_light_green2"
+        android:backgroundTint="@color/palette_light_green_100"
         android:gravity="center"
         android:paddingVertical="8dp"
         android:text="SAT"

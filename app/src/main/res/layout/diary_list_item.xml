@@ -52,11 +52,15 @@
         />
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/tvWeather"
         app:layout_constraintStart_toStartOf="@id/tvWeather"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="10dp"
         style="@style/Font18Weight600"
+        android:lines="2"
+        android:ellipsize="end"
         android:text="오늘의 일기"
         android:textColor="@color/commonDayColor"
         />

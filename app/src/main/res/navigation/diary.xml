@@ -18,5 +18,17 @@
         <action
             android:id="@+id/action_diaryListFragment_to_diaryFragment"
             app:destination="@id/diaryFragment" />
+        <action
+            android:id="@+id/action_diaryListFragment_to_diaryPageFragment"
+            app:destination="@id/diaryPageFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/diaryPageFragment"
+        android:name="com.devd.calenderbydw.ui.diary.page.DiaryPageFragment"
+        android:label="fragment_diary_page"
+        tools:layout="@layout/fragment_diary_page" >
+        <argument
+            android:name="diaryData"
+            app:argType="com.devd.calenderbydw.data.local.entity.DiaryEntity" />
     </fragment>
 </navigation>

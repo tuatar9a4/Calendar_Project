@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -12,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.devd.calenderbydw.R
+import com.devd.calenderbydw.data.local.entity.DiaryEntity
 import com.devd.calenderbydw.databinding.FragmentDiaryListBinding
 import com.devd.calenderbydw.ui.dialog.CommonDialog
 import com.devd.calenderbydw.utils.autoCleared
@@ -67,13 +69,14 @@ class DiaryListFragment : Fragment() {
 
     private fun setToolbarFunc() {
         binding.btnDiaryWrite.setOnClickListener {
-            if (viewModel.todayWriteDiary.value == true) {
-                CommonDialog.Builder().apply {
-                    message = "이미 오늘의 일기를 작성하셨습니다."
-                }.build().show(parentFragmentManager, "writeDiary")
-            } else {
                 findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
-            }
+//            if (viewModel.todayWriteDiary.value == true) {
+//                CommonDialog.Builder().apply {
+//                    message = "이미 오늘의 일기를 작성하셨습니다."
+//                }.build().show(parentFragmentManager, "writeDiary")
+//            } else {
+//                findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
+//            }
         }
     }
 
@@ -89,6 +92,15 @@ class DiaryListFragment : Fragment() {
 
     private fun setDiaryListAdapter() {
         binding.rcDiaryList.adapter = adapter
+        adapter.setOnDiaryClickListener(object :DiaryListAdapter.DiaryClickListener{
+            override fun onItemClick(item: DiaryEntity) {
+                findNavController().navigate(R.id.action_diaryListFragment_to_diaryPageFragment,
+                    bundleOf(
+                        "diaryData" to item
+                    )
+                )
+            }
+        })
         adapter.stateRestorationPolicy =
             RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {

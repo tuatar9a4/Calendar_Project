@@ -1,9 +1,12 @@
 package com.devd.calenderbydw.data.local.entity
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity("diary_table")
 data class DiaryEntity(
     @ColumnInfo("id")
@@ -25,6 +28,8 @@ data class DiaryEntity(
     val customFeel: String? = null,
     @ColumnInfo("diaryContents")
     val diaryContents: String = "",
+    @ColumnInfo("stickerName")
+    val stickerName: String? = null,
     @ColumnInfo("createDate")
     val createDate : Long =0L
-)
+) : Parcelable

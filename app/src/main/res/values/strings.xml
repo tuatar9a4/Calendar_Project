@@ -4,7 +4,10 @@
     <string name="appwidget_text">MonthWidget</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">This is an app widget description</string>
-
+    <string name="weather_fell_holder">오늘 날씨는 %1$s (이)였고 기분은 %2$s 날 이였다.</string>
+    <string name="diary_page_toolbar_holder">%1$s 날의 일기</string>
+    <string name="today_diary_holder">오늘은… %1$s</string>
+    <string name="oracle_bucket_image_path">https://objectstorage.ap-seoul-1.oraclecloud.com/p/%1$s/n/cnud835pjoeg/b/devd_storage/o/sticker/</string>
     <string name="task_input_info">
         "⚠︎ 제목은 최대 50자만 가능 합니다! 필요시 하단 입력창을 사용해주세요!"
         "\n⚠︎ 각 년,월,일 을 선택하여 날짜를 변경할 수 있어요!"
