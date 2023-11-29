@@ -45,6 +45,9 @@ class DiaryFragment : Fragment() {
     private fun setObserver() {
         diaryViewModel.insertResult.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(),"일기를 작성했습니다.",Toast.LENGTH_SHORT).show()
+            findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                "update",true
+            )
             findNavController().popBackStack()
         }
         CoroutineScope(Dispatchers.IO).launch {

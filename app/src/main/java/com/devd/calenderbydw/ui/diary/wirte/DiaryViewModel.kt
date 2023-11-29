@@ -96,6 +96,7 @@ class DiaryViewModel @Inject constructor(
                 createDate = Date().time
             )).run {
                 dataStore.setPreferString(PREF_WRITE_DIARY_LAST_DATE,playDate)
+                dataStore.setPreferBoolean(PREF_TODAY_ALREADY_WRITE_DIARY,true)
                 _insertResult.value=true
             }
         }

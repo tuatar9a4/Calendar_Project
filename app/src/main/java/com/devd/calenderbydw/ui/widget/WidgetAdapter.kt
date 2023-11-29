@@ -124,6 +124,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         CoroutineScope(Dispatchers.IO).launch {
             updateCalendarTask(appDatabase.taskDao().getAllTaskForWidget())
         }
+        Timber.d("onDataSetChnage => ${widgetList.isEmpty()}")
         if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) + 1}.1" } && !isDataLoading) {
             setCalendarList(true, (monthFirstDate.get(Calendar.YEAR) + 1))
         } else if (!widgetList.any { it.key == "${monthFirstDate.get(Calendar.YEAR) - 1}.12" } && !isDataLoading) {
@@ -131,9 +132,7 @@ class StackRemoteViewsFactory(private val context: Context, private val intent: 
         }
     }
 
-
     override fun onDestroy() {
-        job.cancel()
     }
 
     override fun getCount(): Int {

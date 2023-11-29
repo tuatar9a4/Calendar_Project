@@ -1,10 +1,10 @@
 package com.devd.calenderbydw.ui.diary.list
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.devd.calenderbydw.R
 import com.devd.calenderbydw.databinding.FragmentDiaryListBinding
+import com.devd.calenderbydw.ui.dialog.CommonDialog
 import com.devd.calenderbydw.utils.autoCleared
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -36,36 +37,72 @@ class DiaryListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentDiaryListBinding.inflate(inflater,container,false)
-        binding.rcDiaryList.adapter = adapter
-        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        binding.btn.setOnClickListener {
-            findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
-//            testAddData()
-        }
-        binding.btn2.setOnClickListener {
-            adapter.refresh()
-            refresh=true
-
-        }
+        binding = FragmentDiaryListBinding.inflate(inflater, container, false)
+        setToolbarFunc()
+        setDiaryListAdapter()
+        setObserver()
         return binding.root
     }
 
-    private fun setCollectItems(){
+    private fun setObserver() {
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("update")
+            ?.observe(viewLifecycleOwner) {
+                Timber.d("UpdateCheck -> ${it}")
+                if (it) {
+                    adapter.refresh()
+                    refresh = true
+                    findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("update")
+                }
+            }
+
+        viewModel.todayWriteDiary.observe(viewLifecycleOwner) {
+            val writeBtnColor = if (it) {
+                requireContext().getColor(R.color.grayDayColor)
+            } else {
+                requireContext().getColor(R.color.commonDayColor)
+            }
+            binding.btnDiaryWrite.setTextColor(writeBtnColor)
+        }
+    }
+
+    private fun setToolbarFunc() {
+        binding.btnDiaryWrite.setOnClickListener {
+            if (viewModel.todayWriteDiary.value == true) {
+                CommonDialog.Builder().apply {
+                    message = "이미 오늘의 일기를 작성하셨습니다."
+                }.build().show(parentFragmentManager, "writeDiary")
+            } else {
+                findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
+            }
+        }
+    }
+
+    private fun setCollectItems() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED){
-                viewModel.item.collect {
-                    adapter.submitData(viewLifecycleOwner.lifecycle,it)
-                    if(refresh){
-                        binding.rcDiaryList.scrollToPosition(0)
-                        refresh=false
-                    }
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.item.collectLatest {
+                    adapter.submitData(viewLifecycleOwner.lifecycle, it)
                 }
             }
         }
     }
 
-    private fun testAddData(){
+    private fun setDiaryListAdapter() {
+        binding.rcDiaryList.adapter = adapter
+        adapter.stateRestorationPolicy =
+            RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                if (refresh) {
+                    binding.rcDiaryList.scrollToPosition(0)
+                    refresh = false
+                }
+            }
+        })
+    }
+
+    private fun testAddData() {
         viewModel.testAddDatas()
     }
 

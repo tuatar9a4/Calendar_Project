@@ -93,19 +93,17 @@ class CommonDialog() : DialogFragment() {
             binding.btnRightPositive.setBackgroundColor(it)
         }
 
-        builder?.negativeBtnClickListener?.let { listener ->
-            binding.btnLeftNegative.setOnClickListener {
-                listener.onClick()
-                dismiss()
-            }
+        binding.btnLeftNegative.setOnClickListener {
+            builder?.negativeBtnClickListener?.onClick()
+            dismiss()
         }
 
-        builder?.positiveBtnClickListener?.let { listener ->
-            binding.btnRightPositive.setOnClickListener {
-                listener.onClick()
-                dismiss()
-            }
+
+        binding.btnRightPositive.setOnClickListener {
+            builder?.positiveBtnClickListener?.onClick()
+            dismiss()
         }
+
     }
 
     class Builder {

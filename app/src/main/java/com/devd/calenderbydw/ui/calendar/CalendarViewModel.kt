@@ -186,7 +186,7 @@ class CalendarViewModel @Inject constructor(
         changeList?.filter { it.year == year && it.month == month }
             ?.forEach { calendarData ->
                 calendarData.dayList.forEach { dayItem ->
-                    dayItem.toDay = dayItem.day == day.toString()
+                    dayItem.toDay = (dayItem.day == day.toString() && dayItem.month == month.toString())
                 }
             }
     }
