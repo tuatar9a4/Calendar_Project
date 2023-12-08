@@ -33,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
         fun buildDatabase(context: Context) : AppDatabase{
             return Room.databaseBuilder(context, AppDatabase::class.java, "calendar_db")
                 // pre-populate the database
+                .allowMainThreadQueries()
                 .addCallback(
                     object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {

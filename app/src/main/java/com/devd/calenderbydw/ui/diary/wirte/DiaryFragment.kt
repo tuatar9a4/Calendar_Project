@@ -148,13 +148,16 @@ class DiaryFragment : Fragment() {
             }.build().show(parentFragmentManager, "feelDialog")
         }
         binding.ivSticker.setOnClickListener {
-            StickerBottomSheetDialog.Builder().apply {
-                stickerClickListener = object :StickerBottomSheetDialog.StickerClickListener{
-                    override fun onStickerClick(stickerId: String) {
-                        diaryViewModel.setStickerId(stickerId)
+            if(diaryViewModel.stickerList.isNotEmpty()){
+                StickerBottomSheetDialog.Builder().apply {
+                    stickerList = diaryViewModel.stickerList
+                    stickerClickListener = object :StickerBottomSheetDialog.StickerClickListener{
+                        override fun onStickerClick(stickerId: String) {
+                            diaryViewModel.setStickerId(stickerId)
+                        }
                     }
-                }
-            }.build().show(parentFragmentManager,"stickerDialog")
+                }.build().show(parentFragmentManager,"stickerDialog")
+            }
         }
     }
 

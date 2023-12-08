@@ -4,6 +4,7 @@ import com.devd.calenderbydw.data.local.dao.CalendarDao
 import com.devd.calenderbydw.data.local.dao.DiaryDao
 import com.devd.calenderbydw.data.local.dao.HolidayDao
 import com.devd.calenderbydw.data.local.dao.TaskDao
+import com.devd.calenderbydw.data.remote.api.CalendarService
 import com.devd.calenderbydw.data.remote.api.HolidayService
 import com.devd.calenderbydw.repository.CalendarRepository
 import com.devd.calenderbydw.repository.DiaryRepository
@@ -38,6 +39,6 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideDiaryRepository(diaryDao: DiaryDao) : DiaryRepository =
-        DiaryRepository(diaryDao)
+    fun provideDiaryRepository(diaryDao: DiaryDao,@NetworkModule.CalendarServer calendarService: CalendarService) : DiaryRepository =
+        DiaryRepository(calendarService,diaryDao)
 }

@@ -7,9 +7,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.devd.calenderbydw.R
+import com.devd.calenderbydw.data.remote.calendar.DiaryStickerResponse
 import com.devd.calenderbydw.databinding.StickerBottomSheetItemBinding
 
-class StickerItemAdapter : ListAdapter<String, StickerItemAdapter.StickerItemVH>(diff) {
+class StickerItemAdapter : ListAdapter<DiaryStickerResponse, StickerItemAdapter.StickerItemVH>(diff) {
     private var stickerClickListener : StickerBottomSheetDialog.StickerClickListener? =null
 
     fun setOnStickerClickListener(listener: StickerBottomSheetDialog.StickerClickListener){
@@ -29,24 +30,24 @@ class StickerItemAdapter : ListAdapter<String, StickerItemAdapter.StickerItemVH>
     class StickerItemVH(private val binding : StickerBottomSheetItemBinding,private val listener :StickerBottomSheetDialog.StickerClickListener?) :ViewHolder(binding.root){
         private val key =itemView.context.getString(R.string.oracleBucketKey)
         private val imagePath = itemView.context.getString(R.string.oracle_bucket_image_path,key)
-        fun bind(imageId :String){
+        fun bind(imageId :DiaryStickerResponse){
             Glide.with(itemView.context)
-                .load("${imagePath}${imageId}")
+                .load("${imagePath}${imageId.stickerName}")
                 .into(binding.ivStickerItem)
             binding.root.setOnClickListener {
-                listener?.onStickerClick(imageId)
+                listener?.onStickerClick(imageId.stickerName)
             }
         }
     }
 
     companion object{
-        val diff = object : ItemCallback<String>(){
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+        val diff = object : ItemCallback<DiaryStickerResponse>(){
+            override fun areItemsTheSame(oldItem: DiaryStickerResponse, newItem: DiaryStickerResponse): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: DiaryStickerResponse, newItem: DiaryStickerResponse): Boolean {
+                return oldItem.stickerName == newItem.stickerName
             }
         }
     }

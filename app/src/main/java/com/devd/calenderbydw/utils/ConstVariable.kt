@@ -9,6 +9,7 @@ import org.joda.time.DateTimeConstants
 object ConstVariable {
 
     const val HOLIDAY_API_URL = "http://apis.data.go.kr/"
+    const val CALENDAR_API_URL = "http://193.123.232.164:8087/"
 
     const val WEEK_SUN_DAY = 1
     const val WEEK_MON_DAY = 2
@@ -30,15 +31,7 @@ object ConstVariable {
 
     const val HAPPY = "icon_sticker_happy.png"
     val STICKERS_TEMP_LIST = listOf<String>(
-        "icon_sticker_happy.png",
-        "icon_sticker_whistling.png",
-        "icon_sticker_salute.png",
-        "icon_sticker_temperature.png",
-        "icon_sticker_wink.png",
-        "icon_sticker_sneeze.png",
-        "icon_sticker_annoyed.png",
-        "icon_sticker_cute.png",
-        "icon_sticker_crying.png",
+        "icon_sticker_happy.png"
     )
     const val WEATHER_TYPE_SUNNY = 0
     const val WEATHER_TYPE_SUNNY_TXT = "맑음"

@@ -122,12 +122,6 @@ class CalendarWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
-        // Construct the RemoteViews object
-        val views = RemoteViews(context.packageName, R.layout.calendar_widget)
-        //위젯 클릭 기능
-        widgetClickFunc(views, context)
-        //그리드 뷰에 어댑터 셋팅
-        widgetCalendarGridSetting(views, context, appWidgetId)
         //저장된 달력 시간 저장
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.getPreferLong(PREF_KEY_WIDGET_SHOW_TIME)?.let {
@@ -136,6 +130,12 @@ class CalendarWidget : AppWidgetProvider() {
                 dataStore.setPreferLong(PREF_KEY_WIDGET_SHOW_TIME,System.currentTimeMillis())
                 showTimeDate=System.currentTimeMillis()
             }
+            // Construct the RemoteViews object
+            val views = RemoteViews(context.packageName, R.layout.calendar_widget)
+            //위젯 클릭 기능
+            widgetClickFunc(views, context)
+            //그리드 뷰에 어댑터 셋팅
+            widgetCalendarGridSetting(views, context, appWidgetId)
             showTimeDate?.let {
                 val showDateTime = Calendar.getInstance().apply {
                     time = Date(it)
@@ -174,7 +174,6 @@ class CalendarWidget : AppWidgetProvider() {
         //gvCalendar 달력 뷰에 데이터 보내기
         val intent = Intent(context, WidgetAdapter::class.java)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-        Timber.d("onDataSetChnage showTimeDate333: ${showTimeDate}")
         intent.putExtra(WIDGET_SHOW_DATE, showTimeDate)
         views.setRemoteAdapter(R.id.gvCalendar, intent)
         views.setEmptyView(R.id.gvCalendar, R.id.tvTask1)

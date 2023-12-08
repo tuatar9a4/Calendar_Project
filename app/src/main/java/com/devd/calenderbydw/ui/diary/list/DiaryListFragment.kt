@@ -53,6 +53,7 @@ class DiaryListFragment : Fragment() {
                 if (it) {
                     adapter.refresh()
                     refresh = true
+                    viewModel.setTodayCanWrite(true)
                     findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("update")
                 }
             }
@@ -69,14 +70,14 @@ class DiaryListFragment : Fragment() {
 
     private fun setToolbarFunc() {
         binding.btnDiaryWrite.setOnClickListener {
-                findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
-//            if (viewModel.todayWriteDiary.value == true) {
-//                CommonDialog.Builder().apply {
-//                    message = "이미 오늘의 일기를 작성하셨습니다."
-//                }.build().show(parentFragmentManager, "writeDiary")
-//            } else {
 //                findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
-//            }
+            if (viewModel.todayWriteDiary.value == true) {
+                CommonDialog.Builder().apply {
+                    message = "이미 오늘의 일기를 작성하셨습니다."
+                }.build().show(parentFragmentManager, "writeDiary")
+            } else {
+                findNavController().navigate(R.id.action_diaryListFragment_to_diaryFragment)
+            }
         }
     }
 

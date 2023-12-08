@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devd.calenderbydw.data.local.dialog.BottomSheetItem
 import com.devd.calenderbydw.data.local.entity.DiaryEntity
+import com.devd.calenderbydw.data.remote.CallResult
+import com.devd.calenderbydw.data.remote.calendar.DiaryStickerResponse
 import com.devd.calenderbydw.repository.CalendarDataStore
 import com.devd.calenderbydw.repository.DataStoreKey.Companion.PREF_TODAY_ALREADY_WRITE_DIARY
 import com.devd.calenderbydw.repository.DataStoreKey.Companion.PREF_WRITE_DIARY_LAST_DATE
@@ -68,6 +70,23 @@ class DiaryViewModel @Inject constructor(
         return@combine contents.isNotEmpty() &&
                 ((weatherType == WEATHER_TYPE_ETC.toString() && weatherStr.isNotEmpty()) || weatherType != WEATHER_TYPE_ETC.toString()) &&
                 ((feelType == FEEL_TYPE_ETC.toString() && feelStr.isNotEmpty()) || feelType != FEEL_TYPE_ETC.toString())
+    }
+
+    var stickerList = listOf<DiaryStickerResponse>()
+
+    init {
+        viewModelScope.launch {
+            repository.getDiaryStickers().run {
+                when(this){
+                    is CallResult.Success->{
+                        stickerList=this.data
+                    }
+                    else ->{
+
+                    }
+                }
+            }
+        }
     }
 
     fun setContents(contents: String) {

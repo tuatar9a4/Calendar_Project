@@ -41,8 +41,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val visibility = if (
                 destination.id == R.id.calendarFragment ||
-                destination.id == R.id.diaryListFragment ||
-                destination.id == R.id.myFragment
+                destination.id == R.id.diaryListFragment
             ) {
                 View.VISIBLE
             } else {

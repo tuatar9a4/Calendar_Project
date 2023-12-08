@@ -125,7 +125,8 @@ class CalendarFragment : Fragment() {
                     val currentItem = viewModel.getAdapterCurrentList()[position]
                     if(viewModel.currentPos == position) return
                     viewModel.currentPos = position
-                    binding.tvCurrentMonth.text = "${currentItem.year}.${currentItem.month}"
+                    binding.tvCalendarYear.text= currentItem.year.toString()
+                    binding.tvCalendarMonth.text= currentItem.month.toString()
                     viewModel.setMonthTaskList(
                         currentItem.year.toString(),
                         currentItem.month.toString(),

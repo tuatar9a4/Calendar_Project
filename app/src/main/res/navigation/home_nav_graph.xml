@@ -5,6 +5,5 @@
     android:id="@+id/home_nav_graph"
     app:startDestination="@id/calendar">
     <include app:graph="@navigation/calendar" />
-    <include app:graph="@navigation/my" />
     <include app:graph="@navigation/diary" />
 </navigation>

@@ -15,11 +15,4 @@
         android:title="diary"
         app:showAsAction="ifRoom"
         />
-    <item
-        android:id="@+id/my"
-        android:enabled="true"
-        android:icon="@drawable/icon_my"
-        android:title="my"
-        app:showAsAction="ifRoom"
-        />
 </menu>
